@@ -1,12 +1,8 @@
 // src/components/ContractUploader.tsx
-// PDF 업로드 컴포넌트 - react-dropzone 기반 drag & drop
-
 "use client";
 
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { Upload, FileText, AlertCircle } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
 
 interface ContractUploaderProps {
   onUploadComplete: (reviewId: string) => void;
@@ -14,95 +10,63 @@ interface ContractUploaderProps {
   userId?: string | null;
 }
 
-const LOAD_STEPS = [
-  "PDF 파싱 중...",
-  "조항 분류 중...",
-  "위험도 분석 중...",
-  "요약 생성 중...",
-];
+const LOAD_STEPS = ["PDF 파싱 중...", "조항 분류 중...", "위험도 분석 중...", "요약 생성 중..."];
 
-export function ContractUploader({
-  onUploadComplete,
-  onError,
-  userId,
-}: ContractUploaderProps) {
+export function ContractUploader({ onUploadComplete, onError, userId }: ContractUploaderProps) {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [stepText, setStepText] = useState("");
   const [fileName, setFileName] = useState("");
   const [error, setError] = useState("");
 
-  const processFile = useCallback(
-    async (file: File) => {
-      // 파일 유효성 검사
-      if (file.type !== "application/pdf") {
-        setError("PDF 파일만 업로드 가능합니다.");
-        return;
+  const processFile = useCallback(async (file: File) => {
+    if (file.type !== "application/pdf") { setError("PDF 파일만 업로드 가능합니다."); return; }
+    if (file.size > 10 * 1024 * 1024) { setError("파일 크기는 10MB 이하여야 합니다."); return; }
+
+    setError("");
+    setLoading(true);
+    setFileName(file.name);
+    setProgress(0);
+
+    let step = 0;
+    setStepText(LOAD_STEPS[0]);
+    const interval = setInterval(() => {
+      step++;
+      if (step < LOAD_STEPS.length) {
+        setStepText(LOAD_STEPS[step]);
+        setProgress((step / LOAD_STEPS.length) * 80);
       }
-      if (file.size > 10 * 1024 * 1024) {
-        setError("파일 크기는 10MB 이하여야 합니다.");
-        return;
-      }
+    }, 4000);
 
-      setError("");
-      setLoading(true);
-      setFileName(file.name);
-      setProgress(0);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      if (userId) formData.append("userId", userId);
 
-      // 진행 단계 시뮬레이션 (AI 분석 중 UX 개선)
-      let step = 0;
-      setStepText(LOAD_STEPS[0]);
-      const interval = setInterval(() => {
-        step++;
-        if (step < LOAD_STEPS.length) {
-          setStepText(LOAD_STEPS[step]);
-          setProgress((step / LOAD_STEPS.length) * 80);
-        }
-      }, 4000);
+      const response = await fetch("/api/review", { method: "POST", body: formData });
+      clearInterval(interval);
 
-      try {
-        const formData = new FormData();
-        formData.append("file", file);
-        if (userId) formData.append("userId", userId);
-
-        const response = await fetch("/api/review", {
-          method: "POST",
-          body: formData,
-        });
-
-        clearInterval(interval);
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || "검토 중 오류가 발생했습니다.");
-        }
-
-        setProgress(100);
-        setStepText("완료!");
-
+      if (!response.ok) {
         const data = await response.json();
-        setTimeout(() => {
-          setLoading(false);
-          onUploadComplete(data.reviewId);
-        }, 500);
-      } catch (err) {
-        clearInterval(interval);
-        setLoading(false);
-        const message =
-          err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다.";
-        setError(message);
-        onError(message);
+        throw new Error(data.error || "검토 중 오류가 발생했습니다.");
       }
-    },
-    [userId, onUploadComplete, onError]
-  );
 
-  const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
-      if (acceptedFiles[0]) processFile(acceptedFiles[0]);
-    },
-    [processFile]
-  );
+      setProgress(100);
+      setStepText("완료!");
+      const data = await response.json();
+      setTimeout(() => { setLoading(false); onUploadComplete(data.reviewId); }, 500);
+    } catch (err) {
+      clearInterval(interval);
+      setLoading(false);
+      const message = err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다.";
+      setError(message);
+      onError(message);
+    }
+  }, [userId, onUploadComplete, onError]);
+
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    if (acceptedFiles[0]) processFile(acceptedFiles[0]);
+  }, [processFile]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -113,12 +77,27 @@ export function ContractUploader({
 
   if (loading) {
     return (
-      <div className="border-2 border-dashed border-[#4F8EF7] rounded-xl bg-blue-50 p-10 text-center">
-        <div className="flex flex-col items-center gap-4">
-          <FileText className="w-10 h-10 text-[#4F8EF7]" />
-          <div className="text-sm font-medium text-[#4F8EF7]">{stepText}</div>
-          <Progress value={progress} className="w-64 h-1.5" />
-          <div className="text-xs text-[#8A8FAA]">{fileName}</div>
+      <div style={{
+        background: "#FFFFFF",
+        border: "2px dashed #00A599",
+        borderRadius: 4,
+        padding: "52px 32px",
+        textAlign: "center",
+      }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+          <div style={{
+            fontSize: 13, fontWeight: 700, color: "#00A599",
+            letterSpacing: "0.04em", fontFamily: "'DM Sans', sans-serif",
+          }}>
+            {stepText.toUpperCase()}
+          </div>
+          <div style={{ width: 300, height: 3, background: "#F6F7FB", borderRadius: 2, overflow: "hidden" }}>
+            <div style={{
+              height: "100%", background: "#00A599", borderRadius: 2,
+              width: `${progress}%`, transition: "width 0.5s ease",
+            }} />
+          </div>
+          <div style={{ fontSize: 12, color: "#7A9A9E", fontFamily: "'DM Sans', sans-serif" }}>{fileName}</div>
         </div>
       </div>
     );
@@ -128,33 +107,37 @@ export function ContractUploader({
     <div>
       <div
         {...getRootProps()}
-        className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all duration-200 ${
-          isDragActive
-            ? "border-[#4F8EF7] bg-blue-50"
-            : error
-            ? "border-red-300 bg-red-50"
-            : "border-[#D0D5E8] bg-white hover:border-[#4F8EF7] hover:bg-blue-50/30"
-        }`}
+        style={{
+          background: isDragActive ? "rgba(0,165,153,0.04)" : "#FFFFFF",
+          border: `2px dashed ${error ? "#D94F3D" : isDragActive ? "#00A599" : "rgba(4,34,40,0.1)"}`,
+          borderRadius: 4,
+          padding: "52px 32px",
+          textAlign: "center",
+          cursor: "pointer",
+          transition: "all 0.2s",
+        }}
       >
         <input {...getInputProps()} />
-        <div className="flex flex-col items-center gap-3">
-          {error ? (
-            <AlertCircle className="w-10 h-10 text-red-400" />
-          ) : (
-            <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
-              <Upload className="w-6 h-6 text-[#4F8EF7]" />
-            </div>
-          )}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+          <div style={{
+            width: 52, height: 52, borderRadius: "50%",
+            background: "#F6F7FB",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+              <path d="M11 14V4M8 7l3-3 3 3M3 16h16" stroke="#00A599" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
           <div>
-            <p className="text-sm font-semibold text-[#1A1A2E] mb-1">
-              {isDragActive
-                ? "여기에 놓으세요"
-                : "계약서 PDF를 드래그하거나 클릭하세요"}
+            <p style={{ fontSize: 16, fontWeight: 800, color: "#042228", letterSpacing: "-0.02em", marginBottom: 6, fontFamily: "'DM Sans', sans-serif" }}>
+              {isDragActive ? "여기에 놓으세요" : "Upload your contract PDF"}
             </p>
-            <p className="text-xs text-[#8A8FAA]">최대 10MB · PDF 형식</p>
+            <p style={{ fontSize: 14, color: "#7A9A9E", fontFamily: "'DM Sans', sans-serif" }}>
+              Drag & drop or click to select · Max 10MB
+            </p>
           </div>
           {error && (
-            <p className="text-xs text-red-600 bg-red-50 px-3 py-1.5 rounded-lg">
+            <p style={{ fontSize: 12, color: "#D94F3D", background: "rgba(217,79,61,0.06)", padding: "6px 14px", borderRadius: 28, fontFamily: "'DM Sans', sans-serif" }}>
               {error}
             </p>
           )}

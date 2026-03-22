@@ -1,58 +1,91 @@
 // src/components/ClauseCard.tsx
-// 조항별 카드 UI - 위험도에 따라 left border 색상 변경
-
 "use client";
 
 import { useState } from "react";
 import { ClauseResult } from "@/lib/types";
 import { RiskBadge } from "./RiskBadge";
-import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface ClauseCardProps {
   clause: ClauseResult;
   index: number;
 }
 
-const clauseClass = {
-  high: "clause-high",
-  medium: "clause-medium",
-  low: "clause-low",
+const borderColors = {
+  high:   "#D94F3D",
+  medium: "#E59A1A",
+  low:    "#1A9E6A",
 };
 
 export function ClauseCard({ clause, index }: ClauseCardProps) {
   const [expanded, setExpanded] = useState(clause.risk === "high");
+  const [hovered, setHovered] = useState(false);
 
   return (
     <div
-      className={`bg-white border border-[#D0D5E8] rounded-xl overflow-hidden transition-all duration-200 hover:border-[#B0B7D0] ${clauseClass[clause.risk]}`}
-      style={{ animationDelay: `${index * 70}ms` }}
+      onClick={() => setExpanded(!expanded)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        background: "#FFFFFF",
+        borderLeft: `3px solid ${borderColors[clause.risk]}`,
+        borderRadius: "0 4px 4px 0",
+        padding: "16px 20px",
+        cursor: "pointer",
+        transition: "box-shadow 0.15s",
+        boxShadow: hovered ? "0 2px 12px rgba(4,34,40,0.08)" : "none",
+        animationDelay: `${index * 70}ms`,
+      }}
     >
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center gap-3 p-4 text-left hover:bg-gray-50 transition-colors"
-        aria-expanded={expanded}
-      >
-        <RiskBadge level={clause.risk} />
-        <h3 className="flex-1 text-sm font-semibold text-[#1A1A2E] leading-snug">
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: expanded ? 12 : 0 }}>
+        <span style={{
+          flex: 1,
+          fontSize: 14,
+          fontWeight: 700,
+          color: "#042228",
+          letterSpacing: "-0.01em",
+          fontFamily: "'DM Sans', sans-serif",
+        }}>
           {clause.title}
-        </h3>
-        {expanded ? (
-          <ChevronUp className="w-4 h-4 text-[#8A8FAA] flex-shrink-0" />
-        ) : (
-          <ChevronDown className="w-4 h-4 text-[#8A8FAA] flex-shrink-0" />
-        )}
-      </button>
+        </span>
+        <RiskBadge level={clause.risk} />
+        <span style={{ fontSize: 12, color: "#7A9A9E", marginLeft: 4 }}>
+          {expanded ? "▲" : "▼"}
+        </span>
+      </div>
 
       {expanded && (
-        <div className="px-4 pb-4 border-t border-[#F0F1F7]">
-          <p className="text-sm text-[#4A4E6A] leading-[1.7] mt-3 mb-2">
+        <div style={{ overflow: "hidden" }}>
+          <p style={{
+            fontSize: 13,
+            color: "#3D5A5E",
+            lineHeight: 1.7,
+            marginBottom: 8,
+            fontFamily: "'DM Sans', sans-serif",
+          }}>
             {clause.content_ko}
           </p>
-          <p className="text-xs text-[#8A8FAA] leading-[1.6] italic mb-3">
+          <p style={{
+            fontSize: 12,
+            color: "#7A9A9E",
+            lineHeight: 1.6,
+            fontStyle: "italic",
+            marginBottom: clause.action ? 12 : 0,
+            fontFamily: "'DM Sans', sans-serif",
+          }}>
             {clause.content_en}
           </p>
           {clause.action && (
-            <span className="inline-block px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-xs font-semibold text-[#4F8EF7]">
+            <span style={{
+              display: "inline-block",
+              padding: "5px 14px",
+              background: "rgba(0,133,124,0.08)",
+              border: "1px solid rgba(0,133,124,0.2)",
+              borderRadius: 28,
+              fontSize: 12,
+              fontWeight: 700,
+              color: "#00857C",
+              fontFamily: "'DM Sans', sans-serif",
+            }}>
               {clause.action}
             </span>
           )}

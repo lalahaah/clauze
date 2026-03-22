@@ -1,16 +1,48 @@
 // src/app/review/[id]/page.tsx
-// 검토 결과 상세 페이지
-
 "use client";
 
 import { use } from "react";
 import Link from "next/link";
-import { ArrowLeft, FileSearch } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { motion, useMotionValue, useMotionTemplate, useAnimationFrame } from "framer-motion";
 import { ReviewResult } from "@/components/ReviewResult";
-import { RiskBadge } from "@/components/RiskBadge";
 import { Review } from "@/lib/types";
 
-// 데모용 리뷰 데이터
+const R = {
+  bgWhite: "#FFFFFF", bgLight: "#F6F7FB", bgDark: "#093944",
+  tealBright: "#00C2B5", tealMid: "#00A599", tealDark: "#00857C", tealBtn: "#00C2B5",
+  textDark: "#042228", textMid: "#3D5A5E", textLight: "#7A9A9E",
+  textWhite: "#FFFFFF", textOffWhite: "rgba(255,255,255,0.85)",
+  borderLight: "rgba(4,34,40,0.1)", borderDark: "rgba(255,255,255,0.15)",
+  danger: "#D94F3D", warning: "#E59A1A", success: "#1A9E6A",
+  btnRadius: "28px", cardRadius: "4px",
+  fontSans: "'DM Sans', -apple-system, sans-serif",
+  fontMono: "'DM Mono', monospace",
+};
+
+function GridSVG({
+  gridOffX, gridOffY,
+}: {
+  gridOffX: ReturnType<typeof useMotionValue<number>>;
+  gridOffY: ReturnType<typeof useMotionValue<number>>;
+}) {
+  return (
+    <svg style={{ width: "100%", height: "100%" }}>
+      <defs>
+        <motion.pattern
+          id="gp-review"
+          width="40" height="40"
+          patternUnits="userSpaceOnUse"
+          x={gridOffX} y={gridOffY}
+        >
+          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="0.8" />
+        </motion.pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#gp-review)" />
+    </svg>
+  );
+}
+
 const DEMO_REVIEW: Review = {
   id: "1",
   uid: "demo",
@@ -21,110 +53,148 @@ const DEMO_REVIEW: Review = {
   createdAt: new Date().toISOString(),
   result: {
     overallRisk: "high",
-    summary_ko:
-      "이 계약서에는 일방적으로 수정 가능한 대금 조항과 과도한 지식재산권 양도 조항이 포함되어 있습니다. 서명 전 반드시 해당 조항의 수정을 요청하시기 바랍니다.",
-    summary_en:
-      "This contract contains unilateral payment modification clauses and broad IP assignment terms that may disadvantage the service provider. Negotiation is strongly recommended before signing.",
+    summary_ko: "이 계약서에는 일방적으로 수정 가능한 대금 조항과 과도한 지식재산권 양도 조항이 포함되어 있습니다. 서명 전 반드시 해당 조항의 수정을 요청하시기 바랍니다.",
+    summary_en: "This contract contains unilateral payment modification clauses and broad IP assignment terms that may disadvantage the service provider. Negotiation is strongly recommended before signing.",
     clauses: [
-      {
-        title: "제7조 – 대금 지급 조건",
-        content_ko:
-          '"갑의 사정에 따라 대금을 조정할 수 있다"는 조항이 포함되어 있습니다. 구체적 기준 없이 일방적 변경이 가능한 구조입니다.',
-        content_en:
-          '"Party A may adjust the payment based on circumstances" — no objective criteria defined.',
-        risk: "high",
-        action: "해당 조항 삭제 또는 구체적 지급 기준 명시 요청",
-      },
-      {
-        title: "제11조 – 지식재산권 귀속",
-        content_ko:
-          "산출물의 모든 지식재산권이 계약 종료 후에도 영구적으로 갑에게 귀속됩니다. 2차 저작물 사용권도 포함됩니다.",
-        content_en:
-          "All IP rights permanently assigned to Party A including derivative works — unusually broad scope.",
-        risk: "high",
-        action: "범위 제한 및 2차 저작물 권리 협상 요청",
-      },
-      {
-        title: "제15조 – 계약 해지 조건",
-        content_ko:
-          "갑은 7일 사전 통보로 계약을 해지할 수 있으나, 을은 30일 전 통보가 요구됩니다. 비대칭적 조건입니다.",
-        content_en:
-          "Asymmetric termination: Party A 7-day vs Party B 30-day notice period.",
-        risk: "medium",
-        action: "조건 대칭 수정 요청 권장",
-      },
-      {
-        title: "제3조 – 계약 기간",
-        content_ko: "2026년 4월 1일부터 12월 31일까지 표준 기간으로 설정되어 있습니다.",
-        content_en: "Standard contract term April 1 – December 31, 2026. No issues found.",
-        risk: "low",
-        action: null,
-      },
-      {
-        title: "제5조 – 비밀유지 의무",
-        content_ko:
-          "계약 종료 후 2년간 비밀유지 의무를 지는 표준 조항입니다. 업계 통상 범위 내입니다.",
-        content_en:
-          "Standard 2-year NDA post-termination. Within normal industry range.",
-        risk: "low",
-        action: null,
-      },
+      { title: "제7조 – 대금 지급 조건", content_ko: '"갑의 사정에 따라 대금을 조정할 수 있다" — 구체적 기준 없이 일방적 변경이 가능한 구조입니다.', content_en: '"Party A may adjust the payment based on circumstances" — no objective criteria defined.', risk: "high", action: "해당 조항 삭제 또는 구체적 지급 기준 명시 요청" },
+      { title: "제11조 – 지식재산권 귀속", content_ko: "산출물의 모든 지식재산권이 계약 종료 후에도 영구적으로 갑에게 귀속됩니다.", content_en: "All IP rights permanently assigned to Party A including derivative works — unusually broad scope.", risk: "high", action: "범위 제한 및 2차 저작물 권리 협상 요청" },
+      { title: "제15조 – 계약 해지 조건", content_ko: "갑은 7일, 을은 30일 사전 통보 요건 — 비대칭적 조건입니다.", content_en: "Asymmetric termination: Party A 7-day vs Party B 30-day notice period.", risk: "medium", action: "조건 대칭 수정 요청 권장" },
+      { title: "제3조 – 계약 기간", content_ko: "2026년 4월 1일부터 12월 31일까지 표준 기간으로 설정되어 있습니다.", content_en: "Standard contract term April 1 – December 31, 2026. No issues found.", risk: "low", action: null },
+      { title: "제5조 – 비밀유지 의무", content_ko: "계약 종료 후 2년간 비밀유지 의무를 지는 표준 조항입니다.", content_en: "Standard 2-year NDA post-termination. Within normal industry range.", risk: "low", action: null },
     ],
   },
 };
 
-interface Props {
-  params: Promise<{ id: string }>;
-}
+interface Props { params: Promise<{ id: string }> }
 
 export default function ReviewPage({ params }: Props) {
   const { id } = use(params);
-  // id is used for future Firestore lookup; using demo data for now
   void id;
+  const router = useRouter();
   const review = DEMO_REVIEW;
+  const highCount = review.result.clauses.filter(c => c.risk === "high").length;
+  const mediumCount = review.result.clauses.filter(c => c.risk === "medium").length;
 
-  const highCount = review.result.clauses.filter((c) => c.risk === "high").length;
-  void highCount;
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const gridOffX = useMotionValue(0);
+  const gridOffY = useMotionValue(0);
+
+  useAnimationFrame(() => {
+    gridOffX.set((gridOffX.get() + 0.5) % 40);
+    gridOffY.set((gridOffY.get() + 0.5) % 40);
+  });
+
+  const maskImage = useMotionTemplate`radial-gradient(300px circle at ${mouseX}px ${mouseY}px, black, transparent)`;
 
   return (
-    <div className="min-h-screen bg-[#F5F6FA]">
-      {/* Top bar */}
-      <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-[#D0D5E8]">
-        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-[#4F8EF7] flex items-center justify-center">
-              <FileSearch className="w-3.5 h-3.5 text-white" />
+    <div style={{ background: R.bgLight, minHeight: "100vh", fontFamily: R.fontSans }}>
+
+      {/* ── Top utility bar ── */}
+      <div style={{ background: R.bgDark, padding: "6px 40px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 24 }}>
+        {["LOGIN", "GET SUPPORT"].map(label => (
+          <button
+            key={label}
+            onClick={() => label === "LOGIN" && router.push("/login")}
+            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase" }}
+          >{label}</button>
+        ))}
+      </div>
+
+      {/* ── Sticky nav ── */}
+      <nav style={{ background: R.bgWhite, borderBottom: `1px solid ${R.borderLight}`, padding: "0 40px", display: "flex", alignItems: "center", gap: 24, height: 68, position: "sticky", top: 0, zIndex: 100 }}>
+        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, marginRight: 8, textDecoration: "none" }}>
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M14 2C7.373 2 2 7.373 2 14s5.373 12 12 12 12-5.373 12-12S20.627 2 14 2z" fill={R.tealBtn} opacity="0.2"/>
+            <path d="M14 6l5 8H9l5-8z" fill={R.tealBtn}/>
+            <path d="M9 14h10l-3 6H12l-3-6z" fill={R.tealDark}/>
+          </svg>
+          <span style={{ fontFamily: R.fontSans, fontSize: 16, fontWeight: 800, color: R.textDark, letterSpacing: "0.08em", textTransform: "uppercase" }}>CLAUZE</span>
+        </Link>
+
+        {/* Breadcrumb */}
+        <span style={{ fontSize: 13, color: R.textLight, fontFamily: R.fontSans }}>
+          <span
+            onClick={() => router.push("/dashboard")}
+            style={{ cursor: "pointer", color: R.textMid }}
+          >Dashboard</span>
+          {" / "}
+          <span style={{ color: R.textDark, fontWeight: 600 }}>Review</span>
+        </span>
+
+        <div style={{ flex: 1 }} />
+
+        <button
+          onClick={() => router.push("/dashboard")}
+          style={{ background: "none", border: `1px solid ${R.borderLight}`, borderRadius: R.btnRadius, padding: "7px 18px", fontSize: 13, color: R.textMid, fontFamily: R.fontSans, cursor: "pointer", fontWeight: 600 }}
+        >← Dashboard</button>
+      </nav>
+
+      {/* ── Dark hero header ── */}
+      <div
+        onMouseMove={e => { mouseX.set(e.clientX); mouseY.set(e.clientY); }}
+        style={{ position: "relative", background: R.bgDark, padding: "64px 40px 108px", overflow: "hidden" }}
+      >
+        {/* Subtle static grid */}
+        <div style={{ position: "absolute", inset: 0, opacity: 0.05, zIndex: 0 }}>
+          <GridSVG gridOffX={gridOffX} gridOffY={gridOffY} />
+        </div>
+        {/* Mouse-reveal grid */}
+        <motion.div style={{ position: "absolute", inset: 0, opacity: 0.35, maskImage, WebkitMaskImage: maskImage, zIndex: 0 }}>
+          <GridSVG gridOffX={gridOffX} gridOffY={gridOffY} />
+        </motion.div>
+        {/* Glow orbs */}
+        <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}>
+          <div style={{ position: "absolute", right: "-5%", top: "-20%", width: "30%", height: "70%", borderRadius: "50%", background: "rgba(217,79,61,0.08)", filter: "blur(80px)" }} />
+          <div style={{ position: "absolute", left: "-5%", bottom: "-20%", width: "25%", height: "50%", borderRadius: "50%", background: "rgba(0,133,124,0.10)", filter: "blur(100px)" }} />
+        </div>
+
+        <div style={{ position: "relative", zIndex: 10, maxWidth: 1100, margin: "0 auto" }}>
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
+            <p style={{ fontFamily: R.fontSans, fontSize: 12, fontWeight: 700, letterSpacing: "1.8px", textTransform: "uppercase", color: R.tealBright, margin: "0 0 14px" }}>Review Result</p>
+            <h1 style={{ fontFamily: R.fontSans, fontSize: "clamp(20px, 3vw, 36px)", fontWeight: 800, color: R.textWhite, letterSpacing: "-0.02em", lineHeight: 1.2, margin: "0 0 20px", maxWidth: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {review.fileName}
+            </h1>
+
+            {/* Meta row */}
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+              {/* High risk badge */}
+              {highCount > 0 && (
+                <div style={{ padding: "5px 14px", background: "rgba(217,79,61,0.15)", border: "1px solid rgba(217,79,61,0.3)", borderRadius: R.btnRadius, fontSize: 12, fontWeight: 700, color: "#E87A6D", fontFamily: R.fontSans }}>
+                  고위험 {highCount}건
+                </div>
+              )}
+              {/* Medium badge */}
+              {mediumCount > 0 && (
+                <div style={{ padding: "5px 14px", background: "rgba(229,154,26,0.15)", border: "1px solid rgba(229,154,26,0.3)", borderRadius: R.btnRadius, fontSize: 12, fontWeight: 700, color: "#F0B84A", fontFamily: R.fontSans }}>
+                  주의 {mediumCount}건
+                </div>
+              )}
+              <div style={{ width: 1, height: 14, background: R.borderDark }} />
+              <div style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", fontFamily: R.fontMono }}>
+                Analyzed in {review.processingTime ? Math.round(review.processingTime / 1000) : "-"}s
+              </div>
             </div>
-            <span className="font-bold text-[#1A1A2E] text-sm">ContractAI</span>
-          </Link>
-          <div className="w-px h-4 bg-[#D0D5E8]" />
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-1.5 text-sm text-[#4A4E6A] hover:text-[#1A1A2E] transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            대시보드
-          </Link>
-          <div className="flex-1" />
-          <span className="text-sm font-medium text-[#1A1A2E] truncate max-w-xs">
-            {review.fileName}
-          </span>
-          <span className="text-xs text-[#8A8FAA] font-mono">28s</span>
-          <RiskBadge level={review.riskLevel} />
+          </motion.div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="max-w-6xl mx-auto px-6 py-8">
-        <ReviewResult review={review} />
+      {/* ── Review result (overlaps hero) ── */}
+      <div style={{ maxWidth: 1100, margin: "-48px auto 0", padding: "0 40px 80px", position: "relative", zIndex: 20 }}>
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+          <ReviewResult review={review} />
+        </motion.div>
       </div>
 
-      {/* Bottom disclaimer */}
-      <div className="border-t border-[#D0D5E8] bg-white py-4">
-        <p className="text-xs text-[#8A8FAA] text-center max-w-2xl mx-auto">
-          ※ 본 서비스는 법적 조언을 제공하지 않습니다. AI의 검토 결과는 참고용이며, 중요한 계약은 반드시 법률 전문가와 상담하시기 바랍니다. This service does not provide legal advice.
-        </p>
-      </div>
+      {/* ── Disclaimer footer ── */}
+      <footer style={{ background: R.bgDark, padding: "28px 40px" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}>
+          <div style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", fontFamily: R.fontSans }}>© 2026 Clauze. All rights reserved.</div>
+          <p style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", margin: 0, maxWidth: 560, textAlign: "right", fontFamily: R.fontSans, lineHeight: 1.6 }}>
+            ※ 본 서비스는 법적 조언을 제공하지 않습니다. AI의 검토 결과는 참고용이며, 중요한 계약은 반드시 법률 전문가와 상담하시기 바랍니다.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

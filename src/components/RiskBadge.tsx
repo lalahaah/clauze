@@ -1,6 +1,4 @@
 // src/components/RiskBadge.tsx
-// 위험도 뱃지 컴포넌트 (●●●)
-
 import { RiskLevel } from "@/lib/types";
 
 interface RiskBadgeProps {
@@ -9,21 +7,9 @@ interface RiskBadgeProps {
 }
 
 const config = {
-  high: {
-    label: "고위험",
-    className: "bg-red-100 text-red-700 border-red-200",
-    dotColor: "bg-red-500",
-  },
-  medium: {
-    label: "주의",
-    className: "bg-amber-100 text-amber-700 border-amber-200",
-    dotColor: "bg-amber-500",
-  },
-  low: {
-    label: "정상",
-    className: "bg-green-100 text-green-700 border-green-200",
-    dotColor: "bg-green-500",
-  },
+  high:   { label: "고위험", color: "#D94F3D", bg: "rgba(217,79,61,0.1)",   border: "rgba(217,79,61,0.25)" },
+  medium: { label: "주의",   color: "#E59A1A", bg: "rgba(229,154,26,0.1)", border: "rgba(229,154,26,0.25)" },
+  low:    { label: "정상",   color: "#1A9E6A", bg: "rgba(26,158,106,0.1)",  border: "rgba(26,158,106,0.25)" },
 };
 
 export function RiskBadge({ level, className = "" }: RiskBadgeProps) {
@@ -31,9 +17,23 @@ export function RiskBadge({ level, className = "" }: RiskBadgeProps) {
   return (
     <span
       aria-label={`위험도: ${c.label}`}
-      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${c.className} ${className}`}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 5,
+        padding: "3px 10px",
+        borderRadius: 20,
+        background: c.bg,
+        color: c.color,
+        fontSize: 11,
+        fontWeight: 700,
+        fontFamily: "'DM Sans', sans-serif",
+        letterSpacing: "0.04em",
+        border: `1px solid ${c.border}`,
+      }}
+      className={className}
     >
-      <span className={`w-1.5 h-1.5 rounded-full ${c.dotColor}`} />
+      <span style={{ width: 5, height: 5, borderRadius: "50%", background: c.color, display: "inline-block" }} />
       {c.label}
     </span>
   );

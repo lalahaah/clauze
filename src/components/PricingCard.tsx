@@ -1,7 +1,7 @@
 // src/components/PricingCard.tsx
-// 요금제 카드 컴포넌트
+"use client";
 
-import { Check, X } from "lucide-react";
+import { useState } from "react";
 import { UserPlan } from "@/lib/types";
 
 interface PricingCardProps {
@@ -18,94 +18,80 @@ interface PricingCardProps {
 }
 
 export function PricingCard({
-  name,
-  price,
-  period,
-  description,
-  features,
-  lockedFeatures = [],
-  cta,
-  featured = false,
-  onSelect,
+  name, price, period, description, features, lockedFeatures = [], cta, featured = false, onSelect,
 }: PricingCardProps) {
+  const [hov, setHov] = useState(false);
+
   return (
     <div
-      className={`relative flex flex-col rounded-2xl p-7 h-full transition-all ${
-        featured
-          ? "bg-[#4F8EF7] text-white shadow-xl shadow-blue-200 scale-[1.02]"
-          : "bg-white border border-[#D0D5E8] hover:border-[#4F8EF7] hover:shadow-md"
-      }`}
+      style={{
+        background: featured ? "#093944" : "#FFFFFF",
+        borderRadius: 4,
+        padding: "36px 28px",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        gap: 12,
+        borderTop: `3px solid ${featured ? "#00C2B5" : "rgba(4,34,40,0.1)"}`,
+        boxShadow: featured ? "0 8px 40px rgba(9,57,68,0.25)" : "none",
+      }}
     >
       {featured && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <span className="bg-[#1A1A2E] text-white text-[11px] font-bold px-3 py-1 rounded-full">
-            추천
-          </span>
+        <div style={{
+          fontSize: 11, fontWeight: 700, letterSpacing: "1.5px",
+          color: "#00C2B5", textTransform: "uppercase", marginBottom: 4,
+          fontFamily: "'DM Sans', sans-serif",
+        }}>
+          Most Popular
         </div>
       )}
 
-      <div className="mb-6">
-        <h3
-          className={`text-lg font-bold mb-1 ${
-            featured ? "text-white" : "text-[#1A1A2E]"
-          }`}
-        >
-          {name}
-        </h3>
-        <p
-          className={`text-xs ${featured ? "text-blue-100" : "text-[#8A8FAA]"}`}
-        >
-          {description}
-        </p>
+      <div style={{ fontSize: 18, fontWeight: 800, color: featured ? "#FFFFFF" : "#042228", letterSpacing: "-0.02em", fontFamily: "'DM Sans', sans-serif" }}>
+        {name}
+      </div>
+      <div style={{ fontSize: 12, color: featured ? "rgba(255,255,255,0.85)" : "#7A9A9E", marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>
+        {description}
       </div>
 
-      <div className="flex items-baseline gap-1 mb-7">
-        <span
-          className={`text-4xl font-extrabold font-mono tracking-tight ${
-            featured ? "text-white" : "text-[#1A1A2E]"
-          }`}
-        >
+      <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 20 }}>
+        <span style={{ fontSize: 38, fontWeight: 800, color: featured ? "#FFFFFF" : "#042228", letterSpacing: "-0.04em", fontFamily: "'DM Mono', monospace" }}>
           {price}
         </span>
-        <span
-          className={`text-sm ${featured ? "text-blue-100" : "text-[#8A8FAA]"}`}
-        >
+        <span style={{ fontSize: 14, color: featured ? "rgba(255,255,255,0.85)" : "#7A9A9E", fontFamily: "'DM Sans', sans-serif" }}>
           {period}
         </span>
       </div>
 
-      <div className="flex-1 flex flex-col gap-3 mb-7">
-        {features.map((f) => (
-          <div key={f} className="flex items-start gap-2.5">
-            <Check
-              className={`w-4 h-4 flex-shrink-0 mt-0.5 ${
-                featured ? "text-white" : "text-[#00C896]"
-              }`}
-            />
-            <span
-              className={`text-sm ${
-                featured ? "text-white" : "text-[#4A4E6A]"
-              }`}
-            >
-              {f}
-            </span>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8, marginBottom: 24 }}>
+        {features.map(f => (
+          <div key={f} style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 13, color: featured ? "rgba(255,255,255,0.85)" : "#3D5A5E", fontFamily: "'DM Sans', sans-serif" }}>
+            <span style={{ color: featured ? "#00C2B5" : "#00A599", fontWeight: 700, flexShrink: 0 }}>✓</span>
+            {f}
           </div>
         ))}
-        {lockedFeatures.map((f) => (
-          <div key={f} className="flex items-start gap-2.5 opacity-40">
-            <X className="w-4 h-4 flex-shrink-0 mt-0.5 text-[#8A8FAA]" />
-            <span className="text-sm text-[#8A8FAA]">{f}</span>
+        {lockedFeatures.map(f => (
+          <div key={f} style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 13, color: featured ? "rgba(255,255,255,0.3)" : "#7A9A9E", textDecoration: "line-through", fontFamily: "'DM Sans', sans-serif" }}>
+            <span style={{ flexShrink: 0 }}>✕</span>
+            {f}
           </div>
         ))}
       </div>
 
       <button
         onClick={onSelect}
-        className={`w-full py-3 rounded-xl text-sm font-bold transition-all ${
-          featured
-            ? "bg-white text-[#4F8EF7] hover:bg-blue-50"
-            : "bg-[#4F8EF7] text-white hover:bg-[#3D7DE8]"
-        }`}
+        onMouseEnter={() => setHov(true)}
+        onMouseLeave={() => setHov(false)}
+        style={{
+          width: "100%", padding: "13px 28px",
+          background: featured ? (hov ? "#00857C" : "#00C2B5") : (hov ? "rgba(4,34,40,0.06)" : "transparent"),
+          color: featured ? "#FFFFFF" : "#042228",
+          border: featured ? "1.5px solid #00C2B5" : "1.5px solid #042228",
+          borderRadius: 28,
+          fontSize: 14, fontWeight: 700,
+          fontFamily: "'DM Sans', sans-serif",
+          cursor: "pointer",
+          transition: "all 0.2s",
+        }}
       >
         {cta}
       </button>

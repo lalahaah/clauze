@@ -1,169 +1,112 @@
 // src/app/pricing/page.tsx
-// 요금제 페이지 - 3티어 카드
-
 "use client";
 
 import Link from "next/link";
-import { FileSearch, HelpCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { PricingCard } from "@/components/PricingCard";
 
+const R = {
+  bgWhite: "#FFFFFF", bgLight: "#F6F7FB", bgDark: "#093944",
+  tealBright: "#00C2B5", tealMid: "#00A599", tealDark: "#00857C", tealBtn: "#00C2B5",
+  textDark: "#042228", textMid: "#3D5A5E", textLight: "#7A9A9E",
+  textWhite: "#FFFFFF", textOffWhite: "rgba(255,255,255,0.85)",
+  borderLight: "rgba(4,34,40,0.1)", borderDark: "rgba(255,255,255,0.15)",
+  btnRadius: "28px", cardRadius: "4px",
+  fontSans: "'DM Sans', -apple-system, sans-serif",
+  fontMono: "'DM Mono', monospace",
+};
+
 const FAQ = [
-  {
-    q: "무료 플랜에서 유료 플랜으로 언제든지 업그레이드할 수 있나요?",
-    a: "네, 언제든지 업그레이드 가능합니다. 업그레이드 시 즉시 모든 기능이 활성화됩니다.",
-  },
-  {
-    q: "계약서 원본은 저장되나요?",
-    a: "업로드된 PDF는 분석 후 자동 삭제됩니다. 검토 결과 텍스트만 저장됩니다.",
-  },
-  {
-    q: "스캔된 이미지 PDF도 분석 가능한가요?",
-    a: "텍스트 기반 PDF만 지원됩니다. 이미지 스캔 PDF는 OCR 처리 후 다시 업로드해주세요.",
-  },
-  {
-    q: "법적 효력이 있나요?",
-    a: "본 서비스는 참고용 분석을 제공하며 법적 조언이 아닙니다. 중요한 계약은 법률 전문가와 상담하세요.",
-  },
-  {
-    q: "환불 정책은 어떻게 되나요?",
-    a: "결제일로부터 7일 이내 환불 가능합니다. 이미 사용한 검토 건수에 따라 부분 환불될 수 있습니다.",
-  },
+  { q: "무료 플랜에서 유료 플랜으로 언제든지 업그레이드할 수 있나요?", a: "네, 언제든지 업그레이드 가능합니다. 업그레이드 시 즉시 모든 기능이 활성화됩니다." },
+  { q: "계약서 원본은 저장되나요?", a: "업로드된 PDF는 분석 후 자동 삭제됩니다. 검토 결과 텍스트만 저장됩니다." },
+  { q: "스캔된 이미지 PDF도 분석 가능한가요?", a: "텍스트 기반 PDF만 지원됩니다. 이미지 스캔 PDF는 OCR 처리 후 다시 업로드해주세요." },
+  { q: "법적 효력이 있나요?", a: "본 서비스는 참고용 분석을 제공하며 법적 조언이 아닙니다. 중요한 계약은 법률 전문가와 상담하세요." },
+  { q: "환불 정책은 어떻게 되나요?", a: "결제일로부터 7일 이내 환불 가능합니다." },
 ];
 
 export default function PricingPage() {
+  const router = useRouter();
+
   return (
-    <div className="min-h-screen bg-[#F5F6FA]">
-      {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#D0D5E8]">
-        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-[#4F8EF7] flex items-center justify-center">
-              <FileSearch className="w-3.5 h-3.5 text-white" />
-            </div>
-            <span className="font-bold text-[#1A1A2E] text-sm">ContractAI</span>
-          </Link>
-          <div className="flex-1" />
-          <Link href="/login" className="text-sm text-[#4A4E6A] hover:text-[#1A1A2E]">
-            로그인
-          </Link>
-          <Link href="/dashboard" className="px-4 py-2 bg-[#4F8EF7] text-white rounded-lg text-sm font-semibold hover:bg-[#3D7DE8] transition-colors">
-            무료로 시작하기
-          </Link>
-        </div>
+    <div style={{ background: R.bgLight, minHeight: "100vh", fontFamily: R.fontSans }}>
+      {/* Utility bar */}
+      <div style={{ background: R.bgDark, padding: "6px 40px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 24 }}>
+        {["LOGIN", "GET SUPPORT"].map(label => (
+          <button key={label} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase" }}>{label}</button>
+        ))}
+      </div>
+
+      {/* Nav */}
+      <nav style={{ background: R.bgWhite, borderBottom: `1px solid ${R.borderLight}`, padding: "0 40px", display: "flex", alignItems: "center", gap: 36, height: 68, position: "sticky", top: 0, zIndex: 100 }}>
+        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, marginRight: 16, textDecoration: "none" }}>
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M14 2C7.373 2 2 7.373 2 14s5.373 12 12 12 12-5.373 12-12S20.627 2 14 2z" fill={R.tealBtn} opacity="0.2"/>
+            <path d="M14 6l5 8H9l5-8z" fill={R.tealBtn}/>
+            <path d="M9 14h10l-3 6H12l-3-6z" fill={R.tealDark}/>
+          </svg>
+          <span style={{ fontFamily: R.fontSans, fontSize: 16, fontWeight: 800, color: R.textDark, letterSpacing: "0.08em", textTransform: "uppercase" }}>CLAUZE</span>
+        </Link>
+        {[["dashboard", "Dashboard"], ["pricing", "Pricing"]].map(([href, label]) => (
+          <Link key={href} href={`/${href}`} style={{ fontSize: 14, fontFamily: R.fontSans, fontWeight: href === "pricing" ? 700 : 500, color: R.textDark, padding: "4px 0", textDecoration: "none", borderBottom: href === "pricing" ? `2px solid ${R.tealMid}` : "2px solid transparent" }}>{label}</Link>
+        ))}
+        <div style={{ flex: 1 }} />
+        <button onClick={() => router.push("/dashboard")} style={{ padding: "13px 28px", background: R.tealBtn, color: R.textWhite, border: `1.5px solid ${R.tealBtn}`, borderRadius: R.btnRadius, fontSize: 14, fontWeight: 700, fontFamily: R.fontSans, cursor: "pointer" }}>Get started</button>
       </nav>
 
-      {/* Header */}
-      <section className="max-w-4xl mx-auto px-6 pt-20 pb-14 text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-100 text-[#4F8EF7] rounded-full text-xs font-semibold mb-6">
-          PRICING
-        </div>
-        <h1 className="text-4xl font-extrabold text-[#1A1A2E] tracking-tight mb-4">
-          단순하고 투명한 가격
-        </h1>
-        <p className="text-[#4A4E6A]">
-          변호사 1회 검토비(30~50만원)의 1/20 비용으로 매월 무제한 검토
-        </p>
-      </section>
+      {/* Header — dark */}
+      <div style={{ background: R.bgDark, padding: "80px 40px 96px", textAlign: "center" }}>
+        <p style={{ fontFamily: R.fontSans, fontSize: 12, fontWeight: 700, letterSpacing: "1.8px", textTransform: "uppercase", color: R.tealBright, margin: "0 0 14px" }}>Pricing</p>
+        <h1 style={{ fontFamily: R.fontSans, fontSize: "clamp(32px,5vw,52px)", fontWeight: 800, color: R.textWhite, letterSpacing: "-0.03em", margin: "0 0 16px" }}>Simple, transparent pricing</h1>
+        <p style={{ fontSize: 17, color: R.textOffWhite, maxWidth: 480, margin: "0 auto", fontFamily: R.fontSans }}>변호사 1회 검토비(30~50만원)의 1/20 비용으로 매월 무제한 검토</p>
+      </div>
 
-      {/* Pricing grid */}
-      <section className="max-w-4xl mx-auto px-6 pb-20">
-        <div className="grid grid-cols-3 gap-5 items-stretch">
-          <PricingCard
-            plan="free"
-            name="Free"
-            price="₩0"
-            period="/ 월"
-            description="부담 없이 체험해보세요"
-            features={["월 2건 검토", "한국어 요약", "검토 이력 7일"]}
-            lockedFeatures={["영문 번역", "위험 조항 하이라이트", "무제한 검토"]}
-            cta="무료 시작"
-            onSelect={() => {}}
-          />
-          <PricingCard
-            plan="pro"
-            name="Pro"
-            price="₩19,000"
-            period="/ 월"
-            description="외국인 프리랜서 · 1인 사업자"
-            features={[
-              "무제한 검토",
-              "한국어 + 영문 번역",
-              "위험 조항 하이라이트",
-              "검토 이력 무제한",
-              "우선 처리",
-            ]}
-            cta="Pro 시작하기"
-            featured
-            onSelect={() => {}}
-          />
-          <PricingCard
-            plan="business"
-            name="Business"
-            price="₩79,000"
-            period="/ 월"
-            description="법무팀 없는 중소기업"
-            features={[
-              "Pro 모든 기능",
-              "팀 5인 공유",
-              "커스텀 체크리스트",
-              "API 연동",
-              "전담 지원",
-            ]}
-            cta="Business 시작"
-            onSelect={() => {}}
-          />
-        </div>
-      </section>
+      {/* Cards — overlapping */}
+      <div style={{ maxWidth: 1000, margin: "-40px auto 0", padding: "0 40px 80px", display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 20 }}>
+        {[
+          { plan: "free" as const, name: "Free", price: "₩0", period: "/월", description: "부담 없이 체험해보세요", features: ["월 2건 검토", "한국어 요약", "검토 이력 7일"], lockedFeatures: ["영문 번역", "위험 조항 하이라이트"], cta: "무료 시작", featured: false },
+          { plan: "pro" as const, name: "Pro", price: "₩19,000", period: "/월", description: "외국인 프리랜서 · 1인 사업자", features: ["무제한 검토", "한국어 + 영문 번역", "위험 조항 하이라이트", "검토 이력 무제한"], lockedFeatures: [], cta: "Pro 시작하기", featured: true },
+          { plan: "business" as const, name: "Business", price: "₩79,000", period: "/월", description: "법무팀 없는 중소기업", features: ["Pro 모든 기능", "팀 5인 공유", "커스텀 체크리스트", "API 연동"], lockedFeatures: [], cta: "Business 시작", featured: false },
+        ].map((plan, i) => (
+          <motion.div key={plan.name} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.1 }}>
+            <PricingCard {...plan} onSelect={() => router.push("/dashboard")} />
+          </motion.div>
+        ))}
+      </div>
 
       {/* FAQ */}
-      <section className="bg-white border-t border-[#D0D5E8] py-20">
-        <div className="max-w-2xl mx-auto px-6">
-          <h2 className="text-2xl font-bold text-[#1A1A2E] text-center mb-10 tracking-tight">
-            자주 묻는 질문
-          </h2>
-          <div className="flex flex-col gap-4">
+      <div style={{ background: R.bgWhite, borderTop: `1px solid ${R.borderLight}`, padding: "80px 40px" }}>
+        <div style={{ maxWidth: 700, margin: "0 auto" }}>
+          <p style={{ fontFamily: R.fontSans, fontSize: 12, fontWeight: 700, letterSpacing: "1.8px", textTransform: "uppercase", color: R.tealMid, margin: "0 0 14px", textAlign: "center" }}>FAQ</p>
+          <h2 style={{ fontFamily: R.fontSans, fontSize: "clamp(24px,3vw,36px)", fontWeight: 800, color: R.textDark, letterSpacing: "-0.03em", textAlign: "center", margin: "0 0 40px" }}>자주 묻는 질문</h2>
+          <div style={{ borderTop: `1px solid ${R.borderLight}` }}>
             {FAQ.map(({ q, a }) => (
-              <details
-                key={q}
-                className="bg-[#F5F6FA] border border-[#D0D5E8] rounded-xl px-5 py-4 group"
-              >
-                <summary className="flex items-start justify-between cursor-pointer text-sm font-semibold text-[#1A1A2E] list-none">
-                  <span>{q}</span>
-                  <HelpCircle className="w-4 h-4 text-[#8A8FAA] flex-shrink-0 mt-0.5 ml-3" />
+              <details key={q} style={{ borderBottom: `1px solid ${R.borderLight}` }}>
+                <summary style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "22px 0", cursor: "pointer", fontFamily: R.fontSans, fontSize: 17, fontWeight: 700, color: R.textDark, letterSpacing: "-0.01em", listStyle: "none" }}>
+                  {q}
+                  <span style={{ fontSize: 20, color: R.tealMid, flexShrink: 0, marginLeft: 16 }}>+</span>
                 </summary>
-                <p className="mt-3 text-sm text-[#4A4E6A] leading-[1.7]">{a}</p>
+                <p style={{ fontSize: 14, color: R.textMid, lineHeight: 1.7, paddingBottom: 20, margin: 0, fontFamily: R.fontSans }}>{a}</p>
               </details>
             ))}
           </div>
         </div>
-      </section>
+      </div>
 
       {/* Enterprise CTA */}
-      <section className="max-w-4xl mx-auto px-6 py-16 text-center">
-        <div className="bg-[#1A1A2E] rounded-2xl px-10 py-10">
-          <h3 className="text-xl font-bold text-white mb-3">
-            대기업 · 엔터프라이즈 문의
-          </h3>
-          <p className="text-[#8A8FAA] text-sm mb-6">
-            대용량 계약서, 맞춤형 솔루션, 온프레미스 설치 문의
-          </p>
-          <a
-            href="mailto:enterprise@contractai.kr"
-            className="inline-block px-6 py-3 border border-white/20 text-white rounded-xl text-sm font-semibold hover:bg-white/10 transition-colors"
-          >
-            엔터프라이즈 문의하기
-          </a>
-        </div>
-      </section>
+      <div style={{ background: R.bgDark, padding: "64px 40px", textAlign: "center" }}>
+        <p style={{ fontFamily: R.fontSans, fontSize: 12, fontWeight: 700, letterSpacing: "1.8px", textTransform: "uppercase", color: R.tealBright, margin: "0 0 14px" }}>Enterprise</p>
+        <h3 style={{ fontFamily: R.fontSans, fontSize: 32, fontWeight: 800, color: R.textWhite, letterSpacing: "-0.03em", margin: "0 0 12px" }}>대기업 · 엔터프라이즈 문의</h3>
+        <p style={{ fontSize: 16, color: R.textOffWhite, margin: "0 0 32px", fontFamily: R.fontSans }}>대용량 계약서, 맞춤형 솔루션, 온프레미스 설치 문의</p>
+        <button style={{ padding: "13px 32px", background: "transparent", color: R.textWhite, border: `1.5px solid ${R.borderDark}`, borderRadius: R.btnRadius, fontSize: 14, fontWeight: 700, fontFamily: R.fontSans, cursor: "pointer" }}>
+          엔터프라이즈 문의하기
+        </button>
+      </div>
 
-      {/* Footer */}
-      <footer className="border-t border-[#D0D5E8] py-8">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <p className="text-xs text-[#8A8FAA]">
-            ※ 본 서비스는 법적 조언을 제공하지 않습니다.
-          </p>
-          <p className="text-xs text-[#8A8FAA] mt-2">© 2026 ContractAI. All rights reserved.</p>
-        </div>
+      <footer style={{ background: R.bgDark, borderTop: `1px solid ${R.borderDark}`, padding: "24px 40px" }}>
+        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", textAlign: "center", fontFamily: R.fontSans }}>
+          © 2026 Clauze. All rights reserved. · 본 서비스는 법적 조언을 제공하지 않습니다.
+        </p>
       </footer>
     </div>
   );
