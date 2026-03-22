@@ -1,0 +1,91 @@
+// src/lib/claude.ts
+// Claude API 래퍼 + 시스템 프롬프트 (Prompt Caching 포함)
+
+import Anthropic from "@anthropic-ai/sdk";
+import { ReviewResult } from "./types";
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
+
+// 시스템 프롬프트 - 한국 계약법 전문 리뷰어 역할 정의
+const SYSTEM_PROMPT = `당신은 한국 계약법 전문 리뷰어입니다. 업로드된 계약서를 분석하여 위험 조항을 식별하고 구조화된 JSON으로 결과를 반환합니다.
+
+[면책 조항] 본 서비스는 법적 조언을 제공하지 않습니다. AI의 검토 결과는 참고용이며, 중요한 계약은 반드시 법률 전문가와 상담하시기 바랍니다. This service does not provide legal advice.
+
+[출력 규칙]
+- 반드시 아래 JSON 스키마 형식으로만 응답하세요
+- 계약서 원문에 없는 내용을 추가하거나 추측하지 마세요
+- 모든 content_ko는 한국어로, content_en은 영어로 작성하세요
+- 위험도(risk)는 반드시 "high", "medium", "low" 중 하나여야 합니다
+- action은 구체적인 협상/수정 권고사항이며, 문제없는 조항은 null로 설정하세요
+
+[JSON 스키마]
+{
+  "overallRisk": "high|medium|low",
+  "summary_ko": "전체 계약서 위험도 요약 (한국어, 2-3문장)",
+  "summary_en": "Overall contract risk summary in English (2-3 sentences)",
+  "clauses": [
+    {
+      "title": "조항 제목 (예: 제7조 – 대금 지급 조건)",
+      "content_ko": "해당 조항의 한국어 설명 및 위험 요소",
+      "content_en": "English explanation of the clause and risk factors",
+      "risk": "high|medium|low",
+      "action": "협상 권고사항 또는 null"
+    }
+  ]
+}
+
+위험도 판단 기준:
+- high: 일방적 계약 변경, 과도한 IP 양도, 불합리한 위약금, 불법적 조항
+- medium: 비대칭적 조건, 모호한 조항, 불리한 해지 조건
+- low: 표준적이고 합리적인 조항
+
+고위험 조항을 clauses 배열의 앞쪽에 배치하세요.`;
+
+export async function reviewContract(pdfBase64: string): Promise<ReviewResult> {
+  // Prompt Caching으로 시스템 프롬프트 비용 90% 절감
+  const response = await anthropic.beta.messages.create({
+    model: "claude-sonnet-4-20250514",
+    max_tokens: 4096,
+    betas: ["prompt-caching-2024-07-31", "pdfs-2024-09-25"],
+    system: [
+      {
+        type: "text",
+        text: SYSTEM_PROMPT,
+        cache_control: { type: "ephemeral" },
+      },
+    ],
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "document",
+            source: {
+              type: "base64",
+              media_type: "application/pdf",
+              data: pdfBase64,
+            },
+          },
+          {
+            type: "text",
+            text: "위 계약서를 분석하여 지정된 JSON 스키마 형식으로 위험 조항을 식별하고 결과를 반환해주세요. JSON 외의 텍스트는 포함하지 마세요.",
+          },
+        ],
+      },
+    ],
+  });
+
+  // JSON 응답 파싱
+  const content = response.content[0];
+  if (content.type !== "text") {
+    throw new Error("Unexpected response type from Claude API");
+  }
+
+  // JSON 블록 추출 (마크다운 코드 블록 처리)
+  const jsonText = content.text.replace(/```json\n?|\n?```/g, "").trim();
+  const result = JSON.parse(jsonText) as ReviewResult;
+
+  return result;
+}
