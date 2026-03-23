@@ -7,9 +7,10 @@ import { ClauseCard } from "./ClauseCard";
 
 interface ReviewResultProps {
   review: Review;
+  lang?: "ko" | "en";
 }
 
-export function ReviewResult({ review }: ReviewResultProps) {
+export function ReviewResult({ review, lang = "ko" }: ReviewResultProps) {
   const highCount = review.result.clauses.filter(c => c.risk === "high").length;
   const mediumCount = review.result.clauses.filter(c => c.risk === "medium").length;
   const lowCount = review.result.clauses.filter(c => c.risk === "low").length;
@@ -29,7 +30,7 @@ export function ReviewResult({ review }: ReviewResultProps) {
             fontSize: 11, fontWeight: 700, letterSpacing: "1.5px",
             color: "#7A9A9E", marginBottom: 14, textTransform: "uppercase",
             fontFamily: "'DM Sans', sans-serif",
-          }}>Risk Summary</div>
+          }}>{lang === "ko" ? "위험 요약" : "Risk Summary"}</div>
           <div style={{ display: "flex", gap: 8 }}>
             {[
               { n: highCount,   l: "고위험", c: "#D94F3D", bg: "rgba(217,79,61,0.08)" },
@@ -46,21 +47,28 @@ export function ReviewResult({ review }: ReviewResultProps) {
 
         {/* File info */}
         <div style={{ background: "#FFFFFF", padding: "20px 24px", borderRadius: 4 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1.5px", color: "#7A9A9E", marginBottom: 8, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif" }}>File</div>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1.5px", color: "#7A9A9E", marginBottom: 8, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif" }}>
+            {lang === "ko" ? "파일" : "File"}
+          </div>
           <p style={{ fontSize: 13, color: "#3D5A5E", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: "'DM Sans', sans-serif" }} title={review.fileName}>{review.fileName}</p>
-          <p style={{ fontSize: 12, color: "#7A9A9E", marginTop: 4, fontFamily: "'DM Mono', monospace" }}>Analyzed in {time}</p>
+          <p style={{ fontSize: 12, color: "#7A9A9E", marginTop: 4, fontFamily: "'DM Mono', monospace" }}>
+            {lang === "ko" ? "분석 완료" : "Analyzed"} {time}
+          </p>
         </div>
 
-        {/* KO summary */}
+        {/* Bilingual summary */}
         <div style={{ background: "#FFFFFF", padding: "20px 24px", borderRadius: 4 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1.5px", color: "#00A599", marginBottom: 10, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif" }}>한국어 요약</div>
-          <p style={{ fontSize: 13, color: "#3D5A5E", lineHeight: 1.7, margin: 0, fontFamily: "'DM Sans', sans-serif" }}>{review.result.summary_ko}</p>
-        </div>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1.5px", color: "#00A599", marginBottom: 12, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif" }}>Summary</div>
 
-        {/* EN summary */}
-        <div style={{ background: "#FFFFFF", padding: "20px 24px", borderRadius: 4 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1.5px", color: "#00A599", marginBottom: 10, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif" }}>English Summary</div>
-          <p style={{ fontSize: 12, color: "#7A9A9E", lineHeight: 1.7, fontStyle: "italic", margin: 0, fontFamily: "'DM Sans', sans-serif" }}>{review.result.summary_en}</p>
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "#7A9A9E", marginBottom: 6, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif" }}>한국어</div>
+            <p style={{ fontSize: 12, color: "#3D5A5E", lineHeight: 1.7, margin: 0, fontFamily: "'DM Sans', sans-serif" }}>{review.result.summary_ko}</p>
+          </div>
+
+          <div style={{ borderTop: "1px solid rgba(4,34,40,0.08)", paddingTop: 12 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "#7A9A9E", marginBottom: 6, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif" }}>English</div>
+            <p style={{ fontSize: 11, color: "#7A9A9E", lineHeight: 1.6, fontStyle: "italic", margin: 0, fontFamily: "'DM Sans', sans-serif" }}>{review.result.summary_en}</p>
+          </div>
         </div>
 
         {/* Lawyer CTA */}

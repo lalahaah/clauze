@@ -85,6 +85,7 @@ const DEMO_HISTORY = [
 export default function DashboardPage() {
   const router = useRouter();
   const [uploadError, setUploadError] = useState("");
+  const [lang, setLang] = useState<"ko" | "en">("ko");
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -102,14 +103,17 @@ export default function DashboardPage() {
     <div style={{ background: R.bgLight, minHeight: "100vh", fontFamily: R.fontSans }}>
 
       {/* ── Top utility bar ── */}
-      <div style={{ background: R.bgDark, padding: "6px 40px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 24 }}>
-        {["LOGIN", "GET SUPPORT"].map(label => (
-          <button
-            key={label}
-            onClick={() => label === "LOGIN" && router.push("/login")}
-            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase" }}
-          >{label}</button>
-        ))}
+      <div style={{ background: R.bgDark, padding: "6px 40px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 24 }}>
+        <div style={{ flex: 1 }} />
+        <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+          {["LOGIN", "GET SUPPORT"].map(label => (
+            <button
+              key={label}
+              onClick={() => label === "LOGIN" && router.push("/login")}
+              style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase" }}
+            >{label}</button>
+          ))}
+        </div>
       </div>
 
       {/* ── Sticky nav ── */}
@@ -131,6 +135,21 @@ export default function DashboardPage() {
           }}>{label}</Link>
         ))}
         <div style={{ flex: 1 }} />
+        <div style={{ display: "flex", gap: 4, padding: "4px 8px", background: R.bgLight, borderRadius: "20px" }}>
+          {(["ko", "en"] as const).map(l => (
+            <button
+              key={l}
+              onClick={() => setLang(l)}
+              style={{
+                padding: "6px 12px", borderRadius: "16px",
+                background: lang === l ? R.bgWhite : "transparent",
+                border: "none", cursor: "pointer",
+                fontSize: 12, fontWeight: 700, color: lang === l ? R.textDark : R.textLight,
+                fontFamily: R.fontSans, transition: "all 0.2s"
+              }}
+            >{l.toUpperCase()}</button>
+          ))}
+        </div>
         <PillBtn onClick={() => router.push("/login")}>Log in</PillBtn>
         <PillBtn onClick={() => router.push("/pricing")} variant="filled">Upgrade</PillBtn>
       </nav>
@@ -158,10 +177,13 @@ export default function DashboardPage() {
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
             <p style={{ fontFamily: R.fontSans, fontSize: 12, fontWeight: 700, letterSpacing: "1.8px", textTransform: "uppercase", color: R.tealBright, margin: "0 0 14px" }}>My Dashboard</p>
             <h1 style={{ fontFamily: R.fontSans, fontSize: "clamp(30px, 4vw, 52px)", fontWeight: 800, color: R.textWhite, letterSpacing: "-0.03em", lineHeight: 1.1, margin: "0 0 14px" }}>
-              Contract Reviews
+              {lang === "ko" ? "계약서 검토" : "Contract Reviews"}
             </h1>
             <p style={{ fontSize: 16, color: "rgba(255,255,255,0.5)", fontFamily: R.fontSans, margin: 0, maxWidth: 420 }}>
-              Upload a contract for AI-powered risk analysis in under 30 seconds.
+              {lang === "ko"
+                ? "계약서를 업로드하고 30초 이내에 위험 분석을 받으세요."
+                : "Upload a contract for AI-powered risk analysis in under 30 seconds."
+              }
             </p>
           </motion.div>
         </div>
@@ -176,9 +198,24 @@ export default function DashboardPage() {
           style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}
         >
           {[
-            { label: "TOTAL REVIEWS",    value: "47",  sub: "+7 this month",            accent: R.tealMid },
-            { label: "HIGH RISK FOUND",  value: "12",  sub: "3 unresolved",             accent: R.danger  },
-            { label: "AVG REVIEW TIME",  value: "28s", sub: "vs. 3 days industry avg",  accent: R.success },
+            {
+              label: lang === "ko" ? "전체 검토" : "TOTAL REVIEWS",
+              value: "47",
+              sub: lang === "ko" ? "이번 달 +7건" : "+7 this month",
+              accent: R.tealMid
+            },
+            {
+              label: lang === "ko" ? "고위험 발견" : "HIGH RISK FOUND",
+              value: "12",
+              sub: lang === "ko" ? "미해결 3건" : "3 unresolved",
+              accent: R.danger
+            },
+            {
+              label: lang === "ko" ? "평균 검토 시간" : "AVG REVIEW TIME",
+              value: "28s",
+              sub: lang === "ko" ? "업계 평균 3일 대비" : "vs. 3 days industry avg",
+              accent: R.success
+            },
           ].map(({ label, value, sub, accent }) => (
             <div key={label} style={{
               background: R.bgWhite, padding: "24px 28px",
@@ -210,7 +247,9 @@ export default function DashboardPage() {
 
         {/* Recent reviews */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-          <p style={{ fontFamily: R.fontSans, fontSize: 12, fontWeight: 700, letterSpacing: "1.8px", textTransform: "uppercase", color: R.tealMid, margin: "0 0 14px" }}>Recent Reviews</p>
+          <p style={{ fontFamily: R.fontSans, fontSize: 12, fontWeight: 700, letterSpacing: "1.8px", textTransform: "uppercase", color: R.tealMid, margin: "0 0 14px" }}>
+            {lang === "ko" ? "최근 검토" : "Recent Reviews"}
+          </p>
           <div style={{ background: R.bgWhite, borderRadius: R.cardRadius, overflow: "hidden", border: `1px solid ${R.borderLight}` }}>
             {DEMO_HISTORY.map(({ id, name, time, risk }, i) => (
               <div

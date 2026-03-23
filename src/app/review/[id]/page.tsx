@@ -1,7 +1,7 @@
 // src/app/review/[id]/page.tsx
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useMotionValue, useMotionTemplate, useAnimationFrame } from "framer-motion";
@@ -74,6 +74,7 @@ export default function ReviewPage({ params }: Props) {
   const review = DEMO_REVIEW;
   const highCount = review.result.clauses.filter(c => c.risk === "high").length;
   const mediumCount = review.result.clauses.filter(c => c.risk === "medium").length;
+  const [lang, setLang] = useState<"ko" | "en">("ko");
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -124,6 +125,22 @@ export default function ReviewPage({ params }: Props) {
 
         <div style={{ flex: 1 }} />
 
+        <div style={{ display: "flex", gap: 4, padding: "4px 8px", background: R.bgLight, borderRadius: "20px" }}>
+          {(["ko", "en"] as const).map(l => (
+            <button
+              key={l}
+              onClick={() => setLang(l)}
+              style={{
+                padding: "6px 12px", borderRadius: "16px",
+                background: lang === l ? R.bgWhite : "transparent",
+                border: "none", cursor: "pointer",
+                fontSize: 12, fontWeight: 700, color: lang === l ? R.textDark : R.textLight,
+                fontFamily: R.fontSans, transition: "all 0.2s"
+              }}
+            >{l.toUpperCase()}</button>
+          ))}
+        </div>
+
         <button
           onClick={() => router.push("/dashboard")}
           style={{ background: "none", border: `1px solid ${R.borderLight}`, borderRadius: R.btnRadius, padding: "7px 18px", fontSize: 13, color: R.textMid, fontFamily: R.fontSans, cursor: "pointer", fontWeight: 600 }}
@@ -151,7 +168,9 @@ export default function ReviewPage({ params }: Props) {
 
         <div style={{ position: "relative", zIndex: 10, maxWidth: 1100, margin: "0 auto" }}>
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
-            <p style={{ fontFamily: R.fontSans, fontSize: 12, fontWeight: 700, letterSpacing: "1.8px", textTransform: "uppercase", color: R.tealBright, margin: "0 0 14px" }}>Review Result</p>
+            <p style={{ fontFamily: R.fontSans, fontSize: 12, fontWeight: 700, letterSpacing: "1.8px", textTransform: "uppercase", color: R.tealBright, margin: "0 0 14px" }}>
+              {lang === "ko" ? "검토 결과" : "Review Result"}
+            </p>
             <h1 style={{ fontFamily: R.fontSans, fontSize: "clamp(20px, 3vw, 36px)", fontWeight: 800, color: R.textWhite, letterSpacing: "-0.02em", lineHeight: 1.2, margin: "0 0 20px", maxWidth: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {review.fileName}
             </h1>
@@ -161,18 +180,18 @@ export default function ReviewPage({ params }: Props) {
               {/* High risk badge */}
               {highCount > 0 && (
                 <div style={{ padding: "5px 14px", background: "rgba(217,79,61,0.15)", border: "1px solid rgba(217,79,61,0.3)", borderRadius: R.btnRadius, fontSize: 12, fontWeight: 700, color: "#E87A6D", fontFamily: R.fontSans }}>
-                  고위험 {highCount}건
+                  {lang === "ko" ? "고위험" : "High Risk"} {highCount}
                 </div>
               )}
               {/* Medium badge */}
               {mediumCount > 0 && (
                 <div style={{ padding: "5px 14px", background: "rgba(229,154,26,0.15)", border: "1px solid rgba(229,154,26,0.3)", borderRadius: R.btnRadius, fontSize: 12, fontWeight: 700, color: "#F0B84A", fontFamily: R.fontSans }}>
-                  주의 {mediumCount}건
+                  {lang === "ko" ? "주의" : "Caution"} {mediumCount}
                 </div>
               )}
               <div style={{ width: 1, height: 14, background: R.borderDark }} />
               <div style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", fontFamily: R.fontMono }}>
-                Analyzed in {review.processingTime ? Math.round(review.processingTime / 1000) : "-"}s
+                {lang === "ko" ? "분석 완료" : "Analyzed"} {review.processingTime ? Math.round(review.processingTime / 1000) : "-"}s
               </div>
             </div>
           </motion.div>
@@ -182,7 +201,7 @@ export default function ReviewPage({ params }: Props) {
       {/* ── Review result (overlaps hero) ── */}
       <div style={{ maxWidth: 1100, margin: "-48px auto 0", padding: "0 40px 80px", position: "relative", zIndex: 20 }}>
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-          <ReviewResult review={review} />
+          <ReviewResult review={review} lang={lang} />
         </motion.div>
       </div>
 
@@ -191,7 +210,10 @@ export default function ReviewPage({ params }: Props) {
         <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}>
           <div style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", fontFamily: R.fontSans }}>© 2026 Clauze. All rights reserved.</div>
           <p style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", margin: 0, maxWidth: 560, textAlign: "right", fontFamily: R.fontSans, lineHeight: 1.6 }}>
-            ※ 본 서비스는 법적 조언을 제공하지 않습니다. AI의 검토 결과는 참고용이며, 중요한 계약은 반드시 법률 전문가와 상담하시기 바랍니다.
+            {lang === "ko"
+              ? "※ 본 서비스는 법적 조언을 제공하지 않습니다. AI의 검토 결과는 참고용이며, 중요한 계약은 반드시 법률 전문가와 상담하시기 바랍니다."
+              : "※ This service does not provide legal advice. AI analysis is for reference only. For important contracts, always consult a legal professional."
+            }
           </p>
         </div>
       </footer>
