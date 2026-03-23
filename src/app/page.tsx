@@ -240,13 +240,22 @@ export default function LandingPage() {
             <h2 style={{ fontFamily: R.fontSans, fontSize: "clamp(28px,3.5vw,42px)", fontWeight: 800, color: R.textDark, letterSpacing: "-0.03em", lineHeight: 1.2, margin: 0 }}>
               Comprehensive contract review for freelancers and businesses
             </h2>
+            <h3 style={{ fontFamily: R.fontSans, fontSize: "clamp(20px,2.5vw,28px)", fontWeight: 600, color: R.tealMid, letterSpacing: "-0.02em", lineHeight: 1.2, margin: "12px 0 0" }}>
+              프리랜서와 소상공인을 위한 계약서 검토
+            </h3>
           </div>
           <div style={{ paddingTop: 8 }}>
             <p style={{ fontSize: 16, color: R.textMid, lineHeight: 1.8, marginBottom: 20, fontFamily: R.fontSans }}>
               Clauze provides AI-powered Korean contract analysis for anyone who needs to understand what they&apos;re signing — from foreign freelancers to small business owners without a legal team.
             </p>
+            <p style={{ fontSize: 15, color: R.textMid, lineHeight: 1.8, marginBottom: 20, fontFamily: R.fontSans }}>
+              Clauze는 한국 계약서를 이해해야 하는 모든 사람을 위해 AI 기반의 계약서 분석을 제공합니다. 해외 프리랜서부터 법무팀이 없는 소상공인까지.
+            </p>
             <p style={{ fontSize: 16, color: R.textMid, lineHeight: 1.8, fontFamily: R.fontSans }}>
               Our AI identifies risky clauses, provides Korean and English summaries, and gives you actionable guidance — all in under 30 seconds.
+            </p>
+            <p style={{ fontSize: 15, color: R.textMid, lineHeight: 1.8, fontFamily: R.fontSans }}>
+              위험한 조항을 식별하고 한국어와 영어 요약을 제공하며 실행 가능한 조언을 제시합니다. 모두 30초 이내에.
             </p>
           </div>
         </div>
@@ -257,18 +266,47 @@ export default function LandingPage() {
         <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "start" }}>
           <div>
             <Eyebrow dark>How it works</Eyebrow>
-            <h2 style={{ fontFamily: R.fontSans, fontSize: "clamp(28px,3.5vw,42px)", fontWeight: 800, color: R.textWhite, letterSpacing: "-0.03em", lineHeight: 1.2, margin: "0 0 32px" }}>
+            <h2 style={{ fontFamily: R.fontSans, fontSize: "clamp(28px,3.5vw,42px)", fontWeight: 800, color: R.textWhite, letterSpacing: "-0.03em", lineHeight: 1.2, margin: "0 0 12px" }}>
               Sign smarter, one clause at a time
             </h2>
+            <h3 style={{ fontFamily: R.fontSans, fontSize: "clamp(20px,2.5vw,28px)", fontWeight: 700, color: R.tealBright, letterSpacing: "-0.02em", lineHeight: 1.2, margin: "0 0 32px" }}>
+              똑똑하게 서명하기
+            </h3>
             <PillBtn onClick={() => router.push("/dashboard")} variant="outline" dark>Get started</PillBtn>
           </div>
           <div style={{ borderTop: `1px solid ${R.borderDark}` }}>
             {[
-              { title: "Upload your PDF", desc: "Drag and drop any Korean contract. Up to 10MB. No account needed to try." },
-              { title: "AI analysis in 30 seconds", desc: "Claude AI reads every clause, identifies risks, and classifies them by severity." },
-              { title: "Review in Korean & English", desc: "Each risky clause is explained in both languages with a recommended action." },
-            ].map(({ title, desc }) => (
-              <AccordionItem key={title} title={title} desc={desc} dark />
+              {
+                title: "Upload your PDF",
+                title_ko: "PDF 업로드하기",
+                desc: "Drag and drop any Korean contract. Up to 10MB. No account needed to try." ,
+                desc_ko: "한국 계약서를 드래그 앤 드롭하세요. 최대 10MB. 계정 없이도 체험 가능합니다."
+              },
+              {
+                title: "AI analysis in 30 seconds",
+                title_ko: "30초 안에 AI 분석",
+                desc: "Claude AI reads every clause, identifies risks, and classifies them by severity." ,
+                desc_ko: "Claude AI가 모든 조항을 읽고 위험을 식별하며 심각도별로 분류합니다."
+              },
+              {
+                title: "Review in Korean & English",
+                title_ko: "한국어와 영어로 검토",
+                desc: "Each risky clause is explained in both languages with a recommended action." ,
+                desc_ko: "위험한 각 조항을 두 언어로 설명하고 권장 조치를 제시합니다."
+              },
+            ].map(({ title, title_ko, desc, desc_ko }) => (
+              <div key={title} style={{ borderBottom: `1px solid ${R.borderDark}`, cursor: "pointer" }} onClick={() => {}}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "22px 0" }}>
+                  <div>
+                    <span style={{ fontFamily: R.fontSans, fontSize: 17, fontWeight: 700, color: R.textWhite, letterSpacing: "-0.01em" }}>{title}</span>
+                    <span style={{ fontFamily: R.fontSans, fontSize: 14, fontWeight: 600, color: R.tealBright, letterSpacing: "-0.01em", display: "block", marginTop: 4 }}>{title_ko}</span>
+                  </div>
+                </div>
+                <div style={{ paddingBottom: 16 }}>
+                  <p style={{ fontSize: 14, color: "rgba(255,255,255,0.65)", lineHeight: 1.7, margin: "0 0 10px", fontFamily: R.fontSans }}>{desc}</p>
+                  <p style={{ fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.7, margin: 0, fontFamily: R.fontSans }}>{desc_ko}</p>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -282,16 +320,43 @@ export default function LandingPage() {
             <h2 style={{ fontFamily: R.fontSans, fontSize: "clamp(28px,3.5vw,42px)", fontWeight: 800, color: R.textDark, letterSpacing: "-0.03em", lineHeight: 1.2, maxWidth: 540, margin: "0 auto" }}>
               Contract clarity for everyone in Korea
             </h2>
+            <h3 style={{ fontFamily: R.fontSans, fontSize: "clamp(20px,2.5vw,28px)", fontWeight: 700, color: R.tealMid, letterSpacing: "-0.02em", lineHeight: 1.2, maxWidth: 540, margin: "12px auto 0" }}>
+              한국에서 계약서가 필요한 모두를 위해
+            </h3>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
             {[
-              { title: "Foreign freelancers", desc: "Navigate Korean contracts with confidence, even without Korean language skills.", link: "Freelancer solutions" },
-              { title: "Small businesses", desc: "Protect your business from unfair clauses without the cost of a legal retainer.", link: "Business solutions" },
-              { title: "Contractors & doers", desc: "Quick on-demand contract review before you sign any service agreement.", link: "Quick review" },
-            ].map(({ title, desc, link }) => (
+              {
+                title: "Foreign freelancers",
+                title_ko: "해외 프리랜서",
+                desc: "Navigate Korean contracts with confidence, even without Korean language skills.",
+                desc_ko: "한국어 실력이 없어도 자신감 있게 한국 계약서를 이해하세요.",
+                link: "Freelancer solutions"
+              },
+              {
+                title: "Small businesses",
+                title_ko: "소상공인",
+                desc: "Protect your business from unfair clauses without the cost of a legal retainer.",
+                desc_ko: "비싼 변호사 비용 없이 부당한 조항으로부터 사업을 보호하세요.",
+                link: "Business solutions"
+              },
+              {
+                title: "Contractors & doers",
+                title_ko: "용역 계약자",
+                desc: "Quick on-demand contract review before you sign any service agreement.",
+                desc_ko: "서비스 계약에 서명하기 전에 빠르게 계약서를 검토하세요.",
+                link: "Quick review"
+              },
+            ].map(({ title, title_ko, desc, desc_ko, link }) => (
               <div key={title} style={{ background: R.bgLight, padding: "36px 28px", borderRadius: R.cardRadius, display: "flex", flexDirection: "column", gap: 16 }}>
-                <h3 style={{ fontFamily: R.fontSans, fontSize: 20, fontWeight: 800, color: R.textDark, letterSpacing: "-0.02em", margin: 0 }}>{title}</h3>
-                <p style={{ fontSize: 14, color: R.textMid, lineHeight: 1.7, margin: 0, flex: 1, fontFamily: R.fontSans }}>{desc}</p>
+                <div>
+                  <h3 style={{ fontFamily: R.fontSans, fontSize: 20, fontWeight: 800, color: R.textDark, letterSpacing: "-0.02em", margin: "0 0 4px" }}>{title}</h3>
+                  <h4 style={{ fontFamily: R.fontSans, fontSize: 16, fontWeight: 700, color: R.tealMid, letterSpacing: "-0.01em", margin: 0 }}>{title_ko}</h4>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: 14, color: R.textMid, lineHeight: 1.7, margin: "0 0 8px", fontFamily: R.fontSans }}>{desc}</p>
+                  <p style={{ fontSize: 13, color: R.textMid, lineHeight: 1.7, margin: 0, fontFamily: R.fontSans }}>{desc_ko}</p>
+                </div>
                 <button
                   onClick={() => router.push("/dashboard")}
                   style={{
@@ -318,11 +383,17 @@ export default function LandingPage() {
           </div>
           <div style={{ padding: "64px 56px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
             <Eyebrow>Expert guidance</Eyebrow>
-            <h2 style={{ fontFamily: R.fontSans, fontSize: "clamp(24px,3vw,36px)", fontWeight: 800, color: R.textDark, letterSpacing: "-0.03em", lineHeight: 1.2, margin: "0 0 20px" }}>
+            <h2 style={{ fontFamily: R.fontSans, fontSize: "clamp(24px,3vw,36px)", fontWeight: 800, color: R.textDark, letterSpacing: "-0.03em", lineHeight: 1.2, margin: "0 0 12px" }}>
               Meet your AI contract advisor
             </h2>
-            <p style={{ fontSize: 15, color: R.textMid, lineHeight: 1.8, margin: "0 0 28px", fontFamily: R.fontSans }}>
+            <h3 style={{ fontFamily: R.fontSans, fontSize: "clamp(18px,2vw,24px)", fontWeight: 700, color: R.tealMid, letterSpacing: "-0.02em", lineHeight: 1.2, margin: "0 0 20px" }}>
+              당신의 AI 계약서 조언자
+            </h3>
+            <p style={{ fontSize: 15, color: R.textMid, lineHeight: 1.8, margin: "0 0 10px", fontFamily: R.fontSans }}>
               Powered by Claude AI, Clauze understands Korean legal language and identifies the clauses that put you at risk.
+            </p>
+            <p style={{ fontSize: 14, color: R.textMid, lineHeight: 1.8, margin: "0 0 28px", fontFamily: R.fontSans }}>
+              Claude AI로 구동되는 Clauze는 한국 법률 언어를 이해하고 위험한 조항을 식별합니다.
             </p>
             <button
               onClick={() => router.push("/review/demo")}
