@@ -44,48 +44,87 @@ const SYSTEM_PROMPT = `당신은 한국 계약법 전문 리뷰어입니다. 업
 고위험 조항을 clauses 배열의 앞쪽에 배치하세요.`;
 
 export async function reviewContract(pdfBase64: string): Promise<ReviewResult> {
-  // Prompt Caching으로 시스템 프롬프트 비용 90% 절감
-  const response = await anthropic.beta.messages.create({
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 4096,
-    betas: ["prompt-caching-2024-07-31", "pdfs-2024-09-25"],
-    system: [
-      {
-        type: "text",
-        text: SYSTEM_PROMPT,
-        cache_control: { type: "ephemeral" },
-      },
-    ],
-    messages: [
-      {
-        role: "user",
-        content: [
-          {
-            type: "document",
-            source: {
-              type: "base64",
-              media_type: "application/pdf",
-              data: pdfBase64,
-            },
-          },
-          {
-            type: "text",
-            text: "위 계약서를 분석하여 지정된 JSON 스키마 형식으로 위험 조항을 식별하고 결과를 반환해주세요. JSON 외의 텍스트는 포함하지 마세요.",
-          },
-        ],
-      },
-    ],
-  });
-
-  // JSON 응답 파싱
-  const content = response.content[0];
-  if (content.type !== "text") {
-    throw new Error("Unexpected response type from Claude API");
+  // API 키 검증
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error("ANTHROPIC_API_KEY 환경 변수가 설정되지 않았습니다.");
   }
 
-  // JSON 블록 추출 (마크다운 코드 블록 처리)
-  const jsonText = content.text.replace(/```json\n?|\n?```/g, "").trim();
-  const result = JSON.parse(jsonText) as ReviewResult;
+  try {
+    // Prompt Caching으로 시스템 프롬프트 비용 90% 절감
+    const response = await anthropic.beta.messages.create({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 4096,
+      betas: ["prompt-caching-2024-07-31", "pdfs-2024-09-25"],
+      system: [
+        {
+          type: "text",
+          text: SYSTEM_PROMPT,
+          cache_control: { type: "ephemeral" },
+        },
+      ],
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "document",
+              source: {
+                type: "base64",
+                media_type: "application/pdf",
+                data: pdfBase64,
+              },
+            },
+            {
+              type: "text",
+              text: "위 계약서를 분석하여 지정된 JSON 스키마 형식으로 위험 조항을 식별하고 결과를 반환해주세요. JSON 외의 텍스트는 포함하지 마세요.",
+            },
+          ],
+        },
+      ],
+    });
 
-  return result;
+    // JSON 응답 파싱
+    const content = response.content[0];
+    if (content.type !== "text") {
+      throw new Error("Claude API가 예상하지 못한 형식으로 응답했습니다.");
+    }
+
+    // JSON 블록 추출 (마크다운 코드 블록 처리)
+    const jsonText = content.text.replace(/```json\n?|\n?```/g, "").trim();
+
+    // 빈 응답 체크
+    if (!jsonText) {
+      throw new Error("Claude API에서 빈 응답을 받았습니다.");
+    }
+
+    let result: ReviewResult;
+    try {
+      result = JSON.parse(jsonText) as ReviewResult;
+    } catch (parseErr) {
+      console.error("JSON parsing failed. Response text:", jsonText);
+      throw new Error("AI 응답을 파싱할 수 없습니다. 다시 시도해주세요.");
+    }
+
+    // 응답 스키마 검증
+    if (!result.overallRisk || !result.summary_ko || !result.summary_en || !Array.isArray(result.clauses)) {
+      throw new Error("AI 응답 형식이 올바르지 않습니다.");
+    }
+
+    return result;
+  } catch (error) {
+    // Anthropic SDK 에러 처리
+    if (error instanceof Error) {
+      if (error.message.includes("401") || error.message.includes("authentication")) {
+        throw new Error("API 인증 실패. API 키를 확인해주세요.");
+      }
+      if (error.message.includes("429")) {
+        throw new Error("요청이 너무 많습니다. 잠시 후 다시 시도해주세요.");
+      }
+      if (error.message.includes("timeout")) {
+        throw new Error("요청 시간 초과. 파일 크기를 줄여주세요.");
+      }
+      throw error;
+    }
+    throw new Error("계약서 검토 중 예상 못한 오류가 발생했습니다.");
+  }
 }

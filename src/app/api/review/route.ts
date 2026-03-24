@@ -58,15 +58,27 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Review API error:", error);
 
-    if (error instanceof SyntaxError) {
-      return NextResponse.json(
-        { error: "AI 응답 파싱 중 오류가 발생했습니다. 다시 시도해주세요." },
-        { status: 500 }
-      );
+    let errorMsg = "계약서 검토 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+
+    if (error instanceof Error) {
+      // 구체적인 오류 메시지 전파
+      if (error.message.includes("API 키") || error.message.includes("인증")) {
+        errorMsg = "서버 설정 오류. 관리자에게 문의해주세요.";
+      } else if (error.message.includes("형식") || error.message.includes("파싱")) {
+        errorMsg = error.message;
+      } else if (error.message.includes("시간 초과")) {
+        errorMsg = "처리 시간이 너무 오래 걸렸습니다. 파일 크기를 줄여주세요.";
+      } else if (error.message.includes("요청") || error.message.includes("429")) {
+        errorMsg = "요청이 너무 많습니다. 잠시 후 다시 시도해주세요.";
+      } else if (error.message.includes("PDF")) {
+        errorMsg = error.message;
+      } else if (error.message && error.message.length < 100) {
+        errorMsg = error.message;
+      }
     }
 
     return NextResponse.json(
-      { error: "계약서 검토 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요." },
+      { error: errorMsg },
       { status: 500 }
     );
   }
