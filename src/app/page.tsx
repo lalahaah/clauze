@@ -169,7 +169,7 @@ export default function LandingPage() {
           }}>{label}</Link>
         ))}
         <div style={{ flex: 1 }} />
-        <PillBtn onClick={() => router.push("/dashboard")} variant="filled">Get started</PillBtn>
+        <PillBtn onClick={() => router.push("/login?signup=true")} variant="filled">Get started</PillBtn>
       </nav>
 
       {/* Hero */}
