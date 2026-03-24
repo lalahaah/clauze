@@ -1,10 +1,11 @@
 // src/app/dashboard/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useMotionValue, useMotionTemplate, useAnimationFrame } from "framer-motion";
+import { useAuth } from "@/hooks/useAuth";
 import { ContractUploader } from "@/components/ContractUploader";
 import { RiskBadge } from "@/components/RiskBadge";
 import { RiskLevel } from "@/lib/types";
@@ -84,6 +85,7 @@ const DEMO_HISTORY = [
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { user, loading, logout } = useAuth();
   const [uploadError, setUploadError] = useState("");
   const [lang, setLang] = useState<"ko" | "en">("ko");
 
@@ -99,6 +101,38 @@ export default function DashboardPage() {
 
   const maskImage = useMotionTemplate`radial-gradient(300px circle at ${mouseX}px ${mouseY}px, black, transparent)`;
 
+  // 인증 확인 및 리다이렉트
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
+
+  // 로딩 중일 때
+  if (loading) {
+    return (
+      <div style={{ minHeight: "100vh", background: R.bgLight, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: R.fontSans }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 16, fontWeight: 700, color: R.tealMid, marginBottom: 16 }}>로딩 중...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // 로그인되지 않았으면 표시하지 않음 (useEffect에서 리다이렉트됨)
+  if (!user) {
+    return null;
+  }
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push("/");
+    } catch (err) {
+      console.error("로그아웃 실패:", err);
+    }
+  };
+
   return (
     <div style={{ background: R.bgLight, minHeight: "100vh", fontFamily: R.fontSans }}>
 
@@ -106,13 +140,11 @@ export default function DashboardPage() {
       <div style={{ background: R.bgDark, padding: "6px 40px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 24 }}>
         <div style={{ flex: 1 }} />
         <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-          {["LOGIN", "GET SUPPORT"].map(label => (
-            <button
-              key={label}
-              onClick={() => label === "LOGIN" && router.push("/login")}
-              style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase" }}
-            >{label}</button>
-          ))}
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", fontFamily: R.fontSans }}>
+            {user?.email}
+          </div>
+          <button style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase" }}>GET SUPPORT</button>
+          <button onClick={handleLogout} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "rgba(255,255,255,0.9)"} onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.7)"}>LOGOUT</button>
         </div>
       </div>
 
@@ -150,7 +182,6 @@ export default function DashboardPage() {
             >{l.toUpperCase()}</button>
           ))}
         </div>
-        <PillBtn onClick={() => router.push("/login")}>Log in</PillBtn>
         <PillBtn onClick={() => router.push("/pricing")} variant="filled">Upgrade</PillBtn>
       </nav>
 

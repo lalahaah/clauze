@@ -1,8 +1,10 @@
 // src/app/api/review/route.ts
-// 핵심 AI 검토 엔진 - PDF 수신 → Claude 호출 → JSON 반환
+// 핵심 AI 검토 엔진 - PDF 수신 → Claude 호출 → Firestore 저장
 
 import { NextRequest, NextResponse } from "next/server";
+import * as admin from "firebase-admin";
 import { reviewContract } from "@/lib/claude";
+import { adminDb } from "@/lib/firebase-admin";
 
 export const runtime = "nodejs";
 export const maxDuration = 60; // 60초 타임아웃 (PDF 분석 여유 확보)
@@ -32,9 +34,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // userId received but Firestore integration pending
-    void userId;
-
     // PDF를 base64로 변환
     const arrayBuffer = await file.arrayBuffer();
     const base64 = Buffer.from(arrayBuffer).toString("base64");
@@ -46,8 +45,32 @@ export async function POST(request: NextRequest) {
 
     const processingTime = Date.now() - startTime;
 
-    // 리뷰 ID 생성 (실제 구현 시 Firestore에 저장)
+    // 리뷰 ID 생성
     const reviewId = `review_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    // Firestore에 검토 결과 저장 (userId가 있을 경우만)
+    if (userId) {
+      try {
+        await adminDb.collection("reviews").doc(reviewId).set({
+          id: reviewId,
+          uid: userId,
+          fileName: file.name,
+          storageUrl: "", // Cloud Storage에 저장되지 않은 경우
+          result,
+          riskLevel: result.overallRisk,
+          processingTime,
+          createdAt: new Date().toISOString(),
+        });
+
+        // 사용자의 reviewCount 증가
+        await adminDb.collection("users").doc(userId).update({
+          reviewCount: admin.firestore.FieldValue.increment(1),
+        });
+      } catch (firebaseErr) {
+        console.error("Firestore save error (비치명적):", firebaseErr);
+        // Firestore 저장 실패는 무시하고 결과는 반환 (클라이언트는 검토 완료)
+      }
+    }
 
     return NextResponse.json({
       reviewId,
