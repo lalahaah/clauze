@@ -222,7 +222,7 @@ export default function LandingPage() {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
             style={{ display: "flex", gap: 56, justifyContent: "center", marginTop: 64 }}
           >
-            {[{ n: "1,200+", l: "Contracts Reviewed" }, { n: "28s", l: "Average Review Time" }, { n: "98%", l: "Risk Detection Rate" }].map(({ n, l }) => (
+            {[{ n: "Counting", l: "Contracts Reviewed" }, { n: "Measuring", l: "Average Review Time" }, { n: "Measuring", l: "Risk Detection Rate" }].map(({ n, l }) => (
               <div key={l} style={{ textAlign: "center" }}>
                 <div style={{ fontSize: 28, fontWeight: 800, color: R.textWhite, fontFamily: R.fontMono, letterSpacing: "-0.04em" }}>{n}</div>
                 <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginTop: 4, fontFamily: R.fontSans }}>{l}</div>
