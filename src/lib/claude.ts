@@ -31,7 +31,8 @@ const SYSTEM_PROMPT = `당신은 한국 계약법 전문 리뷰어입니다. 업
       "content_ko": "해당 조항의 한국어 설명 및 위험 요소",
       "content_en": "English explanation of the clause and risk factors",
       "risk": "high|medium|low",
-      "action": "협상 권고사항 또는 null"
+      "action": "협상 권고사항 (한국어) 또는 null",
+      "action_en": "Negotiation recommendation in English, or null"
     }
   ]
 }
@@ -50,11 +51,10 @@ export async function reviewContract(pdfBase64: string): Promise<ReviewResult> {
   }
 
   try {
-    // Prompt Caching으로 시스템 프롬프트 비용 90% 절감
-    const response = await anthropic.beta.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 4096,
-      betas: ["prompt-caching-2024-07-31", "pdfs-2024-09-25"],
+    // Claude API로 PDF 분석 (Prompt Caching으로 비용 90% 절감)
+    const response = await anthropic.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 6144,
       system: [
         {
           type: "text",

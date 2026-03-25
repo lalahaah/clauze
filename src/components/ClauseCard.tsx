@@ -8,6 +8,7 @@ import { RiskBadge } from "./RiskBadge";
 interface ClauseCardProps {
   clause: ClauseResult;
   index: number;
+  lang?: "ko" | "en";
 }
 
 const borderColors = {
@@ -16,7 +17,7 @@ const borderColors = {
   low:    "#1A9E6A",
 };
 
-export function ClauseCard({ clause, index }: ClauseCardProps) {
+export function ClauseCard({ clause, index, lang = "ko" }: ClauseCardProps) {
   const [expanded, setExpanded] = useState(clause.risk === "high");
   const [hovered, setHovered] = useState(false);
 
@@ -59,35 +60,26 @@ export function ClauseCard({ clause, index }: ClauseCardProps) {
             fontSize: 13,
             color: "#3D5A5E",
             lineHeight: 1.7,
-            marginBottom: 8,
-            fontFamily: "'DM Sans', sans-serif",
-          }}>
-            {clause.content_ko}
-          </p>
-          <p style={{
-            fontSize: 12,
-            color: "#7A9A9E",
-            lineHeight: 1.6,
-            fontStyle: "italic",
             marginBottom: clause.action ? 12 : 0,
             fontFamily: "'DM Sans', sans-serif",
           }}>
-            {clause.content_en}
+            {lang === "ko" ? clause.content_ko : clause.content_en}
           </p>
-          {clause.action && (
-            <span style={{
-              display: "inline-block",
-              padding: "5px 14px",
-              background: "rgba(0,133,124,0.08)",
+          {(lang === "ko" ? clause.action : (clause.action_en ?? clause.action)) && (
+            <div style={{
+              padding: "10px 16px",
+              background: "rgba(0,133,124,0.06)",
               border: "1px solid rgba(0,133,124,0.2)",
-              borderRadius: 28,
-              fontSize: 12,
-              fontWeight: 700,
-              color: "#00857C",
+              borderRadius: 4,
               fontFamily: "'DM Sans', sans-serif",
             }}>
-              {clause.action}
-            </span>
+              <div style={{ fontSize: 10, fontWeight: 700, color: "#00857C", letterSpacing: "1px", textTransform: "uppercase", marginBottom: 4 }}>
+                {lang === "ko" ? "권고사항" : "Recommendation"}
+              </div>
+              <p style={{ fontSize: 13, fontWeight: 500, color: "#00857C", margin: 0, lineHeight: 1.6 }}>
+                {lang === "ko" ? clause.action : (clause.action_en ?? clause.action)}
+              </p>
+            </div>
           )}
         </div>
       )}

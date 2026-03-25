@@ -11,6 +11,7 @@ export interface ClauseResult {
   content_en: string;
   risk: RiskLevel;
   action: string | null;
+  action_en?: string | null;
 }
 
 export interface ReviewResult {

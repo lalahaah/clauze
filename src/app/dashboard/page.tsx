@@ -267,7 +267,10 @@ export default function DashboardPage() {
         {/* Upload */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} style={{ marginBottom: 36 }}>
           <ContractUploader
-            onUploadComplete={(id) => router.push(`/review/${id}`)}
+            onUploadComplete={(id, result, fileName) => {
+                sessionStorage.setItem(`review_${id}`, JSON.stringify({ id, result, fileName, createdAt: new Date().toISOString() }));
+                router.push(`/review/${id}`);
+              }}
             onError={setUploadError}
             userId={null}
           />

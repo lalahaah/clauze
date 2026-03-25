@@ -67,7 +67,7 @@ export function ReviewResult({ review, lang = "ko" }: ReviewResultProps) {
 
           <div style={{ borderTop: "1px solid rgba(4,34,40,0.08)", paddingTop: 12 }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: "#7A9A9E", marginBottom: 6, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif" }}>English</div>
-            <p style={{ fontSize: 11, color: "#7A9A9E", lineHeight: 1.6, fontStyle: "italic", margin: 0, fontFamily: "'DM Sans', sans-serif" }}>{review.result.summary_en}</p>
+            <p style={{ fontSize: 12, color: "#3D5A5E", lineHeight: 1.7, margin: 0, fontFamily: "'DM Sans', sans-serif" }}>{review.result.summary_en}</p>
           </div>
         </div>
 
@@ -97,7 +97,7 @@ export function ReviewResult({ review, lang = "ko" }: ReviewResultProps) {
       {/* Clause list */}
       <main style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
         {review.result.clauses.map((clause, i) => (
-          <ClauseCard key={i} clause={clause} index={i} />
+          <ClauseCard key={i} clause={clause} index={i} lang={lang} />
         ))}
       </main>
     </div>

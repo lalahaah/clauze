@@ -1,7 +1,7 @@
 // src/app/review/[id]/page.tsx
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useMotionValue, useMotionTemplate, useAnimationFrame } from "framer-motion";
@@ -69,12 +69,24 @@ interface Props { params: Promise<{ id: string }> }
 
 export default function ReviewPage({ params }: Props) {
   const { id } = use(params);
-  void id;
   const router = useRouter();
-  const review = DEMO_REVIEW;
+  const [review, setReview] = useState<Review>(DEMO_REVIEW);
+  const [lang, setLang] = useState<"ko" | "en">("ko");
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem(`review_${id}`);
+    if (stored) {
+      try {
+        const data = JSON.parse(stored);
+        setReview({ id: data.id, uid: "", fileName: data.fileName, storageUrl: "", processingTime: 0, riskLevel: data.result.overallRisk, createdAt: data.createdAt, result: data.result });
+      } catch {
+        // sessionStorage 파싱 실패 시 DEMO_REVIEW 유지
+      }
+    }
+  }, [id]);
+
   const highCount = review.result.clauses.filter(c => c.risk === "high").length;
   const mediumCount = review.result.clauses.filter(c => c.risk === "medium").length;
-  const [lang, setLang] = useState<"ko" | "en">("ko");
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);

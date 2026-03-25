@@ -3,9 +3,10 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import { ReviewResult } from "@/lib/types";
 
 interface ContractUploaderProps {
-  onUploadComplete: (reviewId: string) => void;
+  onUploadComplete: (reviewId: string, result: ReviewResult, fileName: string) => void;
   onError: (error: string) => void;
   userId?: string | null;
 }
@@ -76,7 +77,7 @@ export function ContractUploader({ onUploadComplete, onError, userId }: Contract
       setProgress(100);
       setStepText("완료!");
       const data = await response.json();
-      setTimeout(() => { setLoading(false); onUploadComplete(data.reviewId); }, 500);
+      setTimeout(() => { setLoading(false); onUploadComplete(data.reviewId, data.result, data.fileName); }, 500);
     } catch (err) {
       clearInterval(interval);
       if (err instanceof Error && err.name === "AbortError") {
