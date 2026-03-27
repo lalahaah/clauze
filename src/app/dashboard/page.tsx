@@ -272,7 +272,7 @@ export default function DashboardPage() {
                 router.push(`/review/${id}`);
               }}
             onError={setUploadError}
-            userId={null}
+            userId={user?.uid}
           />
           {uploadError && (
             <p style={{ fontSize: 12, color: R.danger, marginTop: 8, fontFamily: R.fontSans }}>{uploadError}</p>

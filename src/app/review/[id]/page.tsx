@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { motion, useMotionValue, useMotionTemplate, useAnimationFrame } from "framer-motion";
 import { ReviewResult } from "@/components/ReviewResult";
 import { Review } from "@/lib/types";
+import { useAuth } from "@/hooks/useAuth";
 
 const R = {
   bgWhite: "#FFFFFF", bgLight: "#F6F7FB", bgDark: "#093944",
@@ -70,6 +71,7 @@ interface Props { params: Promise<{ id: string }> }
 export default function ReviewPage({ params }: Props) {
   const { id } = use(params);
   const router = useRouter();
+  const { user, loading, logout } = useAuth();
   const [review, setReview] = useState<Review>(DEMO_REVIEW);
   const [lang, setLang] = useState<"ko" | "en">("ko");
 
@@ -105,13 +107,19 @@ export default function ReviewPage({ params }: Props) {
 
       {/* ── Top utility bar ── */}
       <div style={{ background: R.bgDark, padding: "6px 40px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 24 }}>
-        {["LOGIN", "GET SUPPORT"].map(label => (
-          <button
-            key={label}
-            onClick={() => label === "LOGIN" && router.push("/login")}
-            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase" }}
-          >{label}</button>
-        ))}
+        {user && !loading && (
+          <div style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans }}>
+            {user.email}
+          </div>
+        )}
+        <button
+          onClick={() => user ? logout() : router.push("/login")}
+          style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase" }}
+        >{user ? "LOGOUT" : "LOGIN"}</button>
+        <button
+          onClick={() => {}}
+          style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase" }}
+        >GET SUPPORT</button>
       </div>
 
       {/* ── Sticky nav ── */}
