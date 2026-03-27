@@ -412,21 +412,53 @@ export default function LandingPage() {
               <p style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", lineHeight: 1.7, maxWidth: 260, fontFamily: R.fontSans }}>AI-powered Korean contract review for freelancers and businesses.</p>
             </div>
             {[
-              { title: "PRODUCT", items: ["Dashboard", "Contract Review", "Pricing"] },
-              { title: "COMPANY", items: ["About", "Blog", "Contact"] },
-              { title: "LEGAL", items: ["Privacy Policy", "Terms of Service", "Disclaimer"] },
+              { title: "PRODUCT", items: [
+                { label: "Dashboard", href: "/dashboard" },
+                { label: "Contract Review", href: "/dashboard" },
+                { label: "Pricing", href: "#" }
+              ]},
+              { title: "COMPANY", items: [
+                { label: "About", href: "#" },
+                { label: "Blog", href: "#" },
+                { label: "Contact", href: "#" }
+              ]},
+              { title: "LEGAL", items: [
+                { label: "Privacy Policy", href: "#" },
+                { label: "Terms of Service", href: "#" },
+                { label: "Disclaimer", href: "#" }
+              ]},
             ].map(({ title, items }) => (
               <div key={title}>
                 <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1.5px", color: R.tealBright, marginBottom: 16, textTransform: "uppercase", fontFamily: R.fontSans }}>{title}</div>
-                {items.map(item => (
-                  <div key={item} style={{ fontSize: 14, color: "rgba(255,255,255,0.6)", marginBottom: 10, cursor: "pointer", fontFamily: R.fontSans }}>{item}</div>
+                {items.map(({ label, href }) => (
+                  <button
+                    key={label}
+                    onClick={() => href !== "#" ? router.push(href) : undefined}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      padding: 0,
+                      margin: 0,
+                      marginBottom: 10,
+                      fontSize: 14,
+                      color: "rgba(255,255,255,0.6)",
+                      cursor: "pointer",
+                      fontFamily: R.fontSans,
+                      transition: "color 0.2s",
+                      textAlign: "left",
+                      display: "block",
+                      width: "100%"
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.85)"}
+                    onMouseLeave={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.6)"}
+                  >{label}</button>
                 ))}
               </div>
             ))}
           </div>
           <div style={{ borderTop: `1px solid ${R.borderDark}`, paddingTop: 24, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", fontFamily: R.fontSans }}>© 2026 Clauze. All rights reserved.</div>
-            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", maxWidth: 480, textAlign: "right", fontFamily: R.fontSans }}>
+            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", maxWidth: 600, textAlign: "right", fontFamily: R.fontSans, whiteSpace: "nowrap" }}>
               본 서비스는 법적 조언을 제공하지 않습니다. AI 분석 결과는 참고용이며 중요한 계약은 법률 전문가와 상담하세요.
             </div>
           </div>
