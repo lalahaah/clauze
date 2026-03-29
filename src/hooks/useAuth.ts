@@ -2,7 +2,8 @@
 // Firebase Auth 상태 관리 훅
 
 import { useEffect, useState } from "react";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 import { User as FirebaseUser, signOut, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { User } from "@/lib/types";
 
@@ -12,18 +13,28 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
 
-  // Auth 상태 감시
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
       try {
         setError("");
         if (firebaseUser) {
           setUser(firebaseUser);
-          // Firestore에서 사용자 데이터 조회 (나중에 구현)
+
+          // Firestore에서 사용자 플랜 조회
+          let plan: User["plan"] = "free";
+          try {
+            const snap = await getDoc(doc(db, "users", firebaseUser.uid));
+            if (snap.exists()) {
+              plan = (snap.data().plan as User["plan"]) ?? "free";
+            }
+          } catch {
+            // Firestore 조회 실패 시 기본값 유지
+          }
+
           setUserData({
             uid: firebaseUser.uid,
-            email: firebaseUser.email || "",
-            plan: "free",
+            email: firebaseUser.email ?? "",
+            plan,
             reviewCount: 0,
             createdAt: new Date().toISOString(),
           });
@@ -41,7 +52,6 @@ export function useAuth() {
     return () => unsubscribe();
   }, []);
 
-  // Google 로그인
   const signInWithGoogle = async () => {
     try {
       setError("");
@@ -54,7 +64,6 @@ export function useAuth() {
     }
   };
 
-  // 로그아웃
   const logout = async () => {
     try {
       setError("");

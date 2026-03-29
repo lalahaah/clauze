@@ -1,10 +1,13 @@
 // src/app/pricing/page.tsx
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { PricingCard } from "@/components/PricingCard";
+import { useAuth } from "@/hooks/useAuth";
+import { auth } from "@/lib/firebase";
 
 const R = {
   bgWhite: "#FFFFFF", bgLight: "#F6F7FB", bgDark: "#093944",
@@ -27,14 +30,133 @@ const FAQ = [
 
 export default function PricingPage() {
   const router = useRouter();
+  const { user, userData, loading } = useAuth();
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+
+  const handleSelectPlan = async (plan: "free" | "pro" | "business") => {
+    if (plan === "free") {
+      router.push(user ? "/dashboard" : "/login?signup=true");
+      return;
+    }
+
+    if (!user) {
+      router.push(`/login?signup=true&plan=${plan}`);
+      return;
+    }
+
+    // 이미 동일 플랜이면 포털로
+    if (userData?.plan === plan) {
+      await openBillingPortal();
+      return;
+    }
+
+    setCheckoutLoading(plan);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({ plan }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("결제 페이지를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
+      }
+    } catch {
+      alert("오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
+
+  const openBillingPortal = async () => {
+    if (!user) return;
+    setCheckoutLoading("portal");
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const res = await fetch("/api/stripe/portal", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("구독 관리 페이지를 불러오지 못했습니다.");
+      }
+    } catch {
+      alert("오류가 발생했습니다.");
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
+
+  const currentPlan = userData?.plan ?? "free";
+
+  const plans = [
+    {
+      plan: "free" as const,
+      name: "Free",
+      price: "₩0",
+      period: "/월",
+      description: "부담 없이 체험해보세요",
+      features: ["월 2건 검토", "한국어 요약", "검토 이력 7일"],
+      lockedFeatures: ["영문 번역", "위험 조항 하이라이트"],
+      cta: currentPlan === "free" ? "현재 플랜" : "무료 시작",
+      featured: false,
+    },
+    {
+      plan: "pro" as const,
+      name: "Pro",
+      price: "₩19,000",
+      period: "/월",
+      description: "외국인 프리랜서 · 1인 사업자",
+      features: ["무제한 검토", "한국어 + 영문 번역", "위험 조항 하이라이트", "검토 이력 무제한"],
+      lockedFeatures: [],
+      cta: currentPlan === "pro"
+        ? "구독 관리"
+        : (checkoutLoading === "pro" ? "연결 중..." : "Pro 시작하기"),
+      featured: true,
+    },
+    {
+      plan: "business" as const,
+      name: "Business",
+      price: "₩79,000",
+      period: "/월",
+      description: "법무팀 없는 중소기업",
+      features: ["Pro 모든 기능", "팀 5인 공유", "커스텀 체크리스트", "API 연동"],
+      lockedFeatures: [],
+      cta: currentPlan === "business"
+        ? "구독 관리"
+        : (checkoutLoading === "business" ? "연결 중..." : "Business 시작"),
+      featured: false,
+    },
+  ];
 
   return (
     <div style={{ background: R.bgLight, minHeight: "100vh", fontFamily: R.fontSans }}>
       {/* Utility bar */}
       <div style={{ background: R.bgDark, padding: "6px 40px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 24 }}>
-        {["LOGIN", "GET SUPPORT"].map(label => (
-          <button key={label} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase" }}>{label}</button>
-        ))}
+        {!loading && user ? (
+          <>
+            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", fontFamily: R.fontSans }}>{user.email}</span>
+            <button
+              onClick={() => router.push("/dashboard")}
+              style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase" }}
+            >DASHBOARD</button>
+          </>
+        ) : (
+          <button
+            onClick={() => router.push("/login")}
+            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase" }}
+          >LOGIN</button>
+        )}
+        <button style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase" }}>GET SUPPORT</button>
       </div>
 
       {/* Nav */}
@@ -51,7 +173,22 @@ export default function PricingPage() {
           <Link key={href} href={`/${href}`} style={{ fontSize: 14, fontFamily: R.fontSans, fontWeight: href === "pricing" ? 700 : 500, color: R.textDark, padding: "4px 0", textDecoration: "none", borderBottom: href === "pricing" ? `2px solid ${R.tealMid}` : "2px solid transparent" }}>{label}</Link>
         ))}
         <div style={{ flex: 1 }} />
-        <button onClick={() => router.push("/dashboard")} style={{ padding: "13px 28px", background: R.tealBtn, color: R.textWhite, border: `1.5px solid ${R.tealBtn}`, borderRadius: R.btnRadius, fontSize: 14, fontWeight: 700, fontFamily: R.fontSans, cursor: "pointer" }}>Get started</button>
+        {!loading && user && currentPlan !== "free" && (
+          <div style={{
+            padding: "4px 12px", borderRadius: 20,
+            background: "rgba(0,194,181,0.12)",
+            fontSize: 11, fontWeight: 700, color: R.tealMid,
+            fontFamily: R.fontSans, textTransform: "uppercase", letterSpacing: "0.5px",
+          }}>
+            {currentPlan} Plan
+          </div>
+        )}
+        <button
+          onClick={() => router.push(user ? "/dashboard" : "/login?signup=true")}
+          style={{ padding: "13px 28px", background: R.tealBtn, color: R.textWhite, border: `1.5px solid ${R.tealBtn}`, borderRadius: R.btnRadius, fontSize: 14, fontWeight: 700, fontFamily: R.fontSans, cursor: "pointer" }}
+        >
+          {user ? "대시보드" : "시작하기"}
+        </button>
       </nav>
 
       {/* Header — dark */}
@@ -61,18 +198,35 @@ export default function PricingPage() {
         <p style={{ fontSize: 17, color: R.textOffWhite, maxWidth: 480, margin: "0 auto", fontFamily: R.fontSans }}>변호사 1회 검토비(30~50만원)의 1/20 비용으로 매월 무제한 검토</p>
       </div>
 
-      {/* Cards — overlapping */}
+      {/* Cards */}
       <div style={{ maxWidth: 1000, margin: "-40px auto 0", padding: "0 40px 80px", display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 20 }}>
-        {[
-          { plan: "free" as const, name: "Free", price: "₩0", period: "/월", description: "부담 없이 체험해보세요", features: ["월 2건 검토", "한국어 요약", "검토 이력 7일"], lockedFeatures: ["영문 번역", "위험 조항 하이라이트"], cta: "무료 시작", featured: false },
-          { plan: "pro" as const, name: "Pro", price: "₩19,000", period: "/월", description: "외국인 프리랜서 · 1인 사업자", features: ["무제한 검토", "한국어 + 영문 번역", "위험 조항 하이라이트", "검토 이력 무제한"], lockedFeatures: [], cta: "Pro 시작하기", featured: true },
-          { plan: "business" as const, name: "Business", price: "₩79,000", period: "/월", description: "법무팀 없는 중소기업", features: ["Pro 모든 기능", "팀 5인 공유", "커스텀 체크리스트", "API 연동"], lockedFeatures: [], cta: "Business 시작", featured: false },
-        ].map((plan, i) => (
+        {plans.map((plan, i) => (
           <motion.div key={plan.name} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.1 }}>
-            <PricingCard {...plan} onSelect={() => router.push("/dashboard")} />
+            <PricingCard
+              {...plan}
+              onSelect={() => handleSelectPlan(plan.plan)}
+              disabled={checkoutLoading !== null}
+            />
           </motion.div>
         ))}
       </div>
+
+      {/* Billing portal link for paid users */}
+      {!loading && user && currentPlan !== "free" && (
+        <div style={{ textAlign: "center", marginTop: -48, marginBottom: 48 }}>
+          <button
+            onClick={openBillingPortal}
+            disabled={checkoutLoading === "portal"}
+            style={{
+              background: "none", border: "none", cursor: "pointer",
+              fontSize: 13, color: R.textLight, fontFamily: R.fontSans,
+              textDecoration: "underline",
+            }}
+          >
+            {checkoutLoading === "portal" ? "연결 중..." : "구독 취소 또는 결제 정보 변경 →"}
+          </button>
+        </div>
+      )}
 
       {/* FAQ */}
       <div style={{ background: R.bgWhite, borderTop: `1px solid ${R.borderLight}`, padding: "80px 40px" }}>
@@ -98,7 +252,10 @@ export default function PricingPage() {
         <p style={{ fontFamily: R.fontSans, fontSize: 12, fontWeight: 700, letterSpacing: "1.8px", textTransform: "uppercase", color: R.tealBright, margin: "0 0 14px" }}>Enterprise</p>
         <h3 style={{ fontFamily: R.fontSans, fontSize: 32, fontWeight: 800, color: R.textWhite, letterSpacing: "-0.03em", margin: "0 0 12px" }}>대기업 · 엔터프라이즈 문의</h3>
         <p style={{ fontSize: 16, color: R.textOffWhite, margin: "0 0 32px", fontFamily: R.fontSans }}>대용량 계약서, 맞춤형 솔루션, 온프레미스 설치 문의</p>
-        <button style={{ padding: "13px 32px", background: "transparent", color: R.textWhite, border: `1.5px solid ${R.borderDark}`, borderRadius: R.btnRadius, fontSize: 14, fontWeight: 700, fontFamily: R.fontSans, cursor: "pointer" }}>
+        <button
+          onClick={() => window.location.href = "mailto:hello@clauze.io?subject=Enterprise 문의"}
+          style={{ padding: "13px 32px", background: "transparent", color: R.textWhite, border: `1.5px solid ${R.borderDark}`, borderRadius: R.btnRadius, fontSize: 14, fontWeight: 700, fontFamily: R.fontSans, cursor: "pointer" }}
+        >
           엔터프라이즈 문의하기
         </button>
       </div>

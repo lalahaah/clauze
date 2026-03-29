@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useMotionValue, useMotionTemplate, useAnimationFrame } from "framer-motion";
-import { collection, query, where, orderBy, limit, getDocs } from "firebase/firestore";
+import { collection, query, where, limit, getDocs } from "firebase/firestore";
 import { useAuth } from "@/hooks/useAuth";
 import { ContractUploader } from "@/components/ContractUploader";
 import { RiskBadge } from "@/components/RiskBadge";
@@ -189,11 +189,12 @@ export default function DashboardPage() {
         const q = query(
           collection(db, "reviews"),
           where("uid", "==", user.uid),
-          orderBy("createdAt", "desc"),
           limit(20)
         );
         const snapshot = await getDocs(q);
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
+        const data = snapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() } as Review))
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         setReviews(data);
       } catch (err) {
         console.error("Reviews fetch error:", err);

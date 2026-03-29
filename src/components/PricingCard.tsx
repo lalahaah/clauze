@@ -14,11 +14,12 @@ interface PricingCardProps {
   lockedFeatures?: string[];
   cta: string;
   featured?: boolean;
+  disabled?: boolean;
   onSelect: () => void;
 }
 
 export function PricingCard({
-  name, price, period, description, features, lockedFeatures = [], cta, featured = false, onSelect,
+  name, price, period, description, features, lockedFeatures = [], cta, featured = false, disabled = false, onSelect,
 }: PricingCardProps) {
   const [hov, setHov] = useState(false);
 
@@ -79,6 +80,7 @@ export function PricingCard({
 
       <button
         onClick={onSelect}
+        disabled={disabled}
         onMouseEnter={() => setHov(true)}
         onMouseLeave={() => setHov(false)}
         style={{
@@ -89,7 +91,8 @@ export function PricingCard({
           borderRadius: 28,
           fontSize: 14, fontWeight: 700,
           fontFamily: "'DM Sans', sans-serif",
-          cursor: "pointer",
+          cursor: disabled ? "not-allowed" : "pointer",
+          opacity: disabled ? 0.6 : 1,
           transition: "all 0.2s",
         }}
       >
