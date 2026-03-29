@@ -274,7 +274,7 @@ export default function PrivacyPage() {
             rows={[
               ['필수', '이메일 주소, 비밀번호(암호화 저장), 서비스 가입일시'],
               ['자동 수집', 'IP 주소, 쿠키, 서비스 이용 기록, 접속 로그, 기기 정보'],
-              ['결제 시 (유료 플랜)', 'Stripe를 통해 처리 — 회사는 카드번호를 직접 저장하지 않습니다'],
+              ['결제 시 (유료 플랜)', '토스페이먼츠를 통해 처리 — 회사는 카드번호를 직접 저장하지 않습니다'],
             ]}
           />
         </SubSection>
@@ -347,7 +347,7 @@ export default function PrivacyPage() {
           rows={[
             ['Google Firebase', '회원 인증, 데이터 저장, 파일 스토리지', '회원 탈퇴 시까지'],
             ['Anthropic', '계약서 AI 분석 처리 (업로드 PDF 일시 처리)', '분석 완료 즉시 파기'],
-            ['Stripe', '결제 처리 및 구독 관리', '법정 보존 기간'],
+            ['토스페이먼츠', '결제 처리 및 구독 관리', '법정 보존 기간'],
             ['Vercel', '서비스 호스팅 및 배포', '서비스 운영 기간'],
           ]}
         />
@@ -408,7 +408,7 @@ export default function PrivacyPage() {
         <Num n={1}>관리적 조치: 개인정보 접근 권한의 최소화, 정기 교육 실시</Num>
         <Num n={2}>기술적 조치: 개인정보 암호화 저장(Firebase 보안), HTTPS 통신, Firebase Security Rules 적용</Num>
         <Num n={3}>물리적 조치: 서버 보안 구역 접근 통제 (Google Cloud 인프라)</Num>
-        <Num n={4}>결제 정보: PCI-DSS 인증 Stripe를 통해 처리 — 카드 정보 직접 저장 없음</Num>
+        <Num n={4}>결제 정보: PCI-DSS 인증 토스페이먼츠를 통해 처리 — 카드 정보 직접 저장 없음</Num>
       </Section>
 
       {/* 제10조 */}
