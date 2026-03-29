@@ -214,7 +214,7 @@ export default function TermsPage() {
               onClick={() => scrollTo(a.id)}
               style={{
                 display: "flex", alignItems: "center", gap: 8,
-                width: "100%", textAlign: "left", border: "none", background: "none",
+                width: "100%", textAlign: "left", border: "none",
                 padding: "8px 12px", borderRadius: 4, cursor: "pointer",
                 marginBottom: 2, transition: "all 0.15s",
                 borderLeft: `2px solid ${active === a.id ? (a.important ? R.danger : R.tealMid) : "transparent"}`,

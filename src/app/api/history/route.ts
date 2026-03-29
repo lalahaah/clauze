@@ -2,6 +2,7 @@
 // 검토 이력 조회 API
 
 import { NextRequest, NextResponse } from "next/server";
+import { adminDb } from "@/lib/firebase-admin";
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,13 +16,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Firestore 연동 시 여기에 구현
-    // const reviewsRef = collection(db, "reviews");
-    // const q = query(reviewsRef, where("uid", "==", userId), orderBy("createdAt", "desc"), limit(20));
-    // const snapshot = await getDocs(q);
-    // const reviews = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const snapshot = await adminDb
+      .collection("reviews")
+      .where("uid", "==", userId)
+      .orderBy("createdAt", "desc")
+      .limit(20)
+      .get();
 
-    return NextResponse.json({ reviews: [] });
+    const reviews = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    return NextResponse.json({ reviews });
   } catch (error) {
     console.error("History API error:", error);
     return NextResponse.json(

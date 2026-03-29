@@ -5,10 +5,12 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useMotionValue, useMotionTemplate, useAnimationFrame } from "framer-motion";
+import { collection, query, where, orderBy, limit, getDocs } from "firebase/firestore";
 import { useAuth } from "@/hooks/useAuth";
 import { ContractUploader } from "@/components/ContractUploader";
 import { RiskBadge } from "@/components/RiskBadge";
-import { RiskLevel } from "@/lib/types";
+import { db } from "@/lib/firebase";
+import { Review, RiskLevel } from "@/lib/types";
 
 const R = {
   bgWhite: "#FFFFFF", bgLight: "#F6F7FB", bgDark: "#093944",
@@ -21,6 +23,23 @@ const R = {
   fontSans: "'DM Sans', -apple-system, sans-serif",
   fontMono: "'DM Mono', monospace",
 };
+
+function relativeTime(isoDate: string, lang: "ko" | "en"): string {
+  const diff = Date.now() - new Date(isoDate).getTime();
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  if (lang === "en") {
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days < 7) return `${days}d ago`;
+    return new Date(isoDate).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  }
+  if (minutes < 60) return `${minutes}분 전`;
+  if (hours < 24) return `${hours}시간 전`;
+  if (days < 7) return `${days}일 전`;
+  return new Date(isoDate).toLocaleDateString("ko-KR", { month: "long", day: "numeric" });
+}
 
 function GridSVG({
   gridOffX, gridOffY,
@@ -76,18 +95,71 @@ const PillBtn = ({
   );
 };
 
-const DEMO_HISTORY = [
-  { id: "1", name: "프리랜서_용역계약서_A사.pdf", time: "3시간 전", risk: "high" as RiskLevel },
-  { id: "2", name: "NDA_startup_B.pdf", time: "어제", risk: "medium" as RiskLevel },
-  { id: "3", name: "임대차계약서_2026.pdf", time: "3일 전", risk: "low" as RiskLevel },
-  { id: "4", name: "광고대행_계약서.pdf", time: "1주 전", risk: "medium" as RiskLevel },
-];
+// 리스트 로딩 스켈레톤
+function ReviewSkeleton() {
+  return (
+    <div style={{ background: R.bgWhite, borderRadius: R.cardRadius, overflow: "hidden", border: `1px solid ${R.borderLight}` }}>
+      {[1, 2, 3].map(i => (
+        <div key={i} style={{ display: "flex", alignItems: "center", gap: 16, padding: "16px 24px", borderBottom: i < 3 ? `1px solid ${R.borderLight}` : "none" }}>
+          <div style={{ width: 36, height: 36, borderRadius: 4, background: R.bgLight }} />
+          <div style={{ flex: 1, height: 14, borderRadius: 4, background: R.bgLight, maxWidth: 280 }} />
+          <div style={{ width: 60, height: 12, borderRadius: 4, background: R.bgLight }} />
+          <div style={{ width: 56, height: 22, borderRadius: 28, background: R.bgLight }} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// 빈 상태
+function EmptyState({ lang, onScroll }: { lang: "ko" | "en"; onScroll: () => void }) {
+  return (
+    <div style={{
+      background: R.bgWhite, borderRadius: R.cardRadius,
+      border: `1px solid ${R.borderLight}`,
+      padding: "56px 32px", textAlign: "center",
+    }}>
+      <div style={{
+        width: 64, height: 64, borderRadius: "50%",
+        background: "rgba(0,165,153,0.08)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        margin: "0 auto 20px",
+      }}>
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <path d="M14 17V10M11 13l3-3 3 3" stroke={R.tealMid} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <rect x="4" y="4" width="20" height="20" rx="3" stroke={R.tealMid} strokeWidth="1.5" fill="none" />
+        </svg>
+      </div>
+      <p style={{ fontSize: 16, fontWeight: 700, color: R.textDark, margin: "0 0 8px", fontFamily: R.fontSans }}>
+        {lang === "ko" ? "아직 검토 이력이 없어요" : "No reviews yet"}
+      </p>
+      <p style={{ fontSize: 14, color: R.textLight, margin: "0 0 24px", fontFamily: R.fontSans }}>
+        {lang === "ko"
+          ? "위 업로드 영역에 계약서 PDF를 드래그하거나 클릭하여 첫 번째 분석을 시작하세요."
+          : "Drag & drop or click the upload area above to start your first analysis."}
+      </p>
+      <button
+        onClick={onScroll}
+        style={{
+          padding: "10px 24px", borderRadius: R.btnRadius,
+          background: R.bgDark, border: "none",
+          fontSize: 13, fontWeight: 700, color: R.tealBright,
+          fontFamily: R.fontSans, cursor: "pointer",
+        }}
+      >
+        {lang === "ko" ? "계약서 업로드하기 →" : "Upload Contract →"}
+      </button>
+    </div>
+  );
+}
 
 export default function DashboardPage() {
   const router = useRouter();
   const { user, loading, logout } = useAuth();
   const [uploadError, setUploadError] = useState("");
   const [lang, setLang] = useState<"ko" | "en">("ko");
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -108,21 +180,51 @@ export default function DashboardPage() {
     }
   }, [user, loading, router]);
 
-  // 로딩 중일 때
+  // Firestore에서 검토 이력 로드
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchReviews = async () => {
+      try {
+        const q = query(
+          collection(db, "reviews"),
+          where("uid", "==", user.uid),
+          orderBy("createdAt", "desc"),
+          limit(20)
+        );
+        const snapshot = await getDocs(q);
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
+        setReviews(data);
+      } catch (err) {
+        console.error("Reviews fetch error:", err);
+      } finally {
+        setReviewsLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, [user]);
+
+  // 동적 메트릭
+  const totalReviews = reviews.length;
+  const highRiskCount = reviews.filter(r => r.riskLevel === "high").length;
+  const avgTimeSec = reviews.length > 0
+    ? Math.round(reviews.reduce((sum, r) => sum + (r.processingTime ?? 0), 0) / reviews.length / 1000)
+    : 0;
+
+  const scrollToUpload = () => {
+    document.getElementById("upload-zone")?.scrollIntoView({ behavior: "smooth" });
+  };
+
   if (loading) {
     return (
       <div style={{ minHeight: "100vh", background: R.bgLight, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: R.fontSans }}>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 16, fontWeight: 700, color: R.tealMid, marginBottom: 16 }}>로딩 중...</div>
-        </div>
+        <div style={{ fontSize: 16, fontWeight: 700, color: R.tealMid }}>로딩 중...</div>
       </div>
     );
   }
 
-  // 로그인되지 않았으면 표시하지 않음 (useEffect에서 리다이렉트됨)
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   const handleLogout = async () => {
     try {
@@ -144,7 +246,12 @@ export default function DashboardPage() {
             {user?.email}
           </div>
           <button style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase" }}>GET SUPPORT</button>
-          <button onClick={handleLogout} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "rgba(255,255,255,0.9)"} onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.7)"}>LOGOUT</button>
+          <button
+            onClick={handleLogout}
+            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase", transition: "color 0.2s" }}
+            onMouseEnter={e => e.currentTarget.style.color = "rgba(255,255,255,0.9)"}
+            onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.7)"}
+          >LOGOUT</button>
         </div>
       </div>
 
@@ -158,7 +265,7 @@ export default function DashboardPage() {
           </svg>
           <span style={{ fontFamily: R.fontSans, fontSize: 16, fontWeight: 800, color: R.textDark, letterSpacing: "0.08em", textTransform: "uppercase" }}>CLAUZE</span>
         </Link>
-        {[["dashboard", "Dashboard"], ["pricing", "Pricing"]].map(([href, label]) => (
+        {[["dashboard", "Dashboard"], ["pricing", "Pricing"]] .map(([href, label]) => (
           <Link key={href} href={`/${href}`} style={{
             fontSize: 14, fontFamily: R.fontSans,
             fontWeight: href === "dashboard" ? 700 : 500, color: R.textDark,
@@ -190,15 +297,12 @@ export default function DashboardPage() {
         onMouseMove={e => { mouseX.set(e.clientX); mouseY.set(e.clientY); }}
         style={{ position: "relative", background: R.bgDark, padding: "72px 40px 112px", overflow: "hidden" }}
       >
-        {/* Subtle static grid */}
         <div style={{ position: "absolute", inset: 0, opacity: 0.05, zIndex: 0 }}>
           <GridSVG gridOffX={gridOffX} gridOffY={gridOffY} />
         </div>
-        {/* Mouse-reveal grid */}
         <motion.div style={{ position: "absolute", inset: 0, opacity: 0.35, maskImage, WebkitMaskImage: maskImage, zIndex: 0 }}>
           <GridSVG gridOffX={gridOffX} gridOffY={gridOffY} />
         </motion.div>
-        {/* Teal glow orb */}
         <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}>
           <div style={{ position: "absolute", right: "-5%", top: "-30%", width: "35%", height: "80%", borderRadius: "50%", background: "rgba(0,194,181,0.09)", filter: "blur(90px)" }} />
           <div style={{ position: "absolute", left: "-5%", bottom: "-20%", width: "25%", height: "60%", borderRadius: "50%", background: "rgba(0,133,124,0.12)", filter: "blur(100px)" }} />
@@ -220,7 +324,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Metric cards (overlap hero) ── */}
+      {/* ── Metric cards ── */}
       <div style={{ maxWidth: 1100, margin: "-56px auto 0", padding: "0 40px", position: "relative", zIndex: 20 }}>
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -231,21 +335,23 @@ export default function DashboardPage() {
           {[
             {
               label: lang === "ko" ? "전체 검토" : "TOTAL REVIEWS",
-              value: "47",
-              sub: lang === "ko" ? "이번 달 +7건" : "+7 this month",
-              accent: R.tealMid
+              value: reviewsLoading ? "—" : String(totalReviews),
+              sub: reviewsLoading ? "" : (lang === "ko" ? `누적 ${totalReviews}건` : `${totalReviews} total`),
+              accent: R.tealMid,
             },
             {
               label: lang === "ko" ? "고위험 발견" : "HIGH RISK FOUND",
-              value: "12",
-              sub: lang === "ko" ? "미해결 3건" : "3 unresolved",
-              accent: R.danger
+              value: reviewsLoading ? "—" : String(highRiskCount),
+              sub: reviewsLoading ? "" : (lang === "ko"
+                ? (highRiskCount > 0 ? `전체의 ${Math.round(highRiskCount / Math.max(totalReviews, 1) * 100)}%` : "고위험 없음")
+                : (highRiskCount > 0 ? `${Math.round(highRiskCount / Math.max(totalReviews, 1) * 100)}% of total` : "None found")),
+              accent: R.danger,
             },
             {
               label: lang === "ko" ? "평균 검토 시간" : "AVG REVIEW TIME",
-              value: "28s",
+              value: reviewsLoading ? "—" : (avgTimeSec > 0 ? `${avgTimeSec}s` : "—"),
               sub: lang === "ko" ? "업계 평균 3일 대비" : "vs. 3 days industry avg",
-              accent: R.success
+              accent: R.success,
             },
           ].map(({ label, value, sub, accent }) => (
             <div key={label} style={{
@@ -265,12 +371,19 @@ export default function DashboardPage() {
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "36px 40px 80px" }}>
 
         {/* Upload */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} style={{ marginBottom: 36 }}>
+        <motion.div id="upload-zone" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} style={{ marginBottom: 36 }}>
           <ContractUploader
             onUploadComplete={(id, result, fileName) => {
-                sessionStorage.setItem(`review_${id}`, JSON.stringify({ id, result, fileName, createdAt: new Date().toISOString() }));
-                router.push(`/review/${id}`);
-              }}
+              const createdAt = new Date().toISOString();
+              sessionStorage.setItem(`review_${id}`, JSON.stringify({ id, result, fileName, createdAt }));
+              // 목록에 즉시 추가 (낙관적 업데이트)
+              setReviews(prev => [{
+                id, uid: user.uid, fileName, storageUrl: "",
+                result, riskLevel: result.overallRisk as RiskLevel,
+                createdAt, processingTime: 0,
+              }, ...prev]);
+              router.push(`/review/${id}`);
+            }}
             onError={setUploadError}
             userId={user?.uid}
           />
@@ -281,30 +394,47 @@ export default function DashboardPage() {
 
         {/* Recent reviews */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-          <p style={{ fontFamily: R.fontSans, fontSize: 12, fontWeight: 700, letterSpacing: "1.8px", textTransform: "uppercase", color: R.tealMid, margin: "0 0 14px" }}>
-            {lang === "ko" ? "최근 검토" : "Recent Reviews"}
-          </p>
-          <div style={{ background: R.bgWhite, borderRadius: R.cardRadius, overflow: "hidden", border: `1px solid ${R.borderLight}` }}>
-            {DEMO_HISTORY.map(({ id, name, time, risk }, i) => (
-              <div
-                key={id}
-                onClick={() => router.push(`/review/${id}`)}
-                style={{
-                  display: "flex", alignItems: "center", gap: 16, padding: "16px 24px",
-                  borderBottom: i < DEMO_HISTORY.length - 1 ? `1px solid ${R.borderLight}` : "none",
-                  cursor: "pointer", transition: "background 0.15s",
-                }}
-                onMouseEnter={e => (e.currentTarget.style.background = R.bgLight)}
-                onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-              >
-                <div style={{ width: 36, height: 36, borderRadius: 4, background: R.bgLight, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: R.textLight, flexShrink: 0, fontFamily: R.fontMono }}>PDF</div>
-                <div style={{ flex: 1, fontSize: 14, fontWeight: 500, color: R.textDark, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: R.fontSans }}>{name}</div>
-                <div style={{ fontSize: 13, color: R.textLight, flexShrink: 0, fontFamily: R.fontSans }}>{time}</div>
-                <RiskBadge level={risk} />
-                <div style={{ fontSize: 12, color: R.textLight, fontFamily: R.fontSans }}>→</div>
-              </div>
-            ))}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+            <p style={{ fontFamily: R.fontSans, fontSize: 12, fontWeight: 700, letterSpacing: "1.8px", textTransform: "uppercase", color: R.tealMid, margin: 0 }}>
+              {lang === "ko" ? "최근 검토" : "Recent Reviews"}
+            </p>
+            {reviews.length > 0 && (
+              <span style={{ fontSize: 12, color: R.textLight, fontFamily: R.fontSans }}>
+                {lang === "ko" ? `총 ${totalReviews}건` : `${totalReviews} total`}
+              </span>
+            )}
           </div>
+
+          {reviewsLoading ? (
+            <ReviewSkeleton />
+          ) : reviews.length === 0 ? (
+            <EmptyState lang={lang} onScroll={scrollToUpload} />
+          ) : (
+            <div style={{ background: R.bgWhite, borderRadius: R.cardRadius, overflow: "hidden", border: `1px solid ${R.borderLight}` }}>
+              {reviews.map(({ id, fileName, createdAt, riskLevel }, i) => (
+                <div
+                  key={id}
+                  onClick={() => {
+                    // sessionStorage에 데이터가 있으면 그대로, 없으면 review 페이지에서 처리
+                    router.push(`/review/${id}`);
+                  }}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 16, padding: "16px 24px",
+                    borderBottom: i < reviews.length - 1 ? `1px solid ${R.borderLight}` : "none",
+                    cursor: "pointer", transition: "background 0.15s",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = R.bgLight)}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                >
+                  <div style={{ width: 36, height: 36, borderRadius: 4, background: R.bgLight, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: R.textLight, flexShrink: 0, fontFamily: R.fontMono }}>PDF</div>
+                  <div style={{ flex: 1, fontSize: 14, fontWeight: 500, color: R.textDark, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: R.fontSans }}>{fileName}</div>
+                  <div style={{ fontSize: 13, color: R.textLight, flexShrink: 0, fontFamily: R.fontSans }}>{relativeTime(createdAt, lang)}</div>
+                  <RiskBadge level={riskLevel} />
+                  <div style={{ fontSize: 12, color: R.textLight, fontFamily: R.fontSans }}>→</div>
+                </div>
+              ))}
+            </div>
+          )}
         </motion.div>
       </div>
     </div>
