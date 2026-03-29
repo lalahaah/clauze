@@ -8,6 +8,7 @@ import { motion, useMotionValue, useMotionTemplate, useAnimationFrame } from "fr
 import { ReviewResult } from "@/components/ReviewResult";
 import { Review } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
+import { ResultDisclaimer, FooterDisclaimer } from "@/components/legal/Disclaimer";
 
 const R = {
   bgWhite: "#FFFFFF", bgLight: "#F6F7FB", bgDark: "#093944",
@@ -219,23 +220,16 @@ export default function ReviewPage({ params }: Props) {
       </div>
 
       {/* ── Review result (overlaps hero) ── */}
-      <div style={{ maxWidth: 1100, margin: "-48px auto 0", padding: "0 40px 80px", position: "relative", zIndex: 20 }}>
+      <div style={{ maxWidth: 1100, margin: "-48px auto 0", padding: "0 40px 40px", position: "relative", zIndex: 20 }}>
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
           <ReviewResult review={review} lang={lang} />
+          <ResultDisclaimer />
         </motion.div>
       </div>
 
-      {/* ── Disclaimer footer ── */}
-      <footer style={{ background: R.bgDark, padding: "28px 40px" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}>
-          <div style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", fontFamily: R.fontSans }}>© 2026 Clauze. All rights reserved.</div>
-          <p style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", margin: 0, maxWidth: 560, textAlign: "right", fontFamily: R.fontSans, lineHeight: 1.6 }}>
-            {lang === "ko"
-              ? "※ 본 서비스는 법적 조언을 제공하지 않습니다. AI의 검토 결과는 참고용이며, 중요한 계약은 반드시 법률 전문가와 상담하시기 바랍니다."
-              : "※ This service does not provide legal advice. AI analysis is for reference only. For important contracts, always consult a legal professional."
-            }
-          </p>
-        </div>
+      {/* ── Footer ── */}
+      <footer style={{ background: R.bgDark }}>
+        <FooterDisclaimer />
       </footer>
     </div>
   );

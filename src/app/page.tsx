@@ -5,6 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useMotionValue, useMotionTemplate, useAnimationFrame, AnimatePresence } from "framer-motion";
+import { FooterDisclaimer } from "@/components/legal/Disclaimer";
 
 const R = {
   bgWhite: "#FFFFFF",
@@ -415,7 +416,7 @@ export default function LandingPage() {
               { title: "PRODUCT", items: [
                 { label: "Dashboard", href: "/dashboard" },
                 { label: "Contract Review", href: "/dashboard" },
-                { label: "Pricing", href: "#" }
+                { label: "Pricing", href: "/pricing" }
               ]},
               { title: "COMPANY", items: [
                 { label: "About", href: "#" },
@@ -423,9 +424,9 @@ export default function LandingPage() {
                 { label: "Contact", href: "#" }
               ]},
               { title: "LEGAL", items: [
-                { label: "Privacy Policy", href: "/docs/Clauze_개인정보처리방침_v1.pdf" },
-                { label: "Terms of Service", href: "/docs/Clauze_이용약관_v1.pdf" },
-                { label: "Disclaimer", href: "#" }
+                { label: "Privacy Policy", href: "/privacy" },
+                { label: "Terms of Service", href: "/terms" },
+                
               ]},
             ].map(({ title, items }) => (
               <div key={title}>
@@ -465,11 +466,9 @@ export default function LandingPage() {
           </div>
           <div style={{ borderTop: `1px solid ${R.borderDark}`, paddingTop: 24, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", fontFamily: R.fontSans }}>© 2026 Clauze. All rights reserved.</div>
-            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", maxWidth: 600, textAlign: "right", fontFamily: R.fontSans, whiteSpace: "nowrap" }}>
-              본 서비스는 법적 조언을 제공하지 않습니다. AI 분석 결과는 참고용이며 중요한 계약은 법률 전문가와 상담하세요.
-            </div>
           </div>
         </div>
+        <FooterDisclaimer />
       </footer>
     </div>
   );

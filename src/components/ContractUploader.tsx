@@ -4,6 +4,7 @@
 import { useCallback, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { ReviewResult } from "@/lib/types";
+import { DisclaimerModal, hasAgreedToDisclaimer } from "@/components/legal/Disclaimer";
 
 interface ContractUploaderProps {
   onUploadComplete: (reviewId: string, result: ReviewResult, fileName: string) => void;
@@ -19,6 +20,8 @@ export function ContractUploader({ onUploadComplete, onError, userId }: Contract
   const [stepText, setStepText] = useState("");
   const [fileName, setFileName] = useState("");
   const [error, setError] = useState("");
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const handleCancel = useCallback(() => {
@@ -92,7 +95,13 @@ export function ContractUploader({ onUploadComplete, onError, userId }: Contract
   }, [userId, onUploadComplete, onError]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles[0]) processFile(acceptedFiles[0]);
+    if (!acceptedFiles[0]) return;
+    if (hasAgreedToDisclaimer()) {
+      processFile(acceptedFiles[0]);
+    } else {
+      setPendingFile(acceptedFiles[0]);
+      setShowDisclaimer(true);
+    }
   }, [processFile]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -158,6 +167,18 @@ export function ContractUploader({ onUploadComplete, onError, userId }: Contract
 
   return (
     <div>
+      {showDisclaimer && (
+        <DisclaimerModal
+          onAgree={() => {
+            setShowDisclaimer(false);
+            if (pendingFile) { processFile(pendingFile); setPendingFile(null); }
+          }}
+          onClose={() => {
+            setShowDisclaimer(false);
+            setPendingFile(null);
+          }}
+        />
+      )}
       <div
         {...getRootProps()}
         style={{
