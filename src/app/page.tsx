@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useMotionValue, useMotionTemplate, useAnimationFrame, AnimatePresence } from "framer-motion";
 import { FooterDisclaimer } from "@/components/legal/Disclaimer";
+import { useAuth } from "@/hooks/useAuth";
 
 const R = {
   bgWhite: "#FFFFFF",
@@ -122,6 +123,7 @@ function GridSVG({ gridOffX, gridOffY, color = "rgba(255,255,255,0.35)" }: {
 
 export default function LandingPage() {
   const router = useRouter();
+  const { user, logout } = useAuth();
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const gridOffX = useMotionValue(0);
@@ -170,7 +172,15 @@ export default function LandingPage() {
           }}>{label}</Link>
         ))}
         <div style={{ flex: 1 }} />
-        <PillBtn onClick={() => router.push("/login?signup=true")} variant="filled">Get started</PillBtn>
+        {user ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <span style={{ fontSize: 12, color: R.textLight, fontFamily: R.fontSans }}>{user.email}</span>
+            <PillBtn onClick={() => router.push("/dashboard")} variant="filled">Dashboard</PillBtn>
+            <PillBtn onClick={() => logout().then(() => router.push("/"))}>Logout</PillBtn>
+          </div>
+        ) : (
+          <PillBtn onClick={() => router.push("/login?signup=true")} variant="filled">Get started</PillBtn>
+        )}
       </nav>
 
       {/* Hero */}
