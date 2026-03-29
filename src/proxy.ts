@@ -1,4 +1,4 @@
-// src/middleware.ts
+// src/proxy.ts
 // 라우트 보호 미들웨어
 
 import { NextRequest, NextResponse } from "next/server";
@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 // 인증 필요한 라우트
 const protectedRoutes = ["/dashboard", "/review"];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   // 보호된 라우트 확인
