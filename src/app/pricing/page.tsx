@@ -5,6 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { loadTossPayments } from "@tosspayments/sdk";
 import { PricingCard } from "@/components/PricingCard";
 import { useAuth } from "@/hooks/useAuth";
 import { auth } from "@/lib/firebase";
@@ -52,42 +53,45 @@ export default function PricingPage() {
 
     setCheckoutLoading(plan);
     try {
-      const idToken = await auth.currentUser?.getIdToken();
-      const res = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`,
-        },
-        body: JSON.stringify({ plan }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert("결제 페이지를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
+      const uid = auth.currentUser?.uid;
+      if (!uid) {
+        router.push(`/login?signup=true&plan=${plan}`);
+        return;
       }
+
+      const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY!;
+      const tossPayments = await loadTossPayments(clientKey);
+
+      await tossPayments.requestBillingAuth("카드", {
+        customerKey: uid,
+        successUrl: `${window.location.origin}/api/toss/billing/callback?plan=${plan}`,
+        failUrl: `${window.location.origin}/pricing?checkout=cancelled`,
+        customerEmail: user.email ?? undefined,
+        customerName: user.displayName ?? user.email ?? "고객",
+      });
+      // requestBillingAuth는 페이지를 리디렉션하므로 이후 코드는 실행되지 않음
     } catch {
       alert("오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-    } finally {
       setCheckoutLoading(null);
     }
   };
 
   const openBillingPortal = async () => {
     if (!user) return;
+    if (!confirm("구독을 취소하시겠습니까?\n취소 후 즉시 무료 플랜으로 전환됩니다.")) return;
     setCheckoutLoading("portal");
     try {
       const idToken = await auth.currentUser?.getIdToken();
-      const res = await fetch("/api/stripe/portal", {
+      const res = await fetch("/api/toss/cancel", {
         method: "POST",
         headers: { Authorization: `Bearer ${idToken}` },
       });
       const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
+      if (data.success) {
+        alert("구독이 취소되었습니다.");
+        window.location.reload();
       } else {
-        alert("구독 관리 페이지를 불러오지 못했습니다.");
+        alert("구독 취소에 실패했습니다. 잠시 후 다시 시도해주세요.");
       }
     } catch {
       alert("오류가 발생했습니다.");
