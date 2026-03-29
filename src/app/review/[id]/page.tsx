@@ -1,6 +1,8 @@
 // src/app/review/[id]/page.tsx
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { use, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
