@@ -8,7 +8,9 @@ if (!admin.apps.length) {
   try {
     const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID;
     const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
-    const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, "\n");
+    const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY
+      ?.replace(/^["'\s]+|["'\s]+$/g, "")  // 앞뒤 따옴표·공백 제거
+      ?.replace(/\\n/g, "\n");              // 리터럴 \n → 실제 개행 변환
 
     // 환경 변수 검증
     if (!projectId || !clientEmail || !privateKey) {
