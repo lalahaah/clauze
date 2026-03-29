@@ -311,8 +311,8 @@ export default function LoginContent() {
                   />
                   <span>
                     {isKorean
-                      ? <><a href="/docs/Clauze_이용약관_v1.pdf" target="_blank" rel="noopener noreferrer" style={{ color: R.tealBtn, textDecoration: "none", fontWeight: 700 }}>이용약관</a>과 <a href="/docs/Clauze_개인정보처리방침_v1.pdf" target="_blank" rel="noopener noreferrer" style={{ color: R.tealBtn, textDecoration: "none", fontWeight: 700 }}>개인정보처리방침</a>에 동의합니다 (필수)</>
-                      : <><a href="/docs/Clauze_이용약관_v1.pdf" target="_blank" rel="noopener noreferrer" style={{ color: R.tealBtn, textDecoration: "none", fontWeight: 700 }}>Terms</a> and <a href="/docs/Clauze_개인정보처리방침_v1.pdf" target="_blank" rel="noopener noreferrer" style={{ color: R.tealBtn, textDecoration: "none", fontWeight: 700 }}>Privacy Policy</a> (Required)</>
+                      ? <><a href="/terms" target="_blank" rel="noopener noreferrer" style={{ color: R.tealBtn, textDecoration: "none", fontWeight: 700 }}>이용약관</a>과 <a href="/privacy" target="_blank" rel="noopener noreferrer" style={{ color: R.tealBtn, textDecoration: "none", fontWeight: 700 }}>개인정보처리방침</a>에 동의합니다 (필수)</>
+                      : <><a href="/terms" target="_blank" rel="noopener noreferrer" style={{ color: R.tealBtn, textDecoration: "none", fontWeight: 700 }}>Terms</a> and <a href="/privacy" target="_blank" rel="noopener noreferrer" style={{ color: R.tealBtn, textDecoration: "none", fontWeight: 700 }}>Privacy Policy</a> (Required)</>
                     }
                   </span>
                 </label>
