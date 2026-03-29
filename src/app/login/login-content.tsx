@@ -27,6 +27,7 @@ export default function LoginContent() {
   const [error, setError] = useState("");
   const [authLoading, setAuthLoading] = useState(true);
   const [isKorean, setIsKorean] = useState(true);
+  const [agreeTerms, setAgreeTerms] = useState(false);
 
   // URL 쿼리 파라미터에서 초기 상태 설정
   useEffect(() => {
@@ -102,11 +103,15 @@ export default function LoginContent() {
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      setError("이메일과 비밀번호를 입력해주세요.");
+      setError(isKorean ? "이메일과 비밀번호를 입력해주세요." : "Please enter email and password.");
       return;
     }
     if (password.length < 6) {
-      setError("비밀번호는 최소 6자 이상이어야 합니다.");
+      setError(isKorean ? "비밀번호는 최소 6자 이상이어야 합니다." : "Password must be at least 6 characters.");
+      return;
+    }
+    if (!agreeTerms) {
+      setError(isKorean ? "이용약관과 개인정보처리방침에 동의해주세요." : "Please agree to the Terms and Privacy Policy.");
       return;
     }
 
@@ -293,6 +298,26 @@ export default function LoginContent() {
                 }
               </button>
             </form>
+
+            {/* 약관 동의 (회원가입 시에만) */}
+            {isSignUp && (
+              <div style={{ marginBottom: 20, padding: "12px 14px", background: "rgba(0,165,153,0.06)", border: `1px solid rgba(0,165,153,0.2)`, borderRadius: 4 }}>
+                <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 13, color: R.textDark, fontFamily: R.fontSans }}>
+                  <input
+                    type="checkbox"
+                    checked={agreeTerms}
+                    onChange={(e) => setAgreeTerms(e.target.checked)}
+                    style={{ width: 16, height: 16, cursor: "pointer", accentColor: R.tealBtn }}
+                  />
+                  <span>
+                    {isKorean
+                      ? <><a href="/docs/Clauze_이용약관_v1.pdf" target="_blank" rel="noopener noreferrer" style={{ color: R.tealBtn, textDecoration: "none", fontWeight: 700 }}>이용약관</a>과 <a href="/docs/Clauze_개인정보처리방침_v1.pdf" target="_blank" rel="noopener noreferrer" style={{ color: R.tealBtn, textDecoration: "none", fontWeight: 700 }}>개인정보처리방침</a>에 동의합니다 (필수)</>
+                      : <><a href="/docs/Clauze_이용약관_v1.pdf" target="_blank" rel="noopener noreferrer" style={{ color: R.tealBtn, textDecoration: "none", fontWeight: 700 }}>Terms</a> and <a href="/docs/Clauze_개인정보처리방침_v1.pdf" target="_blank" rel="noopener noreferrer" style={{ color: R.tealBtn, textDecoration: "none", fontWeight: 700 }}>Privacy Policy</a> (Required)</>
+                    }
+                  </span>
+                </label>
+              </div>
+            )}
 
             {/* 또는 구분선 */}
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>

@@ -423,8 +423,8 @@ export default function LandingPage() {
                 { label: "Contact", href: "#" }
               ]},
               { title: "LEGAL", items: [
-                { label: "Privacy Policy", href: "#" },
-                { label: "Terms of Service", href: "#" },
+                { label: "Privacy Policy", href: "/docs/Clauze_개인정보처리방침_v1.pdf" },
+                { label: "Terms of Service", href: "/docs/Clauze_이용약관_v1.pdf" },
                 { label: "Disclaimer", href: "#" }
               ]},
             ].map(({ title, items }) => (
@@ -433,7 +433,14 @@ export default function LandingPage() {
                 {items.map(({ label, href }) => (
                   <button
                     key={label}
-                    onClick={() => href !== "#" ? router.push(href) : undefined}
+                    onClick={() => {
+                      if (href === "#") return;
+                      if (href.includes(".pdf")) {
+                        window.open(href, "_blank");
+                      } else {
+                        router.push(href);
+                      }
+                    }}
                     style={{
                       background: "none",
                       border: "none",
