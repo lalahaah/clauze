@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { motion, useMotionValue, useMotionTemplate, useAnimationFrame, AnimatePresence } from "framer-motion";
 import { FooterDisclaimer } from "@/components/legal/Disclaimer";
 import { useAuth } from "@/hooks/useAuth";
+import DifferentiationSection from "@/components/landing/DifferentiationSection";
 
 const R = {
   bgWhite: "#FFFFFF",
@@ -272,20 +273,20 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* How it works — dark */}
-      <div style={{ background: R.bgDark, padding: "96px 40px" }}>
+      {/* How it works */}
+      <div style={{ background: R.bgWhite, padding: "96px 40px" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "start" }}>
           <div>
-            <Eyebrow dark>How it works</Eyebrow>
-            <h2 style={{ fontFamily: R.fontSans, fontSize: "clamp(28px,3.5vw,42px)", fontWeight: 800, color: R.textWhite, letterSpacing: "-0.03em", lineHeight: 1.2, margin: "0 0 12px" }}>
+            <Eyebrow>How it works</Eyebrow>
+            <h2 style={{ fontFamily: R.fontSans, fontSize: "clamp(28px,3.5vw,42px)", fontWeight: 800, color: R.textDark, letterSpacing: "-0.03em", lineHeight: 1.2, margin: "0 0 12px" }}>
               Sign smarter, one clause at a time
             </h2>
-            <h3 style={{ fontFamily: R.fontSans, fontSize: "clamp(20px,2.5vw,28px)", fontWeight: 700, color: R.tealBright, letterSpacing: "-0.02em", lineHeight: 1.2, margin: "0 0 32px" }}>
+            <h3 style={{ fontFamily: R.fontSans, fontSize: "clamp(20px,2.5vw,28px)", fontWeight: 700, color: R.tealMid, letterSpacing: "-0.02em", lineHeight: 1.2, margin: "0 0 32px" }}>
               똑똑하게 서명하기
             </h3>
-            <PillBtn onClick={() => router.push("/dashboard")} variant="outline" dark>Get started</PillBtn>
+            <PillBtn onClick={() => router.push("/dashboard")} variant="outline">Get started</PillBtn>
           </div>
-          <div style={{ borderTop: `1px solid ${R.borderDark}` }}>
+          <div style={{ borderTop: `1px solid ${R.borderLight}` }}>
             {[
               {
                 title: "Upload your PDF",
@@ -306,22 +307,25 @@ export default function LandingPage() {
                 desc_ko: "위험한 각 조항을 두 언어로 설명하고 권장 조치를 제시합니다."
               },
             ].map(({ title, title_ko, desc, desc_ko }) => (
-              <div key={title} style={{ borderBottom: `1px solid ${R.borderDark}`, cursor: "pointer" }} onClick={() => {}}>
+              <div key={title} style={{ borderBottom: `1px solid ${R.borderLight}`, cursor: "pointer" }} onClick={() => {}}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "22px 0" }}>
                   <div>
-                    <span style={{ fontFamily: R.fontSans, fontSize: 17, fontWeight: 700, color: R.textWhite, letterSpacing: "-0.01em" }}>{title}</span>
-                    <span style={{ fontFamily: R.fontSans, fontSize: 14, fontWeight: 600, color: R.tealBright, letterSpacing: "-0.01em", display: "block", marginTop: 4 }}>{title_ko}</span>
+                    <span style={{ fontFamily: R.fontSans, fontSize: 17, fontWeight: 700, color: R.textDark, letterSpacing: "-0.01em" }}>{title}</span>
+                    <span style={{ fontFamily: R.fontSans, fontSize: 14, fontWeight: 600, color: R.tealMid, letterSpacing: "-0.01em", display: "block", marginTop: 4 }}>{title_ko}</span>
                   </div>
                 </div>
                 <div style={{ paddingBottom: 16 }}>
-                  <p style={{ fontSize: 14, color: "rgba(255,255,255,0.65)", lineHeight: 1.7, margin: "0 0 10px", fontFamily: R.fontSans }}>{desc}</p>
-                  <p style={{ fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.7, margin: 0, fontFamily: R.fontSans }}>{desc_ko}</p>
+                  <p style={{ fontSize: 14, color: R.textMid, lineHeight: 1.7, margin: "0 0 10px", fontFamily: R.fontSans }}>{desc}</p>
+                  <p style={{ fontSize: 13, color: R.textMid, lineHeight: 1.7, margin: 0, fontFamily: R.fontSans }}>{desc_ko}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
       </div>
+
+      {/* 3대 차별화 기능 — ChatGPT와의 직접 비교 */}
+      <DifferentiationSection />
 
       {/* Who we serve */}
       <div style={{ background: R.bgWhite, padding: "96px 40px" }}>
