@@ -13,6 +13,8 @@ import { ContractUploader } from "@/components/ContractUploader";
 import { RiskBadge } from "@/components/RiskBadge";
 import { db } from "@/lib/firebase";
 import { Review, RiskLevel } from "@/lib/types";
+import { IndustrySelector } from "@/components/contract/IndustrySelector";
+import { IndustryKey, INDUSTRY_PROFILES } from "@/lib/industry-profiles";
 
 const R = {
   bgWhite: "#FFFFFF", bgLight: "#F6F7FB", bgDark: "#093944",
@@ -160,6 +162,7 @@ export default function DashboardPage() {
   const { user, loading, logout } = useAuth();
   const [uploadError, setUploadError] = useState("");
   const [lang, setLang] = useState<"ko" | "en">("ko");
+  const [industry, setIndustry] = useState<IndustryKey>("general");
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
 
@@ -375,10 +378,11 @@ export default function DashboardPage() {
 
         {/* Upload */}
         <motion.div id="upload-zone" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} style={{ marginBottom: 36 }}>
+          <IndustrySelector selected={industry} onChange={setIndustry} lang={lang} />
           <ContractUploader
-            onUploadComplete={(id, result, fileName, repeatedPatterns = []) => {
+            onUploadComplete={(id, result, fileName, repeatedPatterns = [], industryKey) => {
               const createdAt = new Date().toISOString();
-              sessionStorage.setItem(`review_${id}`, JSON.stringify({ id, result, fileName, createdAt, repeatedPatterns }));
+              sessionStorage.setItem(`review_${id}`, JSON.stringify({ id, result, fileName, createdAt, repeatedPatterns, industry: industryKey }));
               // 목록에 즉시 추가 (낙관적 업데이트)
               setReviews(prev => [{
                 id, uid: user.uid, fileName, storageUrl: "",
@@ -389,6 +393,7 @@ export default function DashboardPage() {
             }}
             onError={setUploadError}
             userId={user?.uid}
+            industry={industry}
           />
           {uploadError && (
             <p style={{ fontSize: 12, color: R.danger, marginTop: 8, fontFamily: R.fontSans }}>{uploadError}</p>
@@ -414,28 +419,42 @@ export default function DashboardPage() {
             <EmptyState lang={lang} onScroll={scrollToUpload} />
           ) : (
             <div style={{ background: R.bgWhite, borderRadius: R.cardRadius, overflow: "hidden", border: `1px solid ${R.borderLight}` }}>
-              {reviews.map(({ id, fileName, createdAt, riskLevel }, i) => (
-                <div
-                  key={id}
-                  onClick={() => {
-                    // sessionStorage에 데이터가 있으면 그대로, 없으면 review 페이지에서 처리
-                    router.push(`/review/${id}`);
-                  }}
-                  style={{
-                    display: "flex", alignItems: "center", gap: 16, padding: "16px 24px",
-                    borderBottom: i < reviews.length - 1 ? `1px solid ${R.borderLight}` : "none",
-                    cursor: "pointer", transition: "background 0.15s",
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.background = R.bgLight)}
-                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-                >
-                  <div style={{ width: 36, height: 36, borderRadius: 4, background: R.bgLight, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: R.textLight, flexShrink: 0, fontFamily: R.fontMono }}>PDF</div>
-                  <div style={{ flex: 1, fontSize: 14, fontWeight: 500, color: R.textDark, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: R.fontSans }}>{fileName}</div>
-                  <div style={{ fontSize: 13, color: R.textLight, flexShrink: 0, fontFamily: R.fontSans }}>{relativeTime(createdAt, lang)}</div>
-                  <RiskBadge level={riskLevel} />
-                  <div style={{ fontSize: 12, color: R.textLight, fontFamily: R.fontSans }}>→</div>
-                </div>
-              ))}
+              {reviews.map(({ id, fileName, createdAt, riskLevel, industry: reviewIndustry }, i) => {
+                // 업종 프로필 조회 (저장된 industry 키로)
+                const industryProfile = reviewIndustry && reviewIndustry in INDUSTRY_PROFILES
+                  ? INDUSTRY_PROFILES[reviewIndustry as IndustryKey]
+                  : null;
+                return (
+                  <div
+                    key={id}
+                    onClick={() => {
+                      // sessionStorage에 데이터가 있으면 그대로, 없으면 review 페이지에서 처리
+                      router.push(`/review/${id}`);
+                    }}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 16, padding: "16px 24px",
+                      borderBottom: i < reviews.length - 1 ? `1px solid ${R.borderLight}` : "none",
+                      cursor: "pointer", transition: "background 0.15s",
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = R.bgLight)}
+                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                  >
+                    <div style={{ width: 36, height: 36, borderRadius: 4, background: R.bgLight, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: R.textLight, flexShrink: 0, fontFamily: R.fontMono }}>PDF</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 14, fontWeight: 500, color: R.textDark, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: R.fontSans }}>{fileName}</div>
+                      {/* 업종 태그 (general 제외) */}
+                      {industryProfile && reviewIndustry !== "general" && (
+                        <div style={{ fontSize: 11, color: R.tealMid, fontFamily: R.fontSans, marginTop: 2 }}>
+                          {industryProfile.icon} {lang === "ko" ? industryProfile.label : industryProfile.labelEn}
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ fontSize: 13, color: R.textLight, flexShrink: 0, fontFamily: R.fontSans }}>{relativeTime(createdAt, lang)}</div>
+                    <RiskBadge level={riskLevel} />
+                    <div style={{ fontSize: 12, color: R.textLight, fontFamily: R.fontSans }}>→</div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </motion.div>

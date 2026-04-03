@@ -44,11 +44,19 @@ const SYSTEM_PROMPT = `당신은 한국 계약법 전문 리뷰어입니다. 업
 
 고위험 조항을 clauses 배열의 앞쪽에 배치하세요.`;
 
-export async function reviewContract(pdfBase64: string): Promise<ReviewResult> {
+export async function reviewContract(
+  pdfBase64: string,
+  industryAddition?: string  // 업종별 추가 시스템 프롬프트
+): Promise<ReviewResult> {
   // API 키 검증
   if (!process.env.ANTHROPIC_API_KEY) {
     throw new Error("ANTHROPIC_API_KEY 환경 변수가 설정되지 않았습니다.");
   }
+
+  // 업종 프롬프트가 있으면 기본 프롬프트에 append
+  const effectivePrompt = industryAddition
+    ? `${SYSTEM_PROMPT}\n${industryAddition}`
+    : SYSTEM_PROMPT;
 
   try {
     // Claude API로 PDF 분석 (Prompt Caching으로 비용 90% 절감)
@@ -58,7 +66,7 @@ export async function reviewContract(pdfBase64: string): Promise<ReviewResult> {
       system: [
         {
           type: "text",
-          text: SYSTEM_PROMPT,
+          text: effectivePrompt,
           cache_control: { type: "ephemeral" },
         },
       ],

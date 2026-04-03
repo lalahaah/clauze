@@ -7,6 +7,7 @@ import { reviewContract } from "@/lib/claude";
 import { adminDb } from "@/lib/firebase-admin";
 import { findPastReviews, detectRepeatedClauses } from "@/lib/pattern-analyzer";
 import { RepeatPattern } from "@/lib/types";
+import { INDUSTRY_PROFILES, IndustryKey } from "@/lib/industry-profiles";
 
 export const runtime = "nodejs";
 export const maxDuration = 60; // 60초 타임아웃 (PDF 분석 여유 확보)
@@ -16,6 +17,12 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
     const userId = formData.get("userId") as string | null;
+    // 업종 파라미터 — 없으면 general 기본값
+    const industryRaw = formData.get("industry") as string | null;
+    const industry: IndustryKey =
+      industryRaw && industryRaw in INDUSTRY_PROFILES
+        ? (industryRaw as IndustryKey)
+        : "general";
 
     // 파일 유효성 검사
     if (!file) {
@@ -42,8 +49,11 @@ export async function POST(request: NextRequest) {
 
     const startTime = Date.now();
 
-    // Claude API 호출하여 계약서 검토
-    const result = await reviewContract(base64);
+    // 업종별 추가 프롬프트 추출
+    const industryAddition = INDUSTRY_PROFILES[industry].systemPromptAddition || undefined;
+
+    // Claude API 호출하여 계약서 검토 (업종 프롬프트 포함)
+    const result = await reviewContract(base64, industryAddition);
 
     const processingTime = Date.now() - startTime;
 
@@ -66,6 +76,7 @@ export async function POST(request: NextRequest) {
           riskLevel: result.overallRisk,
           processingTime,
           createdAt,
+          industry, // 업종 태그
           repeatedPatterns: [], // 패턴 분석 후 업데이트
         });
 
@@ -101,6 +112,7 @@ export async function POST(request: NextRequest) {
       processingTime,
       fileName: file.name,
       repeatedPatterns,
+      industry,
     });
   } catch (error) {
     console.error("Review API error:", error);

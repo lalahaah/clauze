@@ -7,14 +7,15 @@ import { ReviewResult, RepeatPattern } from "@/lib/types";
 import { DisclaimerModal, hasAgreedToDisclaimer } from "@/components/legal/Disclaimer";
 
 interface ContractUploaderProps {
-  onUploadComplete: (reviewId: string, result: ReviewResult, fileName: string, repeatedPatterns?: RepeatPattern[]) => void;
+  onUploadComplete: (reviewId: string, result: ReviewResult, fileName: string, repeatedPatterns?: RepeatPattern[], industry?: string) => void;
   onError: (error: string) => void;
   userId?: string | null;
+  industry?: string; // 업종 선택값 — API 전송용
 }
 
 const LOAD_STEPS = ["PDF 파싱 중...", "조항 분류 중...", "위험도 분석 중...", "요약 생성 중..."];
 
-export function ContractUploader({ onUploadComplete, onError, userId }: ContractUploaderProps) {
+export function ContractUploader({ onUploadComplete, onError, userId, industry }: ContractUploaderProps) {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [stepText, setStepText] = useState("");
@@ -58,6 +59,7 @@ export function ContractUploader({ onUploadComplete, onError, userId }: Contract
       const formData = new FormData();
       formData.append("file", file);
       if (userId) formData.append("userId", userId);
+      if (industry) formData.append("industry", industry); // 업종 파라미터 전송
 
       const response = await fetch("/api/review", {
         method: "POST",
@@ -80,7 +82,7 @@ export function ContractUploader({ onUploadComplete, onError, userId }: Contract
       setProgress(100);
       setStepText("완료!");
       const data = await response.json();
-      setTimeout(() => { setLoading(false); onUploadComplete(data.reviewId, data.result, data.fileName, data.repeatedPatterns ?? []); }, 500);
+      setTimeout(() => { setLoading(false); onUploadComplete(data.reviewId, data.result, data.fileName, data.repeatedPatterns ?? [], data.industry); }, 500);
     } catch (err) {
       clearInterval(interval);
       if (err instanceof Error && err.name === "AbortError") {

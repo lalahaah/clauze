@@ -38,6 +38,7 @@ export interface Review {
   createdAt: string;
   processingTime?: number;
   repeatedPatterns?: RepeatPattern[];
+  industry?: string; // 분석 시 선택된 업종 키
 }
 
 export interface User {
