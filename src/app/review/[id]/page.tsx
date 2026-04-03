@@ -231,7 +231,7 @@ export default function ReviewPage({ params }: Props) {
       <div style={{ maxWidth: 1100, margin: "-48px auto 0", padding: "0 40px 40px", position: "relative", zIndex: 20 }}>
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
           <PatternAlert patterns={repeatedPatterns} lang={lang} />
-          <ReviewResult review={review} lang={lang} />
+          <ReviewResult review={review} lang={lang} userId={user?.uid} />
           <ResultDisclaimer />
         </motion.div>
       </div>

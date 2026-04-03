@@ -8,9 +8,10 @@ import { ClauseCard } from "./ClauseCard";
 interface ReviewResultProps {
   review: Review;
   lang?: "ko" | "en";
+  userId?: string; // 이메일 생성 API 인증용
 }
 
-export function ReviewResult({ review, lang = "ko" }: ReviewResultProps) {
+export function ReviewResult({ review, lang = "ko", userId }: ReviewResultProps) {
   const highCount = review.result.clauses.filter(c => c.risk === "high").length;
   const mediumCount = review.result.clauses.filter(c => c.risk === "medium").length;
   const lowCount = review.result.clauses.filter(c => c.risk === "low").length;
@@ -97,7 +98,14 @@ export function ReviewResult({ review, lang = "ko" }: ReviewResultProps) {
       {/* Clause list */}
       <main style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
         {review.result.clauses.map((clause, i) => (
-          <ClauseCard key={i} clause={clause} index={i} lang={lang} />
+          <ClauseCard
+            key={i}
+            clause={clause}
+            index={i}
+            lang={lang}
+            contractFileName={review.fileName}
+            userId={userId}
+          />
         ))}
       </main>
     </div>
