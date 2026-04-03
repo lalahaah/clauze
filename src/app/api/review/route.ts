@@ -5,6 +5,8 @@ import { NextRequest, NextResponse } from "next/server";
 import * as admin from "firebase-admin";
 import { reviewContract } from "@/lib/claude";
 import { adminDb } from "@/lib/firebase-admin";
+import { findPastReviews, detectRepeatedClauses } from "@/lib/pattern-analyzer";
+import { RepeatPattern } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 60; // 60초 타임아웃 (PDF 분석 여유 확보)
@@ -49,8 +51,12 @@ export async function POST(request: NextRequest) {
     const reviewId = `review_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Firestore에 검토 결과 저장 (userId가 있을 경우만)
+    let repeatedPatterns: RepeatPattern[] = [];
+
     if (userId) {
       try {
+        const createdAt = new Date().toISOString();
+
         await adminDb.collection("reviews").doc(reviewId).set({
           id: reviewId,
           uid: userId,
@@ -59,13 +65,30 @@ export async function POST(request: NextRequest) {
           result,
           riskLevel: result.overallRisk,
           processingTime,
-          createdAt: new Date().toISOString(),
+          createdAt,
+          repeatedPatterns: [], // 패턴 분석 후 업데이트
         });
 
         // 사용자의 reviewCount 증가
         await adminDb.collection("users").doc(userId).update({
           reviewCount: admin.firestore.FieldValue.increment(1),
         });
+
+        // 패턴 분석 - 실패해도 메인 검토 결과에는 영향 없음
+        try {
+          const pastReviews = await findPastReviews(userId, reviewId);
+          repeatedPatterns = detectRepeatedClauses(result.clauses, pastReviews);
+
+          // 패턴이 있을 때만 업데이트 (불필요한 쓰기 절약)
+          if (repeatedPatterns.length > 0) {
+            await adminDb.collection("reviews").doc(reviewId).update({
+              repeatedPatterns,
+            });
+          }
+        } catch (patternErr) {
+          console.error("패턴 분석 실패 (비치명적):", patternErr);
+          // 패턴 분석 실패는 무시
+        }
       } catch (firebaseErr) {
         console.error("Firestore save error (비치명적):", firebaseErr);
         // Firestore 저장 실패는 무시하고 결과는 반환 (클라이언트는 검토 완료)
@@ -77,6 +100,7 @@ export async function POST(request: NextRequest) {
       result,
       processingTime,
       fileName: file.name,
+      repeatedPatterns,
     });
   } catch (error) {
     console.error("Review API error:", error);

@@ -376,9 +376,9 @@ export default function DashboardPage() {
         {/* Upload */}
         <motion.div id="upload-zone" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} style={{ marginBottom: 36 }}>
           <ContractUploader
-            onUploadComplete={(id, result, fileName) => {
+            onUploadComplete={(id, result, fileName, repeatedPatterns = []) => {
               const createdAt = new Date().toISOString();
-              sessionStorage.setItem(`review_${id}`, JSON.stringify({ id, result, fileName, createdAt }));
+              sessionStorage.setItem(`review_${id}`, JSON.stringify({ id, result, fileName, createdAt, repeatedPatterns }));
               // 목록에 즉시 추가 (낙관적 업데이트)
               setReviews(prev => [{
                 id, uid: user.uid, fileName, storageUrl: "",

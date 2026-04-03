@@ -21,6 +21,13 @@ export interface ReviewResult {
   clauses: ClauseResult[];
 }
 
+export interface RepeatPattern {
+  clauseTitle: string;         // 현재 조항명 (키워드)
+  pastOccurrences: number;     // 과거 동일 위험 조항 발견 횟수
+  firstFoundAt: string;        // 최초 발견일 (ISO 문자열)
+  lastReviewFileName: string;  // 마지막 발견된 계약서명
+}
+
 export interface Review {
   id: string;
   uid: string;
@@ -30,6 +37,7 @@ export interface Review {
   riskLevel: RiskLevel;
   createdAt: string;
   processingTime?: number;
+  repeatedPatterns?: RepeatPattern[];
 }
 
 export interface User {

@@ -8,9 +8,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useMotionValue, useMotionTemplate, useAnimationFrame } from "framer-motion";
 import { ReviewResult } from "@/components/ReviewResult";
-import { Review } from "@/lib/types";
+import { Review, RepeatPattern } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
 import { ResultDisclaimer, FooterDisclaimer } from "@/components/legal/Disclaimer";
+import { PatternAlert } from "@/components/contract/PatternAlert";
 
 const R = {
   bgWhite: "#FFFFFF", bgLight: "#F6F7FB", bgDark: "#093944",
@@ -77,6 +78,7 @@ export default function ReviewPage({ params }: Props) {
   const { user, loading, logout } = useAuth();
   const [review, setReview] = useState<Review>(DEMO_REVIEW);
   const [lang, setLang] = useState<"ko" | "en">("ko");
+  const [repeatedPatterns, setRepeatedPatterns] = useState<RepeatPattern[]>([]);
 
   useEffect(() => {
     const stored = sessionStorage.getItem(`review_${id}`);
@@ -84,6 +86,10 @@ export default function ReviewPage({ params }: Props) {
       try {
         const data = JSON.parse(stored);
         setReview({ id: data.id, uid: "", fileName: data.fileName, storageUrl: "", processingTime: 0, riskLevel: data.result.overallRisk, createdAt: data.createdAt, result: data.result });
+        // 패턴 데이터가 있으면 상태에 반영
+        if (Array.isArray(data.repeatedPatterns)) {
+          setRepeatedPatterns(data.repeatedPatterns);
+        }
       } catch {
         // sessionStorage 파싱 실패 시 DEMO_REVIEW 유지
       }
@@ -224,6 +230,7 @@ export default function ReviewPage({ params }: Props) {
       {/* ── Review result (overlaps hero) ── */}
       <div style={{ maxWidth: 1100, margin: "-48px auto 0", padding: "0 40px 40px", position: "relative", zIndex: 20 }}>
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+          <PatternAlert patterns={repeatedPatterns} lang={lang} />
           <ReviewResult review={review} lang={lang} />
           <ResultDisclaimer />
         </motion.div>
