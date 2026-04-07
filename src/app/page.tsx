@@ -206,20 +206,32 @@ export default function LandingPage() {
 
         <div style={{ position: "relative", zIndex: 10, maxWidth: 760, padding: "80px 32px" }}>
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <Eyebrow dark>AI CONTRACT REVIEW</Eyebrow>
+            <Eyebrow dark>AI CONTRACT REVIEW · AI 계약서 검토</Eyebrow>
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}
-            style={{ fontFamily: R.fontSans, fontSize: "clamp(38px, 6vw, 68px)", fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.1, color: R.textWhite, margin: "0 0 20px" }}
+            style={{ fontFamily: R.fontSans, fontSize: "clamp(38px, 6vw, 68px)", fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.1, color: R.textWhite, margin: "0 0 12px" }}
           >
             One Review.<br />
             <span style={{ color: R.tealBright }}>Total Confidence.</span>
           </motion.h1>
           <motion.p
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.15 }}
+            style={{ fontSize: "clamp(18px, 2.5vw, 24px)", fontWeight: 700, color: R.tealBright, letterSpacing: "-0.02em", margin: "0 0 20px", fontFamily: R.fontSans, opacity: 0.85 }}
+          >
+            한 번의 검토. 완전한 확신.
+          </motion.p>
+          <motion.p
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
-            style={{ fontSize: 18, color: R.textOffWhite, lineHeight: 1.7, maxWidth: 480, margin: "0 auto 36px", fontFamily: R.fontSans }}
+            style={{ fontSize: 17, color: R.textOffWhite, lineHeight: 1.75, maxWidth: 480, margin: "0 auto 8px", fontFamily: R.fontSans }}
           >
             Upload your Korean contract. Get risk analysis in 30 seconds — in Korean and English.
+          </motion.p>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.25 }}
+            style={{ fontSize: 15, color: "rgba(255,255,255,0.55)", lineHeight: 1.7, maxWidth: 480, margin: "0 auto 36px", fontFamily: R.fontSans }}
+          >
+            계약서를 업로드하면 30초 안에 위험 분석 결과를 한국어와 영어로 받아보세요.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}
