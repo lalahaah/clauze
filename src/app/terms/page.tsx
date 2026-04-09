@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { SUPPORT_EMAIL } from "@/lib/config";
 
 // 디자인 토큰
 const R = {
@@ -477,7 +478,7 @@ export default function TermsPage() {
 
                 <SectionLabel>⑥ 환불 요청 방법</SectionLabel>
                 <div style={{ background: R.bgLight, borderRadius: 4, padding: "14px 18px", fontSize: 13, color: R.textMid, lineHeight: 2 }}>
-                  <div><strong>이메일:</strong>{' '}<a href="mailto:nextidealab.ai@gmail.com" style={{ color: R.tealMid, textDecoration: "none" }}>nextidealab.ai@gmail.com</a></div>
+                  <div><strong>이메일:</strong>{' '}<a href={`mailto:${SUPPORT_EMAIL}`} style={{ color: R.tealMid, textDecoration: "none" }}>{SUPPORT_EMAIL}</a></div>
                   <div><strong>제목:</strong> [Clauze 환불요청] 결제 이메일 주소</div>
                   <div><strong>필수 포함:</strong> 결제 이메일, 결제 일시, 결제 유형, 환불 사유</div>
                 </div>
@@ -517,7 +518,7 @@ export default function TermsPage() {
 
                 <SectionLabel>⑥ How to Request a Refund</SectionLabel>
                 <div style={{ background: R.bgLight, borderRadius: 4, padding: "14px 18px", fontSize: 13, color: R.textMid, lineHeight: 2 }}>
-                  <div><strong>Email:</strong>{' '}<a href="mailto:nextidealab.ai@gmail.com" style={{ color: R.tealMid, textDecoration: "none" }}>nextidealab.ai@gmail.com</a></div>
+                  <div><strong>Email:</strong>{' '}<a href={`mailto:${SUPPORT_EMAIL}`} style={{ color: R.tealMid, textDecoration: "none" }}>{SUPPORT_EMAIL}</a></div>
                   <div><strong>Subject:</strong> [Clauze Refund] Your payment email</div>
                   <div><strong>Include:</strong> Payment email, date, plan type, reason.</div>
                 </div>
@@ -688,7 +689,7 @@ export default function TermsPage() {
                     ["회사명",   "(주)루시퍼"],
                     ["서비스명", "Clauze (clauze-ai.vercel.app)"],
                     ["담당자",   "박원영"],
-                    ["이메일",   "nextidealab.ai@gmail.com"],
+                    ["이메일",   SUPPORT_EMAIL],
                     ["응답 시간", "영업일 기준 24시간 이내"],
                   ] as [string, string][]).map(([label, value]) => (
                     <React.Fragment key={label}>
@@ -711,7 +712,7 @@ export default function TermsPage() {
                     ["Company",       "Lucifer Inc."],
                     ["Service",       "Clauze (clauze-ai.vercel.app)"],
                     ["Contact",       "Wonyoung Park"],
-                    ["Email",         "nextidealab.ai@gmail.com"],
+                    ["Email",         SUPPORT_EMAIL],
                     ["Response Time", "Within 24 business hours"],
                   ] as [string, string][]).map(([label, value]) => (
                     <React.Fragment key={label}>
@@ -746,7 +747,7 @@ export default function TermsPage() {
             <Link href="/refund" style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>
               {lang === 'ko' ? '환불정책' : 'Refund Policy'}
             </Link>
-            <a href="mailto:nextidealab.ai@gmail.com" style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>nextidealab.ai@gmail.com</a>
+            <a href={`mailto:${SUPPORT_EMAIL}`} style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>{SUPPORT_EMAIL}</a>
           </div>
         </div>
       </footer>

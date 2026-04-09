@@ -7,6 +7,7 @@
 'use client'
 
 import { useState } from 'react'
+import { SUPPORT_EMAIL } from '@/lib/config'
 
 // ─────────────────────────────────────────────────────────────
 // 디자인 토큰
@@ -185,7 +186,7 @@ export function ResultDisclaimer() {
                 {showDetail ? '상세 접기' : '면책 조항 전문 보기'}
               </button>
               <a
-                href="mailto:nextidealab.ai@gmail.com?subject=[Clauze] 법률 전문가 연결 문의"
+                href={`mailto:${SUPPORT_EMAIL}?subject=[Clauze] 법률 전문가 연결 문의`}
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 4,
                   padding: '6px 14px', background: T.bgDark, borderRadius: 28,
@@ -240,7 +241,7 @@ export function ResultDisclaimer() {
           ))}
           <p style={{ fontSize: 11, color: T.textLt, margin: 0 }}>
             (주)루시퍼 · 담당자 박원영 ·{' '}
-            <a href="mailto:nextidealab.ai@gmail.com" style={{ color: T.teal }}>nextidealab.ai@gmail.com</a>
+            <a href={`mailto:${SUPPORT_EMAIL}`} style={{ color: T.teal }}>{SUPPORT_EMAIL}</a>
             {' '}· 시행: 2026.04.01 · 관련 조항:{' '}
             <a href="/terms#section-8" style={{ color: T.teal }}>이용약관 제8조</a>
           </p>

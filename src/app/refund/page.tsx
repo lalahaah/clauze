@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { SUPPORT_EMAIL } from "@/lib/config";
 
 // 디자인 토큰 (terms/privacy 페이지와 통일)
 const R = {
@@ -438,8 +439,8 @@ export default function RefundPage() {
             <div style={{ fontSize: 13, color: R.textMid, lineHeight: 1.8, marginBottom: 12 }}>
               계정 설정 → 구독 관리 → "구독 취소"<br />
               또는 이메일:{" "}
-              <a href="mailto:nextidealab.ai@gmail.com" style={{ color: R.tealMid, textDecoration: "none" }}>
-                nextidealab.ai@gmail.com
+              <a href={`mailto:${SUPPORT_EMAIL}`} style={{ color: R.tealMid, textDecoration: "none" }}>
+                {SUPPORT_EMAIL}
               </a>
             </div>
 
@@ -502,8 +503,8 @@ export default function RefundPage() {
             <div style={{ fontSize: 13, color: R.textMid, lineHeight: 1.8, marginBottom: 12 }}>
               Account Settings → Subscription → &quot;Cancel Subscription&quot;<br />
               Or email:{" "}
-              <a href="mailto:nextidealab.ai@gmail.com" style={{ color: R.tealMid, textDecoration: "none" }}>
-                nextidealab.ai@gmail.com
+              <a href={`mailto:${SUPPORT_EMAIL}`} style={{ color: R.tealMid, textDecoration: "none" }}>
+                {SUPPORT_EMAIL}
               </a>
             </div>
 
@@ -518,8 +519,8 @@ export default function RefundPage() {
           <SectionCard title="환불 요청 절차" accent={R.bgDark}>
             <StepRow step={1} title="이메일 발송">
               <div>수신:{" "}
-                <a href="mailto:nextidealab.ai@gmail.com" style={{ color: R.tealMid, textDecoration: "none" }}>
-                  nextidealab.ai@gmail.com
+                <a href={`mailto:${SUPPORT_EMAIL}`} style={{ color: R.tealMid, textDecoration: "none" }}>
+                  {SUPPORT_EMAIL}
                 </a>
               </div>
               <div>제목: [Clauze 환불요청] 결제 이메일 주소</div>
@@ -547,8 +548,8 @@ export default function RefundPage() {
           <SectionCard title="How to Request a Refund" accent={R.bgDark}>
             <StepRow step={1} title="Send an Email">
               <div>To:{" "}
-                <a href="mailto:nextidealab.ai@gmail.com" style={{ color: R.tealMid, textDecoration: "none" }}>
-                  nextidealab.ai@gmail.com
+                <a href={`mailto:${SUPPORT_EMAIL}`} style={{ color: R.tealMid, textDecoration: "none" }}>
+                  {SUPPORT_EMAIL}
                 </a>
               </div>
               <div>Subject: [Clauze Refund Request] Your payment email</div>
@@ -624,7 +625,7 @@ export default function RefundPage() {
               { label: "회사명",    value: "(주)루시퍼" },
               { label: "서비스명",  value: "Clauze (clauze-ai.vercel.app)" },
               { label: "결제 수단", value: "Dodo Payments" },
-              { label: "환불 문의", value: <a href="mailto:nextidealab.ai@gmail.com" style={{ color: R.tealMid, textDecoration: "none" }}>nextidealab.ai@gmail.com</a> },
+              { label: "환불 문의", value: <a href={`mailto:${SUPPORT_EMAIL}`} style={{ color: R.tealMid, textDecoration: "none" }}>{SUPPORT_EMAIL}</a> },
               { label: "시행일",    value: "2026년 4월 1일" },
               { label: "관련 조항", value: <Link href="/terms#art6" style={{ color: R.tealMid, textDecoration: "none" }}>이용약관 제6조 →</Link> },
             ]}
@@ -635,7 +636,7 @@ export default function RefundPage() {
               { label: "Company",         value: "Lucifer Co., Ltd." },
               { label: "Service",         value: "Clauze (clauze-ai.vercel.app)" },
               { label: "Payment",         value: "Dodo Payments" },
-              { label: "Refund Contact",  value: <a href="mailto:nextidealab.ai@gmail.com" style={{ color: R.tealMid, textDecoration: "none" }}>nextidealab.ai@gmail.com</a> },
+              { label: "Refund Contact",  value: <a href={`mailto:${SUPPORT_EMAIL}`} style={{ color: R.tealMid, textDecoration: "none" }}>{SUPPORT_EMAIL}</a> },
               { label: "Effective",       value: "April 1, 2026" },
               { label: "Related",         value: <Link href="/terms#art6" style={{ color: R.tealMid, textDecoration: "none" }}>Terms of Service Article 6 →</Link> },
             ]}
@@ -683,8 +684,8 @@ export default function RefundPage() {
             <Link href="/refund"  style={{ color: R.tealBright, textDecoration: "none", fontWeight: 600 }}>
               {lang === "ko" ? "환불정책" : "Refund Policy"}
             </Link>
-            <a href="mailto:nextidealab.ai@gmail.com" style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>
-              nextidealab.ai@gmail.com
+            <a href={`mailto:${SUPPORT_EMAIL}`} style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>
+              {SUPPORT_EMAIL}
             </a>
           </div>
         </div>

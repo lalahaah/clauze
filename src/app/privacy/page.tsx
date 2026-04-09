@@ -4,6 +4,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { SUPPORT_EMAIL } from "@/lib/config";
 
 // ── 디자인 토큰 ──────────────────────────────
 const R = {
@@ -286,8 +287,8 @@ function KoContent() {
         <Num n={4}>처리 정지 요구</Num>
         <AlertBox>
           위 권리 행사는 서비스 내 설정 메뉴 또는 개인정보 보호책임자에게{' '}
-          <a href="mailto:nextidealab.ai@gmail.com" style={{ color: R.tealMid }}>
-            nextidealab.ai@gmail.com
+          <a href={`mailto:${SUPPORT_EMAIL}`} style={{ color: R.tealMid }}>
+            {SUPPORT_EMAIL}
           </a>
           으로 요청하실 수 있으며, 회사는 지체 없이 조치하겠습니다.
         </AlertBox>
@@ -339,7 +340,7 @@ function KoContent() {
           rows={[
             ["회사명", "(주)루시퍼"],
             ["성명", "박원영"],
-            ["이메일", "nextidealab.ai@gmail.com"],
+            ["이메일", SUPPORT_EMAIL],
             ["서비스 URL", "https://clauze-ai.vercel.app"],
           ]}
         />
@@ -495,8 +496,8 @@ function EnContent() {
         <Num n={4}>Right to request suspension of processing</Num>
         <AlertBox>
           Rights may be exercised via the in-service settings menu or by contacting the Privacy Officer at{' '}
-          <a href="mailto:nextidealab.ai@gmail.com" style={{ color: R.tealMid }}>
-            nextidealab.ai@gmail.com
+          <a href={`mailto:${SUPPORT_EMAIL}`} style={{ color: R.tealMid }}>
+            {SUPPORT_EMAIL}
           </a>
           . The Company will take action without delay.
         </AlertBox>
@@ -548,7 +549,7 @@ function EnContent() {
           rows={[
             ["Company", "Lucifer Inc. (주)루시퍼"],
             ["Name", "Won-Young Park (박원영)"],
-            ["Email", "nextidealab.ai@gmail.com"],
+            ["Email", SUPPORT_EMAIL],
             ["Service URL", "https://clauze-ai.vercel.app"],
           ]}
         />
@@ -716,8 +717,8 @@ export default function PrivacyPage() {
             {lang === 'ko' ? '환불정책' : 'Refund Policy'}
           </Link>
           &nbsp;·&nbsp;
-          <a href="mailto:nextidealab.ai@gmail.com" style={{ color: R.tealMid, textDecoration: "none" }}>
-            nextidealab.ai@gmail.com
+          <a href={`mailto:${SUPPORT_EMAIL}`} style={{ color: R.tealMid, textDecoration: "none" }}>
+            {SUPPORT_EMAIL}
           </a>
         </p>
       </div>
