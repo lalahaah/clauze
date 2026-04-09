@@ -622,7 +622,7 @@ export default function RefundPage() {
           <InfoTable
             rows={[
               { label: "회사명",    value: "(주)루시퍼" },
-              { label: "서비스명",  value: "Clauze (clauze.io)" },
+              { label: "서비스명",  value: "Clauze (clauze-ai.vercel.app)" },
               { label: "결제 수단", value: "Dodo Payments" },
               { label: "환불 문의", value: <a href="mailto:nextidealab.ai@gmail.com" style={{ color: R.tealMid, textDecoration: "none" }}>nextidealab.ai@gmail.com</a> },
               { label: "시행일",    value: "2026년 4월 1일" },
@@ -633,7 +633,7 @@ export default function RefundPage() {
           <InfoTable
             rows={[
               { label: "Company",         value: "Lucifer Co., Ltd." },
-              { label: "Service",         value: "Clauze (clauze.io)" },
+              { label: "Service",         value: "Clauze (clauze-ai.vercel.app)" },
               { label: "Payment",         value: "Dodo Payments" },
               { label: "Refund Contact",  value: <a href="mailto:nextidealab.ai@gmail.com" style={{ color: R.tealMid, textDecoration: "none" }}>nextidealab.ai@gmail.com</a> },
               { label: "Effective",       value: "April 1, 2026" },

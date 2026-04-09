@@ -340,7 +340,7 @@ function KoContent() {
             ["회사명", "(주)루시퍼"],
             ["성명", "박원영"],
             ["이메일", "nextidealab.ai@gmail.com"],
-            ["서비스 URL", "https://clauze.io"],
+            ["서비스 URL", "https://clauze-ai.vercel.app"],
           ]}
         />
       </Section>
@@ -549,7 +549,7 @@ function EnContent() {
             ["Company", "Lucifer Inc. (주)루시퍼"],
             ["Name", "Won-Young Park (박원영)"],
             ["Email", "nextidealab.ai@gmail.com"],
-            ["Service URL", "https://clauze.io"],
+            ["Service URL", "https://clauze-ai.vercel.app"],
           ]}
         />
       </Section>

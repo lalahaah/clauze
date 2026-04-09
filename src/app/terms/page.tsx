@@ -686,7 +686,7 @@ export default function TermsPage() {
                 <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "10px 24px", marginTop: 16 }}>
                   {([
                     ["회사명",   "(주)루시퍼"],
-                    ["서비스명", "Clauze (clauze.io)"],
+                    ["서비스명", "Clauze (clauze-ai.vercel.app)"],
                     ["담당자",   "박원영"],
                     ["이메일",   "nextidealab.ai@gmail.com"],
                     ["응답 시간", "영업일 기준 24시간 이내"],
@@ -709,7 +709,7 @@ export default function TermsPage() {
                 <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "10px 24px", marginTop: 16 }}>
                   {([
                     ["Company",       "Lucifer Inc."],
-                    ["Service",       "Clauze (clauze.io)"],
+                    ["Service",       "Clauze (clauze-ai.vercel.app)"],
                     ["Contact",       "Wonyoung Park"],
                     ["Email",         "nextidealab.ai@gmail.com"],
                     ["Response Time", "Within 24 business hours"],
