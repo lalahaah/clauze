@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { loadTossPayments } from "@tosspayments/sdk";
 import { useAuth } from "@/hooks/useAuth";
 import { auth } from "@/lib/firebase";
+import { FooterDisclaimer } from "@/components/legal/Disclaimer";
 
 // 플랜 키 타입 (단건 결제 포함)
 type PlanKey = "free" | "single" | "pro" | "business";
@@ -413,11 +414,9 @@ export default function PricingPage() {
       features: [
         "단건 검토 (1회)",
         "한국어 + 영문 동시 요약",
-        "위험도 전체 분류",
-        "협상 이메일 1건 생성",
-        "검토 결과 PDF 다운로드",
+        "위험도 전체 분류 (고위험/주의/정상)",
       ],
-      lockedFeatures: ["검토 이력 저장", "패턴 감지"],
+      lockedFeatures: ["협상 이메일 생성", "검토 이력 저장", "패턴 감지"],
       ctaKo: "건별 결제하기",
       featured: false,
       betaNote: true,
@@ -771,16 +770,70 @@ export default function PricingPage() {
       </div>
 
       {/* 푸터 */}
-      <footer style={{
-        background: T.bgDark, borderTop: `1px solid ${T.borderDk}`,
-        padding: "24px 40px",
-      }}>
-        <p style={{
-          fontSize: 11, color: "rgba(255,255,255,0.3)",
-          textAlign: "center", fontFamily: T.fontSans, margin: 0,
-        }}>
-          © 2026 Clauze. All rights reserved. · 본 서비스는 법적 조언을 제공하지 않습니다.
-        </p>
+      <footer style={{ background: T.bgDark, padding: "64px 40px 32px" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 48, marginBottom: 48 }}>
+            <div>
+              <div style={{ fontFamily: T.fontSans, fontSize: 16, fontWeight: 800, color: "#FFFFFF", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 16 }}>CLAUZE</div>
+              <p style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", lineHeight: 1.7, maxWidth: 260, fontFamily: T.fontSans }}>AI-powered Korean contract review for freelancers and businesses.</p>
+            </div>
+            {[
+              { title: "PRODUCT", items: [
+                { label: "Dashboard", href: "/dashboard" },
+                { label: "Contract Review", href: "/dashboard" },
+                { label: "Pricing", href: "/pricing" }
+              ]},
+              { title: "COMPANY", items: [
+                { label: "About", href: "#" },
+                { label: "Blog", href: "#" },
+                { label: "Contact", href: "#" }
+              ]},
+              { title: "LEGAL", items: [
+                { label: "Privacy Policy", href: "/privacy" },
+                { label: "Terms of Service", href: "/terms" },
+                { label: "Refund Policy", href: "/refund" },
+              ]},
+            ].map(({ title, items }) => (
+              <div key={title}>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1.5px", color: T.tealBr, marginBottom: 16, textTransform: "uppercase", fontFamily: T.fontSans }}>{title}</div>
+                {items.map(({ label, href }) => (
+                  <button
+                    key={label}
+                    onClick={() => {
+                      if (href === "#") return;
+                      if (href.includes(".pdf")) {
+                        window.open(href, "_blank");
+                      } else {
+                        window.location.href = href;
+                      }
+                    }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      padding: 0,
+                      margin: 0,
+                      marginBottom: 10,
+                      fontSize: 14,
+                      color: "rgba(255,255,255,0.6)",
+                      cursor: "pointer",
+                      fontFamily: T.fontSans,
+                      transition: "color 0.2s",
+                      textAlign: "left",
+                      display: "block",
+                      width: "100%"
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.85)"}
+                    onMouseLeave={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.6)"}
+                  >{label}</button>
+                ))}
+              </div>
+            ))}
+          </div>
+          <div style={{ borderTop: `1px solid ${T.borderDk}`, paddingTop: 24, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", fontFamily: T.fontSans }}>© 2026 Clauze. All rights reserved.</div>
+          </div>
+        </div>
+        <FooterDisclaimer />
       </footer>
     </div>
   );

@@ -237,7 +237,69 @@ export default function ReviewPage({ params }: Props) {
       </div>
 
       {/* ── Footer ── */}
-      <footer style={{ background: R.bgDark }}>
+      <footer style={{ background: R.bgDark, padding: "64px 40px 32px" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 48, marginBottom: 48 }}>
+            <div>
+              <div style={{ fontFamily: R.fontSans, fontSize: 16, fontWeight: 800, color: R.textWhite, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 16 }}>CLAUZE</div>
+              <p style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", lineHeight: 1.7, maxWidth: 260, fontFamily: R.fontSans }}>AI-powered Korean contract review for freelancers and businesses.</p>
+            </div>
+            {[
+              { title: "PRODUCT", items: [
+                { label: "Dashboard", href: "/dashboard" },
+                { label: "Contract Review", href: "/dashboard" },
+                { label: "Pricing", href: "/pricing" }
+              ]},
+              { title: "COMPANY", items: [
+                { label: "About", href: "#" },
+                { label: "Blog", href: "#" },
+                { label: "Contact", href: "#" }
+              ]},
+              { title: "LEGAL", items: [
+                { label: "Privacy Policy", href: "/privacy" },
+                { label: "Terms of Service", href: "/terms" },
+                { label: "Refund Policy", href: "/refund" },
+              ]},
+            ].map(({ title, items }) => (
+              <div key={title}>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1.5px", color: R.tealBright, marginBottom: 16, textTransform: "uppercase", fontFamily: R.fontSans }}>{title}</div>
+                {items.map(({ label, href }) => (
+                  <button
+                    key={label}
+                    onClick={() => {
+                      if (href === "#") return;
+                      if (href.includes(".pdf")) {
+                        window.open(href, "_blank");
+                      } else {
+                        window.location.href = href;
+                      }
+                    }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      padding: 0,
+                      margin: 0,
+                      marginBottom: 10,
+                      fontSize: 14,
+                      color: "rgba(255,255,255,0.6)",
+                      cursor: "pointer",
+                      fontFamily: R.fontSans,
+                      transition: "color 0.2s",
+                      textAlign: "left",
+                      display: "block",
+                      width: "100%"
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.85)"}
+                    onMouseLeave={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.6)"}
+                  >{label}</button>
+                ))}
+              </div>
+            ))}
+          </div>
+          <div style={{ borderTop: `1px solid ${R.borderDark}`, paddingTop: 24, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", fontFamily: R.fontSans }}>© 2026 Clauze. All rights reserved.</div>
+          </div>
+        </div>
         <FooterDisclaimer />
       </footer>
     </div>
