@@ -4,11 +4,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as admin from "firebase-admin";
 import { reviewContract } from "@/lib/claude";
-import { adminDb } from "@/lib/firebase-admin";
+import { adminDb, adminAuth } from "@/lib/firebase-admin";
 import { findPastReviews, detectRepeatedClauses } from "@/lib/pattern-analyzer";
 import { RepeatPattern } from "@/lib/types";
 import { INDUSTRY_PROFILES, IndustryKey } from "@/lib/industry-profiles";
-import { checkReviewLimit, getPlanLimits } from "@/lib/plan-limits";
+import { checkReviewPermission, consumeCredit, incrementFreePlanReviewCount } from "@/lib/plan-guard";
 
 export const runtime = "nodejs";
 export const maxDuration = 60; // 60초 타임아웃 (PDF 분석 여유 확보)
@@ -47,24 +47,34 @@ export async function POST(request: NextRequest) {
     // 플랜 제한 확인 (userId가 있을 경우)
     if (userId) {
       try {
-        const userDoc = await adminDb.collection("users").doc(userId).get();
-        const userData = userDoc.data();
-        const plan = userData?.plan ?? "free";
+        const permission = await checkReviewPermission(userId);
+        if (!permission.allowed) {
+          // 에러 메시지 정의
+          let errorMsg = "검토 한도를 초과했습니다.";
+          if (permission.reason === "free_limit") {
+            errorMsg = "무료 플랜은 월 1건만 검토 가능합니다. Pro 플랜을 업그레이드해주세요.";
+          } else if (permission.reason === "no_credits") {
+            errorMsg = "검토 크레딧이 부족합니다. Single Review를 구매하거나 Pro 플랜을 업그레이드해주세요.";
+          } else if (permission.reason === "subscription_cancelled") {
+            errorMsg = "구독이 취소된 상태입니다. 다시 구독해주세요.";
+          }
 
-        const limitCheck = await checkReviewLimit(userId, plan as any);
-        if (!limitCheck.allowed) {
           return NextResponse.json(
             {
-              error: limitCheck.reason,
+              error: errorMsg,
               code: "PLAN_LIMIT_EXCEEDED",
-              plan,
+              reason: permission.reason,
             },
             { status: 429 }
           );
         }
       } catch (err) {
-        console.error("Plan limit check error:", err);
-        // 플랜 확인 실패는 진행 (기본값: free)
+        console.error("Plan permission check error:", err);
+        // 플랜 확인 실패는 안전하게 거부
+        return NextResponse.json(
+          { error: "권한 확인 중 오류가 발생했습니다." },
+          { status: 500 }
+        );
       }
     }
 
@@ -109,6 +119,28 @@ export async function POST(request: NextRequest) {
         await adminDb.collection("users").doc(userId).update({
           reviewCount: admin.firestore.FieldValue.increment(1),
         });
+
+        // 플랜에 따른 크레딧 처리
+        try {
+          const userDoc = await adminDb.collection("users").doc(userId).get();
+          const userData = userDoc.data();
+          const plan = userData?.plan ?? "free";
+
+          if (plan === "single") {
+            // Single Review: 크레딧 차감
+            const consumed = await consumeCredit(userId);
+            if (!consumed) {
+              console.warn(`Failed to consume credit for user ${userId}`);
+            }
+          } else if (plan === "free") {
+            // Free: 월간 검토 수 증가 (선택적 추적)
+            await incrementFreePlanReviewCount(userId);
+          }
+          // Pro/Business: 별도 처리 불필요 (무제한)
+        } catch (creditErr) {
+          console.error("Credit management error (비치명적):", creditErr);
+          // 크레딧 관리 실패는 무시 (검토 결과는 저장됨)
+        }
 
         // 패턴 분석 - 실패해도 메인 검토 결과에는 영향 없음
         try {

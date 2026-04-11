@@ -9,7 +9,8 @@ import { loadTossPayments } from "@tosspayments/sdk";
 import { useAuth } from "@/hooks/useAuth";
 import { auth } from "@/lib/firebase";
 import { FooterDisclaimer } from "@/components/legal/Disclaimer";
-import type { PlanKey } from "@/lib/payment";
+import { CheckoutButton } from "@/components/pricing/CheckoutButton";
+import type { PlanKey, PlanType } from "@/lib/dodo";
 
 // 결제 수단 선택 (환경 변수로 기본값 설정)
 const PAYMENT_PROVIDER = (process.env.NEXT_PUBLIC_PAYMENT_PROVIDER ?? "dodo") as "toss" | "dodo";
@@ -127,25 +128,14 @@ interface CardProps {
   savingsNote?: string;
   betaNote?: boolean;
   currentPlan: string;
-  checkoutLoading: string | null;
-  onSelect: () => void;
 }
 
 function PlanCard({
   planKey, name, price, period, priceNote, descKo, descEn,
   features, lockedFeatures, ctaKo, featured = false, savingsNote,
-  betaNote, currentPlan, checkoutLoading, onSelect,
+  betaNote, currentPlan,
 }: CardProps) {
   const [hov, setHov] = useState(false);
-  const isActive = checkoutLoading !== null;
-  const isThisLoading = checkoutLoading === planKey || checkoutLoading === "portal";
-
-  // CTA 텍스트 결정
-  let ctaText = ctaKo;
-  if (currentPlan === planKey) {
-    ctaText = planKey === "free" ? "현재 플랜" : "구독 관리";
-  }
-  if (isThisLoading) ctaText = "연결 중...";
 
   const isFilled = featured;
 
@@ -259,28 +249,54 @@ function PlanCard({
       )}
 
       {/* CTA 버튼 */}
-      <button
-        onClick={onSelect}
-        disabled={isActive}
-        onMouseEnter={() => setHov(true)}
-        onMouseLeave={() => setHov(false)}
-        style={{
-          width: "100%", padding: "13px 28px",
-          background: isFilled
-            ? (hov ? T.tealDk : T.teal)
-            : (hov ? "rgba(4,34,40,0.06)" : "transparent"),
-          color: isFilled ? "#FFFFFF" : T.text,
-          border: isFilled ? `1.5px solid ${T.teal}` : `1.5px solid ${T.text}`,
-          borderRadius: T.btnR,
-          fontSize: 14, fontWeight: 700,
-          fontFamily: T.fontSans,
-          cursor: isActive ? "not-allowed" : "pointer",
-          opacity: isActive && !isThisLoading ? 0.5 : 1,
-          transition: "all 0.2s",
-        }}
-      >
-        {ctaText}
-      </button>
+      {planKey === "free" ? (
+        <button
+          disabled={currentPlan === "free"}
+          onMouseEnter={() => setHov(true)}
+          onMouseLeave={() => setHov(false)}
+          style={{
+            width: "100%", padding: "13px 28px",
+            background: currentPlan === "free" ? "rgba(4,34,40,0.4)" : "transparent",
+            color: isFilled ? "#FFFFFF" : T.text,
+            border: isFilled ? `1.5px solid ${T.teal}` : `1.5px solid ${T.text}`,
+            borderRadius: T.btnR,
+            fontSize: 14, fontWeight: 700,
+            fontFamily: T.fontSans,
+            cursor: currentPlan === "free" ? "not-allowed" : "pointer",
+            opacity: currentPlan === "free" ? 0.6 : 1,
+            transition: "all 0.2s",
+          }}
+        >
+          {currentPlan === "free" ? "현재 플랜" : ctaKo}
+        </button>
+      ) : (currentPlan === planKey && (planKey === "pro" || planKey === "business")) ? (
+        <button
+          disabled={false}
+          onMouseEnter={() => setHov(true)}
+          onMouseLeave={() => setHov(false)}
+          style={{
+            width: "100%", padding: "13px 28px",
+            background: isFilled
+              ? (hov ? T.tealDk : T.teal)
+              : (hov ? "rgba(4,34,40,0.06)" : "transparent"),
+            color: isFilled ? "#FFFFFF" : T.text,
+            border: isFilled ? `1.5px solid ${T.teal}` : `1.5px solid ${T.text}`,
+            borderRadius: T.btnR,
+            fontSize: 14, fontWeight: 700,
+            fontFamily: T.fontSans,
+            cursor: "pointer",
+            transition: "all 0.2s",
+          }}
+        >
+          구독 관리
+        </button>
+      ) : (
+        <CheckoutButton
+          planType={planKey as PlanType}
+          label={ctaKo}
+        />
+      )}
+
 
       {/* Pro 절약 안내 */}
       {savingsNote && (
@@ -426,8 +442,7 @@ export default function PricingPage() {
       lockedFeatures: ["영문 번역", "검토 이력 저장"],
       ctaKo: "무료로 시작",
       featured: false,
-      currentPlan, checkoutLoading,
-      onSelect: () => handleSelectPlan("free"),
+      currentPlan,
     },
     {
       planKey: "single",
@@ -446,8 +461,7 @@ export default function PricingPage() {
       ctaKo: "건별 결제하기",
       featured: false,
       betaNote: true,
-      currentPlan, checkoutLoading,
-      onSelect: () => handleSelectPlan("single"),
+      currentPlan,
     },
     {
       planKey: "pro",
@@ -469,8 +483,7 @@ export default function PricingPage() {
       ctaKo: "Pro 시작하기",
       featured: true,
       savingsNote: "월 2건 이상이면 단건보다 저렴합니다\n2+ reviews/month? Pro beats per-review pricing.",
-      currentPlan, checkoutLoading,
-      onSelect: () => handleSelectPlan("pro"),
+      currentPlan,
     },
     {
       planKey: "business",
@@ -489,8 +502,7 @@ export default function PricingPage() {
       lockedFeatures: [],
       ctaKo: "Business 시작",
       featured: false,
-      currentPlan, checkoutLoading,
-      onSelect: () => handleSelectPlan("business"),
+      currentPlan,
     },
   ];
 

@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { ContractUploader } from "@/components/ContractUploader";
 import { RiskBadge } from "@/components/RiskBadge";
 import { FooterDisclaimer } from "@/components/legal/Disclaimer";
+import { SubscriptionManager } from "@/components/dashboard/SubscriptionManager";
 import { db } from "@/lib/firebase";
 import { Review, RiskLevel } from "@/lib/types";
 import { IndustrySelector } from "@/components/contract/IndustrySelector";
@@ -329,6 +330,157 @@ export default function DashboardPage() {
             </p>
           </motion.div>
         </div>
+      </div>
+
+      {/* ── Plan Status Card ── */}
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 40px 0" }}>
+        {(() => {
+          const plan = userData?.plan ?? "free";
+          const credits = userData?.singleReviewCredits ?? 0;
+          const currentPeriodEnd = userData?.currentPeriodEnd;
+          const subscriptionStatus = userData?.subscriptionStatus;
+
+          // Free 플랜
+          if (plan === "free") {
+            return (
+              <div style={{
+                background: R.bgWhite,
+                borderRadius: R.cardRadius,
+                padding: "24px 28px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 32,
+                borderLeft: `4px solid ${R.tealMid}`,
+                boxShadow: "0 4px 28px rgba(4,34,40,0.09)",
+              }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: R.textDark, marginBottom: 4, fontFamily: R.fontSans }}>
+                    {lang === "ko" ? "무료 플랜" : "Free Plan"}
+                  </div>
+                  <div style={{ fontSize: 13, color: R.textMid, fontFamily: R.fontSans }}>
+                    {lang === "ko"
+                      ? "이번 달 0/1건 사용 · 업그레이드하면 무제한"
+                      : "0/1 reviews this month · Unlimited with upgrade"}
+                  </div>
+                </div>
+                <button
+                  onClick={() => router.push("/pricing")}
+                  style={{
+                    padding: "10px 24px",
+                    background: R.tealBtn,
+                    color: R.textWhite,
+                    border: `1.5px solid ${R.tealBtn}`,
+                    borderRadius: R.btnRadius,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    fontFamily: R.fontSans,
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = R.tealDark}
+                  onMouseLeave={e => e.currentTarget.style.background = R.tealBtn}
+                >
+                  {lang === "ko" ? "Pro 업그레이드 →" : "Upgrade to Pro →"}
+                </button>
+              </div>
+            );
+          }
+
+          // Single Review
+          if (plan === "single") {
+            return (
+              <div style={{
+                background: R.bgWhite,
+                borderRadius: R.cardRadius,
+                padding: "24px 28px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 32,
+                borderLeft: `4px solid ${R.tealMid}`,
+                boxShadow: "0 4px 28px rgba(4,34,40,0.09)",
+              }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: R.textDark, marginBottom: 4, fontFamily: R.fontSans }}>
+                    Single Review
+                  </div>
+                  <div style={{ fontSize: 13, color: R.textMid, fontFamily: R.fontSans }}>
+                    {lang === "ko"
+                      ? `검토권 ${credits}건 보유 중`
+                      : `${credits} credit${credits !== 1 ? "s" : ""} available`}
+                  </div>
+                </div>
+                <button
+                  onClick={() => router.push("/pricing")}
+                  style={{
+                    padding: "10px 24px",
+                    background: R.tealBtn,
+                    color: R.textWhite,
+                    border: `1.5px solid ${R.tealBtn}`,
+                    borderRadius: R.btnRadius,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    fontFamily: R.fontSans,
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = R.tealDark}
+                  onMouseLeave={e => e.currentTarget.style.background = R.tealBtn}
+                >
+                  {lang === "ko" ? "추가 구매 →" : "Buy more →"}
+                </button>
+              </div>
+            );
+          }
+
+          // Pro/Business 구독
+          if ((plan === "pro" || plan === "business") && subscriptionStatus === "active") {
+            const planName = plan === "pro" ? "Pro" : "Business";
+            const renewalDate = currentPeriodEnd
+              ? new Date(currentPeriodEnd).toLocaleDateString(lang === "ko" ? "ko-KR" : "en-US", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                })
+              : "—";
+
+            return (
+              <div style={{
+                background: R.bgWhite,
+                borderRadius: R.cardRadius,
+                padding: "24px 28px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 32,
+                borderLeft: `4px solid ${R.tealMid}`,
+                boxShadow: "0 4px 28px rgba(4,34,40,0.09)",
+              }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: R.textDark, marginBottom: 4, fontFamily: R.fontSans }}>
+                    {planName} {lang === "ko" ? "플랜" : "Plan"}
+                  </div>
+                  <div style={{ fontSize: 13, color: R.textMid, fontFamily: R.fontSans }}>
+                    {lang === "ko"
+                      ? `구독 중 · 갱신일: ${renewalDate}`
+                      : `Active subscription · Renews: ${renewalDate}`}
+                  </div>
+                </div>
+                <SubscriptionManager
+                  planName={planName}
+                  renewalDate={renewalDate}
+                  lang={lang}
+                  onSuccess={() => {
+                    // 구독 취소 후 동작
+                  }}
+                />
+              </div>
+            );
+          }
+
+          return null;
+        })()}
       </div>
 
       {/* ── Metric cards ── */}
