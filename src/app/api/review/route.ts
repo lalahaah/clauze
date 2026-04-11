@@ -8,6 +8,7 @@ import { adminDb } from "@/lib/firebase-admin";
 import { findPastReviews, detectRepeatedClauses } from "@/lib/pattern-analyzer";
 import { RepeatPattern } from "@/lib/types";
 import { INDUSTRY_PROFILES, IndustryKey } from "@/lib/industry-profiles";
+import { checkReviewLimit, getPlanLimits } from "@/lib/plan-limits";
 
 export const runtime = "nodejs";
 export const maxDuration = 60; // 60초 타임아웃 (PDF 분석 여유 확보)
@@ -41,6 +42,30 @@ export async function POST(request: NextRequest) {
         { error: "파일 크기는 10MB 이하여야 합니다." },
         { status: 400 }
       );
+    }
+
+    // 플랜 제한 확인 (userId가 있을 경우)
+    if (userId) {
+      try {
+        const userDoc = await adminDb.collection("users").doc(userId).get();
+        const userData = userDoc.data();
+        const plan = userData?.plan ?? "free";
+
+        const limitCheck = await checkReviewLimit(userId, plan as any);
+        if (!limitCheck.allowed) {
+          return NextResponse.json(
+            {
+              error: limitCheck.reason,
+              code: "PLAN_LIMIT_EXCEEDED",
+              plan,
+            },
+            { status: 429 }
+          );
+        }
+      } catch (err) {
+        console.error("Plan limit check error:", err);
+        // 플랜 확인 실패는 진행 (기본값: free)
+      }
     }
 
     // PDF를 base64로 변환

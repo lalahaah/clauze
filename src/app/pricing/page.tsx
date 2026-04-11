@@ -9,9 +9,10 @@ import { loadTossPayments } from "@tosspayments/sdk";
 import { useAuth } from "@/hooks/useAuth";
 import { auth } from "@/lib/firebase";
 import { FooterDisclaimer } from "@/components/legal/Disclaimer";
+import type { PlanKey } from "@/lib/payment";
 
-// 플랜 키 타입 (단건 결제 포함)
-type PlanKey = "free" | "single" | "pro" | "business";
+// 결제 수단 선택 (환경 변수로 기본값 설정)
+const PAYMENT_PROVIDER = (process.env.NEXT_PUBLIC_PAYMENT_PROVIDER ?? "dodo") as "toss" | "dodo";
 
 // 디자인 토큰
 const T = {
@@ -333,33 +334,57 @@ export default function PricingPage() {
         return;
       }
 
-      const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY!;
-      const tossPayments = await loadTossPayments(clientKey);
-
-      if (plan === "single") {
-        // 단건 결제: 일반 카드 결제 플로우
-        await tossPayments.requestBillingAuth("카드", {
-          customerKey: uid,
-          successUrl: `${window.location.origin}/api/toss/billing/callback?plan=${plan}`,
-          failUrl: `${window.location.origin}/pricing?checkout=cancelled`,
-          customerEmail: user.email ?? undefined,
-          customerName: user.displayName ?? user.email ?? "고객",
-        });
+      if (PAYMENT_PROVIDER === "toss") {
+        await handleTossPayment(plan, uid);
       } else {
-        // 구독 플랜 (pro / business): 빌링키 발급 플로우
-        await tossPayments.requestBillingAuth("카드", {
-          customerKey: uid,
-          successUrl: `${window.location.origin}/api/toss/billing/callback?plan=${plan}`,
-          failUrl: `${window.location.origin}/pricing?checkout=cancelled`,
-          customerEmail: user.email ?? undefined,
-          customerName: user.displayName ?? user.email ?? "고객",
-        });
+        await handleDodoPayment(plan, uid);
       }
-      // requestBillingAuth는 리디렉션 — 이후 코드 미실행
-    } catch {
-      alert("오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+      // 리디렉션 — 이후 코드 미실행
+    } catch (err) {
+      console.error("Payment error:", err);
+      alert("결제 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
       setCheckoutLoading(null);
     }
+  };
+
+  // Toss Payments 처리
+  const handleTossPayment = async (plan: PlanKey, uid: string) => {
+    const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY!;
+    const tossPayments = await loadTossPayments(clientKey);
+
+    await tossPayments.requestBillingAuth("카드", {
+      customerKey: uid,
+      successUrl: `${window.location.origin}/api/toss/billing/callback?plan=${plan}`,
+      failUrl: `${window.location.origin}/pricing?checkout=cancelled`,
+      customerEmail: user?.email ?? undefined,
+      customerName: user?.displayName ?? user?.email ?? "고객",
+    });
+  };
+
+  // Dodo Payments 처리
+  const handleDodoPayment = async (plan: PlanKey, uid: string) => {
+    const idToken = await auth.currentUser?.getIdToken();
+    const res = await fetch("/api/dodo/payment/request", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`,
+      },
+      body: JSON.stringify({
+        plan,
+        userId: uid,
+        email: user?.email,
+        name: user?.displayName ?? user?.email ?? "고객",
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message ?? "결제 요청 실패");
+    }
+
+    const data = (await res.json()) as { paymentUrl: string };
+    window.location.href = data.paymentUrl;
   };
 
   // 구독 취소 포털
@@ -369,7 +394,8 @@ export default function PricingPage() {
     setCheckoutLoading("portal");
     try {
       const idToken = await auth.currentUser?.getIdToken();
-      const res = await fetch("/api/toss/cancel", {
+      const cancelEndpoint = PAYMENT_PROVIDER === "toss" ? "/api/toss/cancel" : "/api/dodo/cancel";
+      const res = await fetch(cancelEndpoint, {
         method: "POST",
         headers: { Authorization: `Bearer ${idToken}` },
       });

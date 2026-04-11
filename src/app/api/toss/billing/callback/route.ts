@@ -2,7 +2,7 @@
 // 토스 빌링 인증 성공 콜백 — 빌링키 발급 + 첫 결제 + Firestore 저장
 
 import { NextRequest, NextResponse } from "next/server";
-import { issueBillingKey, chargeBilling, PLANS, type PlanKey } from "@/lib/toss";
+import { issueBillingKey, chargeBilling, PLANS, type PlanKey } from "@/lib/payment";
 import { adminDb } from "@/lib/firebase-admin";
 import { randomUUID } from "crypto";
 
