@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
 
-  if (!orderId || !status || !plan || !PLANS[plan] || !userId) {
+  if (!orderId || !status || !plan || !PLANS[plan] || !userId || !paymentKey) {
     return NextResponse.redirect(`${baseUrl}/pricing?checkout=cancelled`);
   }
 

@@ -3,6 +3,7 @@
 
 "use client";
 
+import { Suspense } from "react";
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -37,7 +38,7 @@ const PLAN_MESSAGES = {
   },
 } as const;
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -195,5 +196,13 @@ export default function PaymentSuccessPage() {
         />
       </motion.div>
     </div>
+  );
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={<div>로딩 중...</div>}>
+      <PaymentSuccessContent />
+    </Suspense>
   );
 }

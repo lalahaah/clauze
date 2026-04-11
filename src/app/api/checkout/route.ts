@@ -71,38 +71,53 @@ export async function POST(request: NextRequest) {
     try {
       let checkoutUrl: string;
 
+      // 공통 배송지 정보 (선택적)
+      const billing = {
+        city: "Seoul",
+        country: "KR" as any,
+        state: "Seoul",
+        street: "N/A",
+        zipcode: "00000",
+      };
+
+      // 공통 고객 정보
+      const customer = {
+        email: userEmail || "",
+        name: (userName || "고객") as string,
+      };
+
       if (planType === "single") {
         // 단건 결제 — Payments API 사용
         const paymentResponse = await dodoClient.payments.create({
-          productId,
-          customerId: uid,
-          customerEmail: userEmail,
-          customerName: userName || "고객",
-          returnUrl: `${baseUrl}/payment/success?type=single`,
-          metadata: {
-            userId: uid,
-            planType,
-            type: "single",
-          },
+          payment_link: true,
+          billing,
+          customer,
+          product_cart: [
+            {
+              product_id: productId,
+              quantity: 1,
+            },
+          ],
+          return_url: `${baseUrl}/payment/success?type=single`,
         });
 
-        checkoutUrl = paymentResponse.checkoutUrl;
+        checkoutUrl = paymentResponse.payment_link ?? "";
       } else {
         // 구독 결제 — Subscriptions API 사용
         const subscriptionResponse = await dodoClient.subscriptions.create({
-          productId,
-          customerId: uid,
-          customerEmail: userEmail,
-          customerName: userName || "고객",
-          returnUrl: `${baseUrl}/payment/success?type=${planType}`,
-          metadata: {
-            userId: uid,
-            planType,
-            type: planType,
-          },
+          payment_link: true,
+          billing,
+          customer,
+          product_id: productId,
+          quantity: 1,
+          return_url: `${baseUrl}/payment/success?type=${planType}`,
         });
 
-        checkoutUrl = subscriptionResponse.checkoutUrl;
+        checkoutUrl = subscriptionResponse.payment_link ?? "";
+      }
+
+      if (!checkoutUrl) {
+        throw new Error("결제 링크를 생성할 수 없습니다");
       }
 
       // 5. 결제 시작 로그 (선택적 — 추적용)

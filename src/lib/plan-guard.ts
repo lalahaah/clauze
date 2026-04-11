@@ -100,11 +100,15 @@ export async function consumeCredit(uid: string): Promise<boolean> {
 // Free 플랜 월간 검토 수 증가
 export async function incrementFreePlanReviewCount(uid: string): Promise<void> {
   try {
+    const userDoc = await adminDb.collection("users").doc(uid).get();
+    const userData = userDoc.data();
+    const currentCount = userData?.monthlyReviewCount ?? 0;
+
     await adminDb
       .collection("users")
       .doc(uid)
       .update({
-        monthlyReviewCount: (await adminDb.collection("users").doc(uid).get().then(d => d.data()?.monthlyReviewCount ?? 0)) + 1,
+        monthlyReviewCount: currentCount + 1,
       });
   } catch (err) {
     console.error("Review count increment error:", err);

@@ -24,7 +24,7 @@ export function getPlanLimits(plan: PlanKey): PlanLimits {
     canDetectPatterns: planInfo.features.pattern,
     canGenerateEmail: planInfo.features.email,
     canUseApi: (planInfo.features as Record<string, unknown>).api === true,
-    teamSize: (planInfo.features as Record<string, unknown>).teamSize ?? 1,
+    teamSize: ((planInfo.features as Record<string, unknown>).teamSize as number) ?? 1,
   };
 }
 

@@ -5,6 +5,7 @@ import DodoPayments from "dodopayments";
 
 // Plan 타입
 export type PlanType = "single" | "pro" | "business";
+export type PlanKey = "free" | "single" | "pro" | "business";
 
 // Dodo Products (환경변수에서 가져옴)
 export const DODO_PRODUCTS = {
@@ -35,7 +36,7 @@ export const PLAN_INFO = {
 
 // Dodo Payments 클라이언트 초기화
 export const dodoClient = new DodoPayments({
-  apiKey: process.env.DODO_PAYMENTS_API_KEY!,
+  bearerToken: process.env.DODO_PAYMENTS_API_KEY!,
   environment:
     (process.env.DODO_PAYMENTS_ENVIRONMENT as "live_mode" | "test_mode") ||
     "test_mode",

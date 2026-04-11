@@ -3,7 +3,7 @@
 
 export type RiskLevel = "high" | "medium" | "low";
 
-export type UserPlan = "free" | "pro" | "business";
+export type UserPlan = "free" | "single" | "pro" | "business";
 
 export interface ClauseResult {
   title: string;
@@ -47,4 +47,11 @@ export interface User {
   plan: UserPlan;
   reviewCount: number;
   createdAt: string;
+  singleReviewCredits?: number;
+  subscriptionId?: string | null;
+  subscriptionStatus?: string | null;
+  currentPeriodEnd?: string | null;
+  cancelledAt?: string;
+  updatedAt?: string;
+  monthlyReviewCount?: number;
 }

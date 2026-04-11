@@ -46,7 +46,9 @@ export async function POST(request: NextRequest) {
 
     // 3. Dodo API에서 구독 취소 호출
     try {
-      await dodoClient.subscriptions.cancel(subscriptionId);
+      await dodoClient.subscriptions.update(subscriptionId, {
+        status: "cancelled",
+      });
     } catch (dodoErr) {
       console.error("Dodo cancel error:", dodoErr);
       // Dodo API 호출 실패해도 로컬 DB는 업데이트 (매우 드문 경우)

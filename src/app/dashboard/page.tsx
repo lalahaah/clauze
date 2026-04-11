@@ -161,7 +161,7 @@ function EmptyState({ lang, onScroll }: { lang: "ko" | "en"; onScroll: () => voi
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user, loading, logout } = useAuth();
+  const { user, userData, loading, logout } = useAuth();
   const [uploadError, setUploadError] = useState("");
   const [lang, setLang] = useState<"ko" | "en">("ko");
   const [industry, setIndustry] = useState<IndustryKey>("general");
