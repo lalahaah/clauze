@@ -1,51 +1,32 @@
 // src/lib/firebase-admin.ts
-// Firebase Admin SDK (서버 전용 - 절대 클라이언트에서 import 금지)
+import * as admin from 'firebase-admin'
 
-import * as admin from "firebase-admin";
-
-// Admin SDK 중복 초기화 방지
 if (!admin.apps.length) {
-  try {
-    const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID;
-    const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
-    const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY
-      ?.replace(/^["'\s]+|["'\s]+$/g, "")  // 앞뒤 따옴표·공백 제거
-      ?.replace(/\\n/g, "\n");              // 리터럴 \n → 실제 개행 변환
+  const rawKey =
+    process.env.FIREBASE_ADMIN_PRIVATE_KEY ||
+    process.env.FIREBASE_PRIVATE_KEY || ''
 
-    // 환경 변수 검증
-    if (!projectId || !clientEmail || !privateKey) {
-      console.warn(
-        "⚠️ Firebase Admin 환경 변수가 완전하지 않습니다. Firestore 저장 기능이 비활성화됩니다.",
-        {
-          projectId: !!projectId,
-          clientEmail: !!clientEmail,
-          privateKey: !!privateKey,
-        }
-      );
-      // 더미 앱 초기화 (에러 방지)
-      admin.initializeApp({
-        projectId: "dummy-project",
-      });
-    } else {
-      admin.initializeApp({
-        credential: admin.credential.cert({
-          projectId,
-          clientEmail,
-          privateKey,
-        }),
-      });
-    }
-  } catch (err) {
-    console.error("Firebase Admin 초기화 실패:", err);
-    // 빌드 실패 방지를 위해 더미 초기화
-    if (!admin.apps.length) {
-      admin.initializeApp({
-        projectId: "dummy-project",
-      });
-    }
-  }
+  // 앞뒤 따옴표 제거 (dotenv가 따옴표를 값으로 포함시키는 경우)
+  const stripped = rawKey.replace(/^["']|["']$/g, '')
+
+  // Vercel: 실제 줄바꿈으로 저장 → 그대로 사용
+  // .env.local: \n 이스케이프로 저장 → 변환 필요
+  const privateKey = stripped.includes('\\n')
+    ? stripped.replace(/\\n/g, '\n')
+    : stripped
+
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId:
+        process.env.FIREBASE_ADMIN_PROJECT_ID ||
+        process.env.FIREBASE_PROJECT_ID,
+      clientEmail:
+        process.env.FIREBASE_ADMIN_CLIENT_EMAIL ||
+        process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey,
+    } as admin.ServiceAccount),
+  })
 }
 
-export const adminAuth = admin.auth();
-export const adminDb = admin.firestore();
-export default admin;
+export const adminAuth = admin.auth()
+export const adminDb = admin.firestore()

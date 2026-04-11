@@ -66,55 +66,30 @@ export async function POST(request: NextRequest) {
 
     // 4. Dodo Payments 결제 생성
     const productId = DODO_PRODUCTS[planType];
-    const planInfo = PLAN_INFO[planType];
 
     try {
       let checkoutUrl: string;
 
-      // 공통 배송지 정보 (선택적)
-      const billing = {
-        city: "Seoul",
-        country: "KR" as any,
-        state: "Seoul",
-        street: "N/A",
-        zipcode: "00000",
-      };
-
-      // 공통 고객 정보
+      // 고객 정보
       const customer = {
         email: userEmail || "",
         name: (userName || "고객") as string,
       };
 
-      if (planType === "single") {
-        // 단건 결제 — Payments API 사용
-        const paymentResponse = await dodoClient.payments.create({
-          payment_link: true,
-          billing,
-          customer,
-          product_cart: [
-            {
-              product_id: productId,
-              quantity: 1,
-            },
-          ],
-          return_url: `${baseUrl}/payment/success?type=single`,
-        });
+      // Dodo Checkout Sessions API (단건/구독 통합)
+      // 공식 문서: https://docs.dodopayments.com/developer-resources/integration-guide
+      const sessionResponse = await dodoClient.checkoutSessions.create({
+        product_cart: [
+          {
+            product_id: productId,
+            quantity: 1,
+          },
+        ],
+        customer,
+        return_url: `${baseUrl}/payment/success?type=${planType}`,
+      });
 
-        checkoutUrl = paymentResponse.payment_link ?? "";
-      } else {
-        // 구독 결제 — Subscriptions API 사용
-        const subscriptionResponse = await dodoClient.subscriptions.create({
-          payment_link: true,
-          billing,
-          customer,
-          product_id: productId,
-          quantity: 1,
-          return_url: `${baseUrl}/payment/success?type=${planType}`,
-        });
-
-        checkoutUrl = subscriptionResponse.payment_link ?? "";
-      }
+      checkoutUrl = sessionResponse.checkout_url ?? "";
 
       if (!checkoutUrl) {
         throw new Error("결제 링크를 생성할 수 없습니다");

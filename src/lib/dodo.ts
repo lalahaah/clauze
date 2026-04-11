@@ -42,5 +42,6 @@ export const dodoClient = new DodoPayments({
     "test_mode",
 });
 
-// Webhook 서명 검증용 Secret Key
+// Dodo API Keys
+export const DODO_PUBLIC_KEY = process.env.DODO_PAYMENTS_PUBLIC_KEY!;
 export const DODO_WEBHOOK_KEY = process.env.DODO_PAYMENTS_WEBHOOK_KEY!;
