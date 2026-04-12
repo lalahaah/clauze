@@ -42,7 +42,32 @@ const SYSTEM_PROMPT = `당신은 한국 계약법 전문 리뷰어입니다. 업
 - medium: 비대칭적 조건, 모호한 조항, 불리한 해지 조건
 - low: 표준적이고 합리적인 조항
 
-고위험 조항을 clauses 배열의 앞쪽에 배치하세요.`;
+고위험 조항을 clauses 배열의 앞쪽에 배치하세요.
+
+[출력 형식 엄수]
+반드시 순수 JSON만 출력하세요. 설명, 마크다운, 코드블록 없이 JSON 객체만 반환하세요.
+Output ONLY valid JSON. No explanation, no markdown, no code blocks. Start with { and end with }.`;
+
+function safeParseJSON(text: string): unknown {
+  // 1. 순수 JSON 파싱 시도
+  try { return JSON.parse(text) } catch {}
+
+  // 2. ```json ... ``` 블록 추출
+  const jsonBlock = text.match(/```json\s*([\s\S]*?)\s*```/)
+  if (jsonBlock) {
+    try { return JSON.parse(jsonBlock[1]) } catch {}
+  }
+
+  // 3. { } 범위 추출
+  const start = text.indexOf('{')
+  const end = text.lastIndexOf('}')
+  if (start !== -1 && end !== -1 && end > start) {
+    try { return JSON.parse(text.substring(start, end + 1)) } catch {}
+  }
+
+  // 4. 모두 실패
+  throw new Error(`JSON 파싱 실패. 응답 앞 200자: ${text.substring(0, 200)}`)
+}
 
 export async function reviewContract(
   pdfBase64: string,
@@ -62,7 +87,7 @@ export async function reviewContract(
     // Claude API로 PDF 분석 (Prompt Caching으로 비용 90% 절감)
     const response = await anthropic.messages.create({
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 2048,
+      max_tokens: 4096,
       system: effectivePrompt,
       messages: [
         {
@@ -91,19 +116,16 @@ export async function reviewContract(
       throw new Error("Claude API가 예상하지 못한 형식으로 응답했습니다.");
     }
 
-    // JSON 블록 추출 (마크다운 코드 블록 처리)
-    const jsonText = content.text.replace(/```json\n?|\n?```/g, "").trim();
-
-    // 빈 응답 체크
-    if (!jsonText) {
+    const rawText = content.text.trim();
+    if (!rawText) {
       throw new Error("Claude API에서 빈 응답을 받았습니다.");
     }
 
     let result: ReviewResult;
     try {
-      result = JSON.parse(jsonText) as ReviewResult;
+      result = safeParseJSON(rawText) as ReviewResult;
     } catch (parseErr) {
-      console.error("JSON parsing failed. Response text:", jsonText);
+      console.error("JSON parsing failed. Response text:", rawText);
       throw new Error("AI 응답을 파싱할 수 없습니다. 다시 시도해주세요.");
     }
 
