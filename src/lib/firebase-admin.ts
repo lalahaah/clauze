@@ -24,18 +24,23 @@ if (!admin.apps.length) {
     process.env.FIREBASE_CLIENT_EMAIL || ''
 
   if (!privateKey || !projectId || !clientEmail) {
-    throw new Error(
-      `Firebase Admin 환경변수 누락: projectId=${!!projectId}, clientEmail=${!!clientEmail}, privateKey=${!!privateKey}`
+    console.error(
+      `[Firebase Admin] 환경변수 누락: projectId=${!!projectId}, clientEmail=${!!clientEmail}, privateKey=${!!privateKey}`
     )
+  } else {
+    try {
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId,
+          clientEmail,
+          privateKey,
+        } as admin.ServiceAccount),
+      })
+      console.log('[Firebase Admin] 초기화 성공')
+    } catch (err) {
+      console.error('[Firebase Admin] 초기화 실패:', err)
+    }
   }
-
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId,
-      clientEmail,
-      privateKey,
-    } as admin.ServiceAccount),
-  })
 }
 
 export const adminAuth = admin.auth()

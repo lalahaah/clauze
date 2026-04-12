@@ -69,12 +69,8 @@ export async function POST(request: NextRequest) {
           );
         }
       } catch (err) {
-        console.error("Plan permission check error:", err);
-        // 플랜 확인 실패는 안전하게 거부
-        return NextResponse.json(
-          { error: "권한 확인 중 오류가 발생했습니다." },
-          { status: 500 }
-        );
+        // 플랜 확인 실패는 검토를 막지 않음 (신규 유저 보호)
+        console.error("Plan permission check error (허용으로 계속):", err);
       }
     }
 
@@ -172,7 +168,10 @@ export async function POST(request: NextRequest) {
       industry,
     });
   } catch (error) {
-    console.error("Review API error:", error);
+    console.error("=== REVIEW API ERROR ===");
+    console.error("Type:", typeof error);
+    console.error("Message:", error instanceof Error ? error.message : String(error));
+    console.error("Stack:", error instanceof Error ? error.stack : "");
 
     let errorMsg = "계약서 검토 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
 
