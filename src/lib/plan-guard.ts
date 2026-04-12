@@ -11,18 +11,14 @@ type PermissionResult =
 export async function checkReviewPermission(uid: string): Promise<PermissionResult> {
   try {
     const userDoc = await adminDb.collection("users").doc(uid).get();
-    const userData = userDoc.data();
+    const userData = userDoc.exists ? userDoc.data() : {};
 
-    if (!userData) {
-      return { allowed: false, reason: "free_limit" };
-    }
-
-    const plan = userData.plan ?? "free";
+    const plan = (userData?.plan ?? "free") as string;
 
     // Pro/Business 구독: 무제한 허용
     if (plan === "pro" || plan === "business") {
       // 구독 활성 상태 확인
-      if (userData.subscriptionStatus !== "active") {
+      if (userData?.subscriptionStatus !== "active") {
         return { allowed: false, reason: "subscription_cancelled" };
       }
       return { allowed: true };
@@ -30,7 +26,7 @@ export async function checkReviewPermission(uid: string): Promise<PermissionResu
 
     // Single Review: 크레딧 확인
     if (plan === "single") {
-      const credits = userData.singleReviewCredits ?? 0;
+      const credits = userData?.singleReviewCredits ?? 0;
       if (credits > 0) {
         return { allowed: true };
       }
@@ -63,8 +59,8 @@ export async function checkReviewPermission(uid: string): Promise<PermissionResu
     return { allowed: false, reason: "free_limit" };
   } catch (err) {
     console.error("Permission check error:", err);
-    // 에러 시 안전하게 거부
-    return { allowed: false, reason: "free_limit" };
+    // Firestore 조회 실패 시 free 플랜 기본 허용 (신규 유저 보호)
+    return { allowed: true };
   }
 }
 

@@ -296,11 +296,11 @@ export function DisclaimerModal({ onAgree, onClose }: {
             </svg>
           </div>
           <div>
-            <p style={{ fontSize: 16, fontWeight: 800, color: '#FFFFFF', margin: '0 0 4px', letterSpacing: '-0.02em' }}>
+            <p style={{ fontSize: 16, fontWeight: 800, color: '#FFFFFF', margin: '0 0 2px', letterSpacing: '-0.02em' }}>
               서비스 이용 전 반드시 확인하세요
             </p>
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', margin: 0 }}>
-              Clauze AI 분석의 법적 한계에 대한 안내입니다
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', margin: '0 0 2px' }}>
+              Please confirm before using this service
             </p>
           </div>
         </div>
@@ -309,19 +309,25 @@ export function DisclaimerModal({ onAgree, onClose }: {
         <div style={{ padding: '22px 24px' }}>
           {[
             {
-              title: 'AI 분석은 참고용입니다',
-              desc: '본 서비스의 분석 결과는 정보 제공 목적이며, 법적 효력이 없습니다. AI는 오류를 포함할 수 있습니다.',
+              titleKo: 'AI 분석은 참고용입니다',
+              titleEn: 'AI analysis is for reference only',
+              descKo: '본 서비스의 분석 결과는 정보 제공 목적이며, 법적 효력이 없습니다. AI는 오류를 포함할 수 있습니다.',
+              descEn: 'Analysis results are for informational purposes only and have no legal effect. AI may contain errors.',
             },
             {
-              title: '법률 자문이 아닙니다',
-              desc: 'Clauze는 변호사 서비스가 아닙니다. 중요한 계약은 반드시 자격 있는 법률 전문가와 상담하세요.',
+              titleKo: '법률 자문이 아닙니다',
+              titleEn: 'Not legal advice',
+              descKo: 'Clauze는 변호사 서비스가 아닙니다. 중요한 계약은 반드시 자격 있는 법률 전문가와 상담하세요.',
+              descEn: 'Clauze is not a legal service. For important contracts, always consult a qualified legal professional.',
             },
             {
-              title: '손해에 대한 책임 부인',
-              desc: 'AI 분석 결과에 의존한 법적 결정으로 발생하는 손해에 대해 (주)루시퍼는 책임을 부담하지 않습니다.',
+              titleKo: '손해에 대한 책임 부인',
+              titleEn: 'Disclaimer of liability',
+              descKo: 'AI 분석 결과에 의존한 법적 결정으로 발생하는 손해에 대해 (주)루시퍼는 책임을 부담하지 않습니다.',
+              descEn: 'Lucifer Co., Ltd. disclaims all liability for damages arising from legal decisions based on AI analysis.',
             },
-          ].map(({ title, desc }) => (
-            <div key={title} style={{
+          ].map(({ titleKo, titleEn, descKo, descEn }) => (
+            <div key={titleKo} style={{
               display: 'flex', gap: 12, alignItems: 'flex-start',
               padding: '12px 14px', marginBottom: 8,
               background: T.warning, border: `1px solid rgba(245,158,11,0.2)`, borderRadius: 4,
@@ -333,20 +339,13 @@ export function DisclaimerModal({ onAgree, onClose }: {
                 </svg>
               </div>
               <div>
-                <p style={{ fontSize: 13, fontWeight: 700, color: T.warnText, margin: '0 0 3px' }}>{title}</p>
-                <p style={{ fontSize: 12, color: '#78350F', lineHeight: 1.6, margin: 0 }}>{desc}</p>
+                <p style={{ fontSize: 13, fontWeight: 700, color: T.warnText, margin: '0 0 1px' }}>{titleKo}</p>
+                <p style={{ fontSize: 11, fontWeight: 600, color: 'rgba(146,64,14,0.65)', margin: '0 0 4px', fontStyle: 'italic' }}>{titleEn}</p>
+                <p style={{ fontSize: 12, color: '#78350F', lineHeight: 1.6, margin: '0 0 3px' }}>{descKo}</p>
+                <p style={{ fontSize: 11, color: 'rgba(120,53,15,0.65)', lineHeight: 1.55, margin: 0, fontStyle: 'italic' }}>{descEn}</p>
               </div>
             </div>
           ))}
-
-          <p style={{
-            fontSize: 11, color: T.textLt, lineHeight: 1.65, fontStyle: 'italic',
-            margin: '14px 0 18px', padding: '10px 12px', background: T.bgLight, borderRadius: 4,
-          }}>
-            EN: Clauze provides AI-generated analysis for informational purposes only.
-            This does not constitute legal advice. Results may contain errors.
-            Lucifer Co., Ltd. disclaims all liability for reliance on this analysis.
-          </p>
 
           {/* 체크박스 */}
           <div style={{ marginBottom: 20 }}>
@@ -357,7 +356,10 @@ export function DisclaimerModal({ onAgree, onClose }: {
               />
               <span style={{ fontSize: 13, color: T.text, lineHeight: 1.55 }}>
                 <strong>AI 분석 결과의 한계</strong>를 이해했으며, 이 분석이 법적 효력이 없는 참고용
-                정보임을 인정합니다. (필수)
+                정보임을 인정합니다. (필수)<br />
+                <span style={{ fontSize: 11, color: T.textMid, fontStyle: 'italic' }}>
+                  I understand the limitations of AI analysis and acknowledge it is for reference only. (Required)
+                </span>
               </span>
             </label>
             <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer' }}>
@@ -368,7 +370,10 @@ export function DisclaimerModal({ onAgree, onClose }: {
               <span style={{ fontSize: 13, color: T.text, lineHeight: 1.55 }}>
                 중요한 계약의 최종 검토는{' '}
                 <strong>법률 전문가와 별도 상담</strong>이 필요함을 이해하고,
-                본 서비스를 그 대체제로 사용하지 않겠습니다. (필수)
+                본 서비스를 그 대체제로 사용하지 않겠습니다. (필수)<br />
+                <span style={{ fontSize: 11, color: T.textMid, fontStyle: 'italic' }}>
+                  I understand that final review of important contracts requires a legal professional and will not use this service as a substitute. (Required)
+                </span>
               </span>
             </label>
           </div>
@@ -383,7 +388,7 @@ export function DisclaimerModal({ onAgree, onClose }: {
                 fontSize: 13, fontWeight: 600, color: T.textMid, cursor: 'pointer',
               }}
             >
-              취소
+              취소 / Cancel
             </button>
             <button
               onClick={handleAgree}
@@ -397,15 +402,22 @@ export function DisclaimerModal({ onAgree, onClose }: {
                 transition: 'all 0.15s',
               }}
             >
-              {canProceed ? '동의하고 계약서 분석 시작 →' : '위 항목에 모두 동의해주세요'}
+              {canProceed ? '동의하고 계약서 분석 시작 →' : '위 항목에 모두 동의해주세요 / Agree to all'}
             </button>
           </div>
 
-          <p style={{ fontSize: 11, color: T.textLt, textAlign: 'center', marginTop: 12 }}>
-            <a href="/terms#section-8" target="_blank" style={{ color: T.teal, textDecoration: 'none' }}>이용약관 제8조 면책 조항</a>
+          <p style={{ fontSize: 11, color: T.textLt, textAlign: 'center', marginTop: 12, lineHeight: 1.7 }}>
+            이용약관{' '}
+            <a href="/terms#section-8" target="_blank" style={{ color: T.teal, textDecoration: 'none' }}>제8조 면책 조항</a>
             {' '}및{' '}
             <a href="/privacy" target="_blank" style={{ color: T.teal, textDecoration: 'none' }}>개인정보처리방침</a>
-            에도 동의하게 됩니다.
+            에도 동의하게 됩니다.<br />
+            <span style={{ fontStyle: 'italic' }}>
+              By agreeing, you also consent to{' '}
+              <a href="/terms#section-8" target="_blank" style={{ color: T.teal, textDecoration: 'none' }}>Article 8 of our Terms of Service</a>
+              {' '}and{' '}
+              <a href="/privacy" target="_blank" style={{ color: T.teal, textDecoration: 'none' }}>Privacy Policy</a>.
+            </span>
           </p>
         </div>
       </div>
