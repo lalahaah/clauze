@@ -1,219 +1,114 @@
 // src/app/api/webhook/route.ts
-// Dodo Payments 웹훅 처리 — 결제/구독 이벤트 처리
+// Dodo Payments 웹훅 처리 — Svix + standardwebhooks 헤더 지원
 
-import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase-admin";
-import { DODO_WEBHOOK_KEY, type PlanType } from "@/lib/dodo";
-import { Webhook } from "standardwebhooks";
+import { Webhook } from 'standardwebhooks'
+import { headers } from 'next/headers'
+import { adminDb } from '@/lib/firebase-admin'
 
-export async function POST(request: NextRequest) {
+export const runtime = 'nodejs'
+
+export async function POST(request: Request) {
   try {
-    // 1. 요청 본문 읽기
-    const body = await request.text();
+    const headersList = await headers()
+    const rawBody = await request.text()
 
-    // 2. Webhook 서명 검증 (standardwebhooks)
-    const signature = request.headers.get("webhook-signature") ?? "";
-    const timestamp = request.headers.get("webhook-timestamp") ?? "";
+    // Svix 형식 헤더 (Dodo가 사용)
+    const svixId        = headersList.get('svix-id')        || ''
+    const svixSignature = headersList.get('svix-signature') || ''
+    const svixTimestamp = headersList.get('svix-timestamp') || ''
 
-    if (!signature || !timestamp) {
-      console.warn("Missing webhook headers");
-      return NextResponse.json(
-        { error: "Missing webhook headers" },
-        { status: 400 }
-      );
+    // standardwebhooks 형식 헤더 (fallback)
+    const webhookId        = headersList.get('webhook-id')        || svixId
+    const webhookSignature = headersList.get('webhook-signature') || svixSignature
+    const webhookTimestamp = headersList.get('webhook-timestamp') || svixTimestamp
+
+    console.log('[Webhook] 헤더 확인:', {
+      svixId:     !!svixId,
+      svixSig:    !!svixSignature,
+      webhookId:  !!webhookId,
+      webhookSig: !!webhookSignature,
+    })
+
+    if (!webhookId || !webhookSignature || !webhookTimestamp) {
+      console.error('[Webhook] 필수 헤더 없음 — 200 반환')
+      return new Response('ok', { status: 200 })
     }
 
-    try {
-      const wh = new Webhook(DODO_WEBHOOK_KEY);
-      wh.verify(body, {
-        "webhook-signature": signature,
-        "webhook-timestamp": timestamp,
-      });
-    } catch (err) {
-      console.error("Webhook signature verification failed:", err);
-      return NextResponse.json(
-        { error: "Signature verification failed" },
-        { status: 401 }
-      );
+    const wh = new Webhook(process.env.DODO_PAYMENTS_WEBHOOK_KEY!)
+    await wh.verify(rawBody, {
+      'webhook-id':        webhookId,
+      'webhook-signature': webhookSignature,
+      'webhook-timestamp': webhookTimestamp,
+    })
+
+    const payload   = JSON.parse(rawBody)
+    const eventType = payload.type as string
+    const data      = payload.data as Record<string, any>
+
+    console.log('[Webhook] 이벤트:', eventType, data?.customer?.email)
+
+    const customerEmail = data?.customer?.email as string | undefined
+    if (!customerEmail) {
+      console.warn('[Webhook] customer.email 없음 — 200 반환')
+      return new Response('ok', { status: 200 })
     }
 
-    // 3. 웹훅 이벤트 파싱
-    const event = JSON.parse(body) as {
-      type: string;
-      data: Record<string, any>;
-    };
+    // 이메일로 유저 조회
+    const userQuery = await adminDb
+      .collection('users')
+      .where('email', '==', customerEmail)
+      .limit(1)
+      .get()
 
-    const eventType = event.type;
-    const eventData = event.data;
-
-    console.log(`Webhook received: ${eventType}`, eventData);
-
-    // 4. 이벤트 타입별 처리
-    switch (eventType) {
-      // 단건 결제 완료
-      case "payment.succeeded": {
-        const paymentId = eventData.id;
-        const customerId = eventData.customerId;
-        const metadata = eventData.metadata ?? {};
-
-        if (!customerId) {
-          console.warn("payment.succeeded: missing customerId");
-          break;
-        }
-
-        // 단건 결제 크레딧 +1
-        const userDoc = await adminDb
-          .collection("users")
-          .doc(customerId)
-          .get();
-        const currentCredits = userDoc.data()?.singleReviewCredits ?? 0;
-
-        await adminDb
-          .collection("users")
-          .doc(customerId)
-          .set(
-            {
-              singleReviewCredits: currentCredits + 1,
-              lastPaymentId: paymentId,
-              lastPaymentAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            },
-            { merge: true }
-          );
-
-        console.log(`Payment succeeded for user ${customerId}`);
-        break;
-      }
-
-      // 구독 활성화 (처음 결제 성공)
-      case "subscription.active": {
-        const subscriptionId = eventData.id;
-        const customerId = eventData.customerId;
-        const metadata = eventData.metadata ?? {};
-        const planType = metadata.planType as PlanType;
-        const currentPeriodEnd = eventData.currentPeriodEnd;
-
-        if (!customerId || !planType) {
-          console.warn("subscription.active: missing customerId or planType");
-          break;
-        }
-
-        await adminDb
-          .collection("users")
-          .doc(customerId)
-          .set(
-            {
-              plan: planType,
-              subscriptionId,
-              subscriptionStatus: "active",
-              currentPeriodEnd: currentPeriodEnd
-                ? new Date(currentPeriodEnd).toISOString()
-                : null,
-              subscriptionStartedAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            },
-            { merge: true }
-          );
-
-        console.log(`Subscription ${subscriptionId} activated for user ${customerId}`);
-        break;
-      }
-
-      // 구독 갱신 (정기적인 결제)
-      case "subscription.renewed": {
-        const subscriptionId = eventData.id;
-        const customerId = eventData.customerId;
-        const currentPeriodEnd = eventData.currentPeriodEnd;
-
-        if (!customerId) {
-          console.warn("subscription.renewed: missing customerId");
-          break;
-        }
-
-        await adminDb
-          .collection("users")
-          .doc(customerId)
-          .set(
-            {
-              currentPeriodEnd: currentPeriodEnd
-                ? new Date(currentPeriodEnd).toISOString()
-                : null,
-              subscriptionStatus: "active",
-              updatedAt: new Date().toISOString(),
-            },
-            { merge: true }
-          );
-
-        console.log(`Subscription ${subscriptionId} renewed for user ${customerId}`);
-        break;
-      }
-
-      // 구독 취소
-      case "subscription.cancelled": {
-        const subscriptionId = eventData.id;
-        const customerId = eventData.customerId;
-
-        if (!customerId) {
-          console.warn("subscription.cancelled: missing customerId");
-          break;
-        }
-
-        await adminDb
-          .collection("users")
-          .doc(customerId)
-          .set(
-            {
-              plan: "free",
-              subscriptionId: null,
-              subscriptionStatus: null,
-              currentPeriodEnd: null,
-              cancelledAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            },
-            { merge: true }
-          );
-
-        console.log(`Subscription ${subscriptionId} cancelled for user ${customerId}`);
-        break;
-      }
-
-      // 구독 결제 실패
-      case "subscription.failed": {
-        const subscriptionId = eventData.id;
-        const customerId = eventData.customerId;
-
-        if (!customerId) {
-          console.warn("subscription.failed: missing customerId");
-          break;
-        }
-
-        // 구독 실패 시 free로 롤백 (결제 실패 시 서비스 중단)
-        await adminDb
-          .collection("users")
-          .doc(customerId)
-          .set(
-            {
-              plan: "free",
-              subscriptionStatus: "failed",
-              failedPaymentAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            },
-            { merge: true }
-          );
-
-        console.log(`Subscription ${subscriptionId} failed for user ${customerId}`);
-        break;
-      }
-
-      default:
-        console.log(`Unhandled webhook event: ${eventType}`);
+    if (userQuery.empty) {
+      console.warn('[Webhook] 유저 없음:', customerEmail)
+      return new Response('ok', { status: 200 })
     }
 
-    // 5. 모든 이벤트에 대해 200 OK 반환 (처리 여부와 관계없이)
-    return NextResponse.json({ success: true }, { status: 200 });
-  } catch (err) {
-    console.error("Webhook processing error:", err);
-    // 웹훅 처리 실패해도 200 반환 (Dodo가 재시도하도록)
-    return NextResponse.json({ success: false }, { status: 200 });
+    const userDoc = userQuery.docs[0]
+
+    // payment.succeeded — 단건 크레딧 추가
+    if (eventType === 'payment.succeeded') {
+      const current = (userDoc.data().singleReviewCredits as number) || 0
+      await userDoc.ref.update({
+        singleReviewCredits: current + 1,
+        updatedAt: new Date(),
+      })
+      console.log('[Webhook] 단건 크레딧 +1:', customerEmail)
+    }
+
+    // subscription.active / subscription.renewed — 구독 활성화
+    if (eventType === 'subscription.active' || eventType === 'subscription.renewed') {
+      const productId = data?.product_id as string | undefined
+      const planType =
+        productId === process.env.DODO_PRODUCT_PRO      ? 'pro'
+        : productId === process.env.DODO_PRODUCT_BUSINESS ? 'business'
+        : 'free'
+
+      await userDoc.ref.update({
+        plan:             planType,
+        subscriptionId:   (data.subscription_id as string) || '',
+        subscriptionStatus: 'active',
+        currentPeriodEnd: (data.next_billing_date as string) || null,
+        updatedAt:        new Date(),
+      })
+      console.log('[Webhook] 플랜 업데이트:', customerEmail, '->', planType)
+    }
+
+    // subscription.cancelled / subscription.failed — 구독 해제
+    if (eventType === 'subscription.cancelled' || eventType === 'subscription.failed') {
+      await userDoc.ref.update({
+        plan:               'free',
+        subscriptionStatus: 'cancelled',
+        updatedAt:          new Date(),
+      })
+      console.log('[Webhook] 구독 취소:', customerEmail)
+    }
+
+    return new Response('ok', { status: 200 })
+
+  } catch (error) {
+    console.error('[Webhook] 오류:', error instanceof Error ? error.message : error)
+    return new Response('ok', { status: 200 })
   }
 }
