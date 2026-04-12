@@ -61,15 +61,9 @@ export async function reviewContract(
   try {
     // Claude API로 PDF 분석 (Prompt Caching으로 비용 90% 절감)
     const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 6144,
-      system: [
-        {
-          type: "text",
-          text: effectivePrompt,
-          cache_control: { type: "ephemeral" },
-        },
-      ],
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 2048,
+      system: effectivePrompt,
       messages: [
         {
           role: "user",
