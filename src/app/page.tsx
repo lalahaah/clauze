@@ -8,6 +8,7 @@ import { motion, useMotionValue, useMotionTemplate, useAnimationFrame, AnimatePr
 import { FooterDisclaimer } from "@/components/legal/Disclaimer";
 import { useAuth } from "@/hooks/useAuth";
 import DifferentiationSection from "@/components/landing/DifferentiationSection";
+import { SupportVideoModal } from "@/components/SupportVideoModal";
 
 const R = {
   bgWhite: "#FFFFFF",
@@ -125,6 +126,7 @@ function GridSVG({ gridOffX, gridOffY, color = "rgba(255,255,255,0.35)" }: {
 export default function LandingPage() {
   const router = useRouter();
   const { user, logout } = useAuth();
+  const [supportModalOpen, setSupportModalOpen] = useState(false);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const gridOffX = useMotionValue(0);
@@ -147,7 +149,10 @@ export default function LandingPage() {
             fontSize: 11, fontWeight: 700, letterSpacing: "1.2px",
             color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase",
           }}
-          onClick={() => label === "LOGIN" && router.push("/login")}
+          onClick={() => {
+            if (label === "LOGIN") router.push("/login");
+            if (label === "GET SUPPORT") setSupportModalOpen(true);
+          }}
           >{label}</button>
         ))}
       </div>
@@ -442,7 +447,8 @@ export default function LandingPage() {
               { title: "PRODUCT", items: [
                 { label: "Dashboard", href: "/dashboard" },
                 { label: "Contract Review", href: "/dashboard" },
-                { label: "Pricing", href: "/pricing" }
+                { label: "Pricing", href: "/pricing" },
+                { label: "Get Support", href: "modal" }
               ]},
               { title: "COMPANY", items: [
                 { label: "About", href: "#" },
@@ -462,7 +468,9 @@ export default function LandingPage() {
                     key={label}
                     onClick={() => {
                       if (href === "#") return;
-                      if (href.includes(".pdf")) {
+                      if (href === "modal") {
+                        setSupportModalOpen(true);
+                      } else if (href.includes(".pdf")) {
                         window.open(href, "_blank");
                       } else {
                         router.push(href);
@@ -496,6 +504,9 @@ export default function LandingPage() {
         </div>
         <FooterDisclaimer />
       </footer>
+
+      {/* Support Video Modal */}
+      <SupportVideoModal isOpen={supportModalOpen} onClose={() => setSupportModalOpen(false)} />
     </div>
   );
 }
