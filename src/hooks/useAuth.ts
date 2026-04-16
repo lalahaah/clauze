@@ -20,24 +20,37 @@ export function useAuth() {
         if (firebaseUser) {
           setUser(firebaseUser);
 
-          // Firestore에서 사용자 플랜 조회
-          let plan: User["plan"] = "free";
+          // Firestore에서 사용자 데이터 조회
+          let userData: User = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email ?? "",
+            plan: "free",
+            reviewCount: 0,
+            createdAt: new Date().toISOString(),
+          };
           try {
             const snap = await getDoc(doc(db, "users", firebaseUser.uid));
             if (snap.exists()) {
-              plan = (snap.data().plan as User["plan"]) ?? "free";
+              const data = snap.data();
+              userData = {
+                ...userData,
+                plan: (data.plan as User["plan"]) ?? "free",
+                reviewCount: data.reviewCount ?? 0,
+                createdAt: data.createdAt ?? userData.createdAt,
+                singleReviewCredits: data.singleReviewCredits,
+                subscriptionId: data.subscriptionId,
+                subscriptionStatus: data.subscriptionStatus,
+                currentPeriodEnd: data.currentPeriodEnd,
+                cancelledAt: data.cancelledAt,
+                updatedAt: data.updatedAt,
+                monthlyReviewCount: data.monthlyReviewCount ?? 0,
+              };
             }
           } catch {
             // Firestore 조회 실패 시 기본값 유지
           }
 
-          setUserData({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email ?? "",
-            plan,
-            reviewCount: 0,
-            createdAt: new Date().toISOString(),
-          });
+          setUserData(userData);
         } else {
           setUser(null);
           setUserData(null);

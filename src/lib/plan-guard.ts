@@ -103,9 +103,10 @@ export async function incrementFreePlanReviewCount(uid: string): Promise<void> {
     await adminDb
       .collection("users")
       .doc(uid)
-      .update({
+      .set({
         monthlyReviewCount: currentCount + 1,
-      });
+        updatedAt: new Date().toISOString(),
+      }, { merge: true });
   } catch (err) {
     console.error("Review count increment error:", err);
     // 비치명적 에러 — 무시

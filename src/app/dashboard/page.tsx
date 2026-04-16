@@ -360,8 +360,8 @@ export default function DashboardPage() {
                   </div>
                   <div style={{ fontSize: 13, color: R.textMid, fontFamily: R.fontSans }}>
                     {lang === "ko"
-                      ? "이번 달 0/1건 사용 · 업그레이드하면 무제한"
-                      : "0/1 reviews this month · Unlimited with upgrade"}
+                      ? `이번 달 ${userData?.monthlyReviewCount ?? 0}/1건 사용 · 업그레이드하면 무제한`
+                      : `${userData?.monthlyReviewCount ?? 0}/1 reviews this month · Unlimited with upgrade`}
                   </div>
                 </div>
                 <button

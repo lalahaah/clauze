@@ -111,10 +111,11 @@ export async function POST(request: NextRequest) {
           repeatedPatterns: [], // 패턴 분석 후 업데이트
         });
 
-        // 사용자의 reviewCount 증가
-        await adminDb.collection("users").doc(userId).update({
+        // 사용자의 reviewCount 증가 (문서 없는 신규 유저도 set+merge로 생성)
+        await adminDb.collection("users").doc(userId).set({
           reviewCount: admin.firestore.FieldValue.increment(1),
-        });
+          updatedAt: new Date().toISOString(),
+        }, { merge: true });
 
         // 플랜에 따른 크레딧 처리
         try {
