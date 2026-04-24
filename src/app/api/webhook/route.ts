@@ -9,8 +9,6 @@ export async function POST(request: Request) {
     const headersList = await headers()
     const rawBody = await request.text()
 
-    // Dodo는 Svix 형식으로 전송
-    // svix-id → webhook-id로 매핑
     const webhookId =
       headersList.get('webhook-id') ||
       headersList.get('svix-id') || ''
@@ -30,11 +28,10 @@ export async function POST(request: Request) {
     })
 
     if (!webhookId || !webhookSignature || !webhookTimestamp) {
-      console.error('[Webhook] 헤더 누락 — 무시')
+      console.error('[Webhook] 헤더 누락')
       return new Response('ok', { status: 200 })
     }
 
-    // 서명 검증
     const wh = new Webhook(process.env.DODO_PAYMENTS_WEBHOOK_KEY!)
     await wh.verify(rawBody, {
       'webhook-id': webhookId,
@@ -53,7 +50,6 @@ export async function POST(request: Request) {
       return new Response('ok', { status: 200 })
     }
 
-    // 이메일로 유저 조회
     const userQuery = await adminDb
       .collection('users')
       .where('email', '==', customerEmail)
@@ -67,17 +63,15 @@ export async function POST(request: Request) {
 
     const userDoc = userQuery.docs[0]
 
-    // 단건 결제 완료 → 크레딧 +1
     if (eventType === 'payment.succeeded') {
       const current = userDoc.data().singleReviewCredits || 0
       await userDoc.ref.update({
         singleReviewCredits: current + 1,
         updatedAt: new Date(),
       })
-      console.log('[Webhook] ✅ 단건 크레딧 +1 완료:', customerEmail)
+      console.log('[Webhook] ✅ 단건 크레딧 +1:', customerEmail)
     }
 
-    // 구독 활성화 / 갱신 → 플랜 업데이트
     if (
       eventType === 'subscription.active' ||
       eventType === 'subscription.renewed'
@@ -97,10 +91,9 @@ export async function POST(request: Request) {
         currentPeriodEnd: data?.next_billing_date || null,
         updatedAt: new Date(),
       })
-      console.log('[Webhook] ✅ 플랜 업데이트 완료:', customerEmail, '->', planType)
+      console.log('[Webhook] ✅ 플랜 업데이트:', customerEmail, '->', planType)
     }
 
-    // 구독 취소 / 실패 → 무료 플랜으로
     if (
       eventType === 'subscription.cancelled' ||
       eventType === 'subscription.failed'
@@ -110,7 +103,7 @@ export async function POST(request: Request) {
         subscriptionStatus: 'cancelled',
         updatedAt: new Date(),
       })
-      console.log('[Webhook] ✅ 구독 취소 완료:', customerEmail)
+      console.log('[Webhook] ✅ 구독 취소:', customerEmail)
     }
 
     return new Response('ok', { status: 200 })
