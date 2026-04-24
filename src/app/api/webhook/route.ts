@@ -1,55 +1,55 @@
-// src/app/api/webhook/route.ts
-// Dodo Payments 웹훅 처리 — Svix + standardwebhooks 헤더 지원
-
-import { Webhook } from 'standardwebhooks'
 import { headers } from 'next/headers'
+import { NextResponse } from 'next/server'
+import { Webhook } from 'standardwebhooks'
 import { adminDb } from '@/lib/firebase-admin'
-
-export const runtime = 'nodejs'
 
 export async function POST(request: Request) {
   try {
     const headersList = await headers()
     const rawBody = await request.text()
 
-    // Svix 형식 헤더 (Dodo가 사용)
-    const svixId        = headersList.get('svix-id')        || ''
-    const svixSignature = headersList.get('svix-signature') || ''
-    const svixTimestamp = headersList.get('svix-timestamp') || ''
+    // Dodo는 Svix 형식으로 전송 (svix-id, svix-signature, svix-timestamp)
+    // standardwebhooks는 webhook-id 형식을 요구
+    // → Svix 헤더를 standardwebhooks 형식으로 매핑
+    const webhookId =
+      headersList.get('webhook-id') ||
+      headersList.get('svix-id') || ''
 
-    // standardwebhooks 형식 헤더 (fallback)
-    const webhookId        = headersList.get('webhook-id')        || svixId
-    const webhookSignature = headersList.get('webhook-signature') || svixSignature
-    const webhookTimestamp = headersList.get('webhook-timestamp') || svixTimestamp
+    const webhookSignature =
+      headersList.get('webhook-signature') ||
+      headersList.get('svix-signature') || ''
 
-    console.log('[Webhook] 헤더 확인:', {
-      svixId:     !!svixId,
-      svixSig:    !!svixSignature,
-      webhookId:  !!webhookId,
-      webhookSig: !!webhookSignature,
+    const webhookTimestamp =
+      headersList.get('webhook-timestamp') ||
+      headersList.get('svix-timestamp') || ''
+
+    console.log('[Webhook] 헤더 수신:', {
+      hasId: !!webhookId,
+      hasSignature: !!webhookSignature,
+      hasTimestamp: !!webhookTimestamp,
     })
 
     if (!webhookId || !webhookSignature || !webhookTimestamp) {
-      console.error('[Webhook] 필수 헤더 없음 — 200 반환')
+      console.error('[Webhook] 헤더 누락 — 무시')
       return new Response('ok', { status: 200 })
     }
 
+    // 서명 검증
     const wh = new Webhook(process.env.DODO_PAYMENTS_WEBHOOK_KEY!)
     await wh.verify(rawBody, {
-      'webhook-id':        webhookId,
+      'webhook-id': webhookId,
       'webhook-signature': webhookSignature,
       'webhook-timestamp': webhookTimestamp,
     })
 
-    const payload   = JSON.parse(rawBody)
-    const eventType = payload.type as string
-    const data      = payload.data as Record<string, any>
+    const payload = JSON.parse(rawBody)
+    const eventType = payload.type
+    const data = payload.data
+    const customerEmail = data?.customer?.email
 
-    console.log('[Webhook] 이벤트:', eventType, data?.customer?.email)
+    console.log('[Webhook] 이벤트:', eventType, '/', customerEmail)
 
-    const customerEmail = data?.customer?.email as string | undefined
     if (!customerEmail) {
-      console.warn('[Webhook] customer.email 없음 — 200 반환')
       return new Response('ok', { status: 200 })
     }
 
@@ -67,48 +67,57 @@ export async function POST(request: Request) {
 
     const userDoc = userQuery.docs[0]
 
-    // payment.succeeded — 단건 크레딧 추가
+    // 단건 결제 완료 → 크레딧 +1
     if (eventType === 'payment.succeeded') {
-      const current = (userDoc.data().singleReviewCredits as number) || 0
+      const current = userDoc.data().singleReviewCredits || 0
       await userDoc.ref.update({
         singleReviewCredits: current + 1,
         updatedAt: new Date(),
       })
-      console.log('[Webhook] 단건 크레딧 +1:', customerEmail)
+      console.log('[Webhook] ✅ 단건 크레딧 +1 완료:', customerEmail)
     }
 
-    // subscription.active / subscription.renewed — 구독 활성화
-    if (eventType === 'subscription.active' || eventType === 'subscription.renewed') {
-      const productId = data?.product_id as string | undefined
+    // 구독 활성화 / 갱신 → 플랜 업데이트
+    if (
+      eventType === 'subscription.active' ||
+      eventType === 'subscription.renewed'
+    ) {
+      const productId = data?.product_id
       const planType =
-        productId === process.env.DODO_PRODUCT_PRO      ? 'pro'
-        : productId === process.env.DODO_PRODUCT_BUSINESS ? 'business'
-        : 'free'
+        productId === process.env.DODO_PRODUCT_PRO
+          ? 'pro'
+          : productId === process.env.DODO_PRODUCT_BUSINESS
+          ? 'business'
+          : 'free'
 
       await userDoc.ref.update({
-        plan:             planType,
-        subscriptionId:   (data.subscription_id as string) || '',
+        plan: planType,
+        subscriptionId: data?.subscription_id || '',
         subscriptionStatus: 'active',
-        currentPeriodEnd: (data.next_billing_date as string) || null,
-        updatedAt:        new Date(),
+        currentPeriodEnd: data?.next_billing_date || null,
+        updatedAt: new Date(),
       })
-      console.log('[Webhook] 플랜 업데이트:', customerEmail, '->', planType)
+      console.log('[Webhook] ✅ 플랜 업데이트 완료:', customerEmail, '->', planType)
     }
 
-    // subscription.cancelled / subscription.failed — 구독 해제
-    if (eventType === 'subscription.cancelled' || eventType === 'subscription.failed') {
+    // 구독 취소 / 실패 → 무료 플랜으로
+    if (
+      eventType === 'subscription.cancelled' ||
+      eventType === 'subscription.failed'
+    ) {
       await userDoc.ref.update({
-        plan:               'free',
+        plan: 'free',
         subscriptionStatus: 'cancelled',
-        updatedAt:          new Date(),
+        updatedAt: new Date(),
       })
-      console.log('[Webhook] 구독 취소:', customerEmail)
+      console.log('[Webhook] ✅ 구독 취소 완료:', customerEmail)
     }
 
     return new Response('ok', { status: 200 })
 
   } catch (error) {
     console.error('[Webhook] 오류:', error instanceof Error ? error.message : error)
+    // 200 반환해야 Dodo가 재시도 안 함
     return new Response('ok', { status: 200 })
   }
 }
