@@ -1,16 +1,16 @@
-import { headers } from 'next/headers'
-import { NextResponse } from 'next/server'
 import { Webhook } from 'standardwebhooks'
+import { headers } from 'next/headers'
 import { adminDb } from '@/lib/firebase-admin'
+
+export const runtime = 'nodejs'
 
 export async function POST(request: Request) {
   try {
     const headersList = await headers()
     const rawBody = await request.text()
 
-    // Dodo는 Svix 형식으로 전송 (svix-id, svix-signature, svix-timestamp)
-    // standardwebhooks는 webhook-id 형식을 요구
-    // → Svix 헤더를 standardwebhooks 형식으로 매핑
+    // Dodo는 Svix 형식으로 전송
+    // svix-id → webhook-id로 매핑
     const webhookId =
       headersList.get('webhook-id') ||
       headersList.get('svix-id') || ''
@@ -117,7 +117,6 @@ export async function POST(request: Request) {
 
   } catch (error) {
     console.error('[Webhook] 오류:', error instanceof Error ? error.message : error)
-    // 200 반환해야 Dodo가 재시도 안 함
     return new Response('ok', { status: 200 })
   }
 }
