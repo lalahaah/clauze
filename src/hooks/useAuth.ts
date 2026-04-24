@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { auth, db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { User as FirebaseUser, signOut, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { User } from "@/lib/types";
 
@@ -29,7 +29,8 @@ export function useAuth() {
             createdAt: new Date().toISOString(),
           };
           try {
-            const snap = await getDoc(doc(db, "users", firebaseUser.uid));
+            const userDocRef = doc(db, "users", firebaseUser.uid);
+            const snap = await getDoc(userDocRef);
             if (snap.exists()) {
               const data = snap.data();
               userData = {
@@ -45,6 +46,17 @@ export function useAuth() {
                 updatedAt: data.updatedAt,
                 monthlyReviewCount: data.monthlyReviewCount ?? 0,
               };
+              if (!data.email) {
+                await setDoc(userDocRef, { email: firebaseUser.email }, { merge: true });
+              }
+            } else {
+              await setDoc(userDocRef, {
+                email: firebaseUser.email,
+                plan: "free",
+                monthlyReviewCount: 0,
+                singleReviewCredits: 0,
+                createdAt: new Date(),
+              });
             }
           } catch {
             // Firestore 조회 실패 시 기본값 유지
