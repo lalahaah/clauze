@@ -21,12 +21,6 @@ export async function POST(request: Request) {
       headersList.get('webhook-timestamp') ||
       headersList.get('svix-timestamp') || ''
 
-    console.log('[Webhook] 헤더 수신:', {
-      hasId: !!webhookId,
-      hasSignature: !!webhookSignature,
-      hasTimestamp: !!webhookTimestamp,
-    })
-
     if (!webhookId || !webhookSignature || !webhookTimestamp) {
       console.error('[Webhook] 헤더 누락')
       return new Response('ok', { status: 200 })
@@ -43,30 +37,44 @@ export async function POST(request: Request) {
     const eventType = payload.type
     const data = payload.data
     const customerEmail = data?.customer?.email
+    const uid = data?.metadata?.uid
 
-    console.log('[Webhook] 이벤트:', eventType, '/', customerEmail)
+    console.log('[Webhook] 이벤트:', eventType, '| email:', customerEmail, '| uid:', uid)
 
-    if (!customerEmail) {
-      return new Response('ok', { status: 200 })
+    let userRef: FirebaseFirestore.DocumentReference | null = null
+
+    if (uid) {
+      const doc = await adminDb.collection('users').doc(uid).get()
+      if (doc.exists) {
+        userRef = doc.ref
+        console.log('[Webhook] ✅ uid로 유저 찾음:', uid)
+      }
     }
 
-    const userQuery = await adminDb
-      .collection('users')
-      .where('email', '==', customerEmail)
-      .limit(1)
-      .get()
-
-    if (userQuery.empty) {
-      console.warn('[Webhook] 유저 없음:', customerEmail)
-      return new Response('ok', { status: 200 })
+    if (!userRef && customerEmail) {
+      const q = await adminDb
+        .collection('users')
+        .where('email', '==', customerEmail)
+        .limit(1)
+        .get()
+      if (!q.empty) {
+        userRef = q.docs[0].ref
+        console.log('[Webhook] ✅ email로 유저 찾음:', customerEmail)
+      }
     }
 
-    const userDoc = userQuery.docs[0]
+    if (!userRef) {
+      console.warn('[Webhook] ❌ 유저 없음 — uid:', uid, '/ email:', customerEmail)
+      return new Response('ok', { status: 200 })
+    }
 
     if (eventType === 'payment.succeeded') {
-      const current = userDoc.data().singleReviewCredits || 0
-      await userDoc.ref.update({
+      const doc = await userRef.get()
+      const current = doc.data()?.singleReviewCredits || 0
+      await userRef.update({
+        plan: 'single',
         singleReviewCredits: current + 1,
+        email: customerEmail,
         updatedAt: new Date(),
       })
       console.log('[Webhook] ✅ 단건 크레딧 +1:', customerEmail)
@@ -84,8 +92,9 @@ export async function POST(request: Request) {
           ? 'business'
           : 'free'
 
-      await userDoc.ref.update({
+      await userRef.update({
         plan: planType,
+        email: customerEmail,
         subscriptionId: data?.subscription_id || '',
         subscriptionStatus: 'active',
         currentPeriodEnd: data?.next_billing_date || null,
@@ -98,7 +107,7 @@ export async function POST(request: Request) {
       eventType === 'subscription.cancelled' ||
       eventType === 'subscription.failed'
     ) {
-      await userDoc.ref.update({
+      await userRef.update({
         plan: 'free',
         subscriptionStatus: 'cancelled',
         updatedAt: new Date(),
