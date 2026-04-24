@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
+    const baseUrl = process.env.DODO_PAYMENTS_RETURN_URL?.replace("/payment/success", "") ?? "https://clauze-ai.vercel.app";
 
     // 3. 이미 같은 플랜의 구독을 가진 경우 확인 (pro/business)
     if (planType !== "single") {
