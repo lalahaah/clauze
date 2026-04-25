@@ -453,11 +453,11 @@ export default function PricingPage() {
       descKo: "필요할 때 한 건씩. 구독 없이.",
       descEn: "Pay only when you need it. No subscription.",
       features: [
-        "단건 검토 (1회)",
+        "AI 위험 분석 1건",
         "한국어 + 영문 동시 요약",
         "위험도 전체 분류 (고위험/주의/정상)",
       ],
-      lockedFeatures: ["협상 이메일 생성", "검토 이력 저장", "패턴 감지"],
+      lockedFeatures: ["검토 이력 저장"],
       ctaKo: "건별 결제하기",
       featured: false,
       betaNote: true,
@@ -482,7 +482,7 @@ export default function PricingPage() {
       lockedFeatures: [],
       ctaKo: "Pro 시작하기",
       featured: true,
-      savingsNote: "월 2건 이상이면 단건보다 저렴합니다\n2+ reviews/month? Pro beats per-review pricing.",
+      savingsNote: "월 2건부터 단건보다 저렴해집니다\nFrom 2 reviews/month, Pro beats per-review pricing.",
       currentPlan,
     },
     {
