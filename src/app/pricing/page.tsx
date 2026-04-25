@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { auth } from "@/lib/firebase";
 import { FooterDisclaimer } from "@/components/legal/Disclaimer";
 import { CheckoutButton } from "@/components/pricing/CheckoutButton";
+import { SupportVideoModal } from "@/components/SupportVideoModal";
 import type { PlanKey, PlanType } from "@/lib/dodo";
 
 // 결제 수단 선택 (환경 변수로 기본값 설정)
@@ -319,6 +320,7 @@ export default function PricingPage() {
   const { user, userData, loading } = useAuth();
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [supportOpen, setSupportOpen] = useState(false);
 
   const currentPlan = userData?.plan ?? "free";
 
@@ -573,6 +575,7 @@ export default function PricingPage() {
           </button>
         )}
         <button
+          onClick={() => setSupportOpen(true)}
           style={{
             background: "none", border: "none", cursor: "pointer",
             fontSize: 11, fontWeight: 700, letterSpacing: "1.2px",
@@ -873,6 +876,7 @@ export default function PricingPage() {
         </div>
         <FooterDisclaimer />
       </footer>
+      <SupportVideoModal isOpen={supportOpen} onClose={() => setSupportOpen(false)} />
     </div>
   );
 }

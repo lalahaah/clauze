@@ -13,6 +13,7 @@ import { ContractUploader } from "@/components/ContractUploader";
 import { RiskBadge } from "@/components/RiskBadge";
 import { FooterDisclaimer } from "@/components/legal/Disclaimer";
 import { SubscriptionManager } from "@/components/dashboard/SubscriptionManager";
+import { SupportVideoModal } from "@/components/SupportVideoModal";
 import { db } from "@/lib/firebase";
 import { Review, RiskLevel } from "@/lib/types";
 import { IndustrySelector } from "@/components/contract/IndustrySelector";
@@ -163,6 +164,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const { user, userData, loading, logout } = useAuth();
   const [uploadError, setUploadError] = useState("");
+  const [supportOpen, setSupportOpen] = useState(false);
   const [lang, setLang] = useState<"ko" | "en">("ko");
   const [industry, setIndustry] = useState<IndustryKey>("general");
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -253,7 +255,7 @@ export default function DashboardPage() {
           <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", fontFamily: R.fontSans }}>
             {user?.email}
           </div>
-          <button style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase" }}>GET SUPPORT</button>
+          <button onClick={() => setSupportOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase" }}>GET SUPPORT</button>
           <button
             onClick={handleLogout}
             style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase", transition: "color 0.2s" }}
@@ -679,6 +681,7 @@ export default function DashboardPage() {
         </div>
         <FooterDisclaimer />
       </footer>
+      <SupportVideoModal isOpen={supportOpen} onClose={() => setSupportOpen(false)} />
     </div>
   );
 }

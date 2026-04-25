@@ -12,6 +12,7 @@ import { Review, RepeatPattern } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
 import { ResultDisclaimer, FooterDisclaimer } from "@/components/legal/Disclaimer";
 import { PatternAlert } from "@/components/contract/PatternAlert";
+import { SupportVideoModal } from "@/components/SupportVideoModal";
 
 const R = {
   bgWhite: "#FFFFFF", bgLight: "#F6F7FB", bgDark: "#093944",
@@ -77,6 +78,7 @@ export default function ReviewPage({ params }: Props) {
   const router = useRouter();
   const { user, loading, logout } = useAuth();
   const [review, setReview] = useState<Review>(DEMO_REVIEW);
+  const [supportOpen, setSupportOpen] = useState(false);
   const [lang, setLang] = useState<"ko" | "en">("ko");
   const [repeatedPatterns, setRepeatedPatterns] = useState<RepeatPattern[]>([]);
 
@@ -126,7 +128,7 @@ export default function ReviewPage({ params }: Props) {
           style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase" }}
         >{user ? "LOGOUT" : "LOGIN"}</button>
         <button
-          onClick={() => {}}
+          onClick={() => setSupportOpen(true)}
           style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase" }}
         >GET SUPPORT</button>
       </div>
@@ -302,6 +304,7 @@ export default function ReviewPage({ params }: Props) {
         </div>
         <FooterDisclaimer />
       </footer>
+      <SupportVideoModal isOpen={supportOpen} onClose={() => setSupportOpen(false)} />
     </div>
   );
 }
