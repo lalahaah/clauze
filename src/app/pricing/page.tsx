@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { loadTossPayments } from "@tosspayments/sdk";
 import { useAuth } from "@/hooks/useAuth";
 import { auth } from "@/lib/firebase";
+import { signOut } from "firebase/auth";
 import { FooterDisclaimer } from "@/components/legal/Disclaimer";
 import { CheckoutButton } from "@/components/pricing/CheckoutButton";
 import { SupportVideoModal } from "@/components/SupportVideoModal";
@@ -547,21 +548,9 @@ export default function PricingPage() {
         display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 24,
       }}>
         {!loading && user ? (
-          <>
-            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", fontFamily: T.fontSans }}>
-              {user.email}
-            </span>
-            <button
-              onClick={() => router.push("/dashboard")}
-              style={{
-                background: "none", border: "none", cursor: "pointer",
-                fontSize: 11, fontWeight: 700, letterSpacing: "1.2px",
-                color: "rgba(255,255,255,0.7)", fontFamily: T.fontSans, textTransform: "uppercase",
-              }}
-            >
-              DASHBOARD
-            </button>
-          </>
+          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", fontFamily: T.fontSans }}>
+            {user.email}
+          </span>
         ) : (
           <button
             onClick={() => router.push("/login")}
@@ -584,6 +573,18 @@ export default function PricingPage() {
         >
           GET SUPPORT
         </button>
+        {!loading && user && (
+          <button
+            onClick={async () => { await signOut(auth); router.push("/"); }}
+            style={{
+              background: "none", border: "none", cursor: "pointer",
+              fontSize: 11, fontWeight: 700, letterSpacing: "1.2px",
+              color: "rgba(255,255,255,0.7)", fontFamily: T.fontSans, textTransform: "uppercase",
+            }}
+          >
+            LOGOUT
+          </button>
+        )}
       </div>
 
       {/* 네비게이션 */}
