@@ -143,18 +143,22 @@ export default function LandingPage() {
     <div style={{ background: R.bgWhite, fontFamily: R.fontSans }}>
       {/* Top utility bar */}
       <div style={{ background: R.bgDark, padding: "6px 40px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 24 }}>
-        {["LOGIN", "GET SUPPORT"].map(label => (
-          <button key={label} style={{
+        {!user && (
+          <button style={{
             background: "none", border: "none", cursor: "pointer",
             fontSize: 11, fontWeight: 700, letterSpacing: "1.2px",
             color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase",
           }}
-          onClick={() => {
-            if (label === "LOGIN") router.push("/login");
-            if (label === "GET SUPPORT") setSupportModalOpen(true);
-          }}
-          >{label}</button>
-        ))}
+          onClick={() => router.push("/login")}
+          >LOGIN</button>
+        )}
+        <button style={{
+          background: "none", border: "none", cursor: "pointer",
+          fontSize: 11, fontWeight: 700, letterSpacing: "1.2px",
+          color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase",
+        }}
+        onClick={() => setSupportModalOpen(true)}
+        >GET SUPPORT</button>
       </div>
 
       {/* Main nav */}
