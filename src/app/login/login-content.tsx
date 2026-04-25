@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
 import { sendSignInLinkToEmail, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { SupportVideoModal } from "@/components/SupportVideoModal";
 
 const R = {
   bgWhite: "#FFFFFF", bgLight: "#F6F7FB", bgDark: "#093944",
@@ -25,6 +26,7 @@ export default function LoginContent() {
   const [authLoading, setAuthLoading] = useState(true);
   const [isKorean, setIsKorean] = useState(true);
   const [linkSent, setLinkSent] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
 
   // 이미 로그인되어 있으면 대시보드로 리다이렉트
   useEffect(() => {
@@ -145,7 +147,7 @@ export default function LoginContent() {
           ))}
         </div>
         <button
-          onClick={() => router.push("/login")}
+          onClick={() => setSupportOpen(true)}
           style={{
             padding: "13px 28px",
             background: "transparent",
@@ -375,6 +377,7 @@ export default function LoginContent() {
           }
         </p>
       </footer>
+      <SupportVideoModal isOpen={supportOpen} onClose={() => setSupportOpen(false)} />
     </div>
   );
 }
