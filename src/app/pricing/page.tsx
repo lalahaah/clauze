@@ -129,13 +129,14 @@ interface CardProps {
   featured?: boolean;
   savingsNote?: string;
   betaNote?: boolean;
+  comingSoon?: boolean;
   currentPlan: string;
 }
 
 function PlanCard({
   planKey, name, price, period, priceNote, descKo, descEn,
   features, lockedFeatures, ctaKo, featured = false, savingsNote,
-  betaNote, currentPlan,
+  betaNote, comingSoon, currentPlan,
 }: CardProps) {
   const [hov, setHov] = useState(false);
 
@@ -163,6 +164,17 @@ function PlanCard({
           fontFamily: T.fontSans, marginBottom: 12,
         }}>
           Most Popular
+        </div>
+      )}
+
+      {/* COMING SOON 배지 */}
+      {comingSoon && (
+        <div style={{
+          fontSize: 10, fontWeight: 700, letterSpacing: "1.6px",
+          color: T.textLt, textTransform: "uppercase",
+          fontFamily: T.fontSans, marginBottom: 12,
+        }}>
+          Coming Soon
         </div>
       )}
 
@@ -250,8 +262,36 @@ function PlanCard({
         </div>
       )}
 
+      {/* 준비 중 안내 (Business용) */}
+      {comingSoon && (
+        <div style={{
+          fontSize: 11, color: T.textLt, fontFamily: T.fontSans,
+          marginBottom: 8, textAlign: "center", lineHeight: 1.6,
+        }}>
+          🛠️ 팀 기능 및 API는 현재 준비 중입니다.<br />
+          <span style={{ opacity: 0.7 }}>Team &amp; API features coming soon.</span>
+        </div>
+      )}
+
       {/* CTA 버튼 */}
-      {planKey === "free" ? (
+      {comingSoon ? (
+        <button
+          disabled
+          style={{
+            width: "100%", padding: "13px 28px",
+            background: "rgba(4,34,40,0.04)",
+            color: T.textLt,
+            border: `1.5px solid ${T.border}`,
+            borderRadius: T.btnR,
+            fontSize: 14, fontWeight: 700,
+            fontFamily: T.fontSans,
+            cursor: "not-allowed",
+            opacity: 0.6,
+          }}
+        >
+          {ctaKo}
+        </button>
+      ) : planKey === "free" ? (
         <button
           disabled={currentPlan === "free"}
           onMouseEnter={() => setHov(true)}
@@ -505,6 +545,7 @@ export default function PricingPage() {
       lockedFeatures: [],
       ctaKo: "Business 시작",
       featured: false,
+      comingSoon: true,
       currentPlan,
     },
   ];
