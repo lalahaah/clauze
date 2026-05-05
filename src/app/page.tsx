@@ -162,7 +162,7 @@ export default function LandingPage() {
           .grid-4col { grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
           .split-2col { grid-template-columns: 1fr; }
           .stats-row { gap: 28px; margin-top: 40px; }
-          .nav-pad { padding: 0 16px; gap: 16px !important; }
+          .nav-pad { padding: 8px 16px; gap: 12px !important; flex-wrap: wrap; height: auto !important; }
           .hero-pad { padding: 56px 20px; }
           .split-left { padding: 40px 20px; min-height: 200px; }
           .split-right { padding: 40px 20px; }

@@ -187,7 +187,7 @@ export default function PricingPage() {
         @media (max-width: 768px) {
           .pricing-grid { grid-template-columns: 1fr; padding: 0 20px 60px; }
           .pricing-utility { padding: 6px 16px; }
-          .pricing-nav { padding: 0 16px; gap: 16px; }
+          .pricing-nav { padding: 8px 16px; gap: 12px; flex-wrap: wrap; height: auto !important; }
           .pricing-hero { padding: 56px 20px 72px; }
           .pricing-faq { padding: 56px 20px; }
           .pricing-cta { padding: 56px 20px; }
