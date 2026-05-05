@@ -140,35 +140,50 @@ export default function LandingPage() {
   const maskImage = useMotionTemplate`radial-gradient(300px circle at ${mouseX}px ${mouseY}px, black, transparent)`;
 
   return (
-    <div style={{ background: R.bgWhite, fontFamily: R.fontSans }}>
+    <div style={{ background: R.bgWhite, fontFamily: R.fontSans, overflowX: "hidden" }}>
       <style>{`
-  .landing-section { padding: 96px 40px; }
-  .landing-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; max-width: 1100px; margin: 0 auto; align-items: start; }
-  .landing-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  .landing-grid-4 { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
-  .landing-split { display: grid; grid-template-columns: 1fr 1fr; max-width: 1100px; margin: 0 auto; min-height: 480px; }
-  .landing-stats { display: flex; gap: 56px; justify-content: center; margin-top: 64px; }
-  @media (max-width: 768px) {
-    .landing-section { padding: 60px 20px; }
-    .landing-grid-2 { grid-template-columns: 1fr; gap: 32px; }
-    .landing-grid-3 { grid-template-columns: 1fr; }
-    .landing-grid-4 { grid-template-columns: 1fr 1fr; gap: 24px; }
-    .landing-split { grid-template-columns: 1fr; }
-    .landing-stats { gap: 24px; flex-wrap: wrap; }
-  }
-  @media (max-width: 480px) {
-    .landing-grid-4 { grid-template-columns: 1fr; }
-  }
-`}</style>
+        * { box-sizing: border-box; }
+        .section-pad { padding: 96px 40px; }
+        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; max-width: 1100px; margin: 0 auto; align-items: start; }
+        .grid-3col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .grid-4col { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+        .split-2col { display: grid; grid-template-columns: 1fr 1fr; max-width: 1100px; margin: 0 auto; min-height: 480px; }
+        .stats-row { display: flex; gap: 56px; justify-content: center; margin-top: 64px; flex-wrap: wrap; }
+        .nav-pad { padding: 0 40px; }
+        .hero-pad { padding: 80px 32px; }
+        .split-left { background: ${R.bgDark}; display: flex; align-items: center; justify-content: center; padding: 60px; }
+        .split-right { padding: 64px 56px; display: flex; flex-direction: column; justify-content: center; }
+        .footer-pad { padding: 64px 40px 32px; }
+        .utility-bar { padding: 6px 40px; }
+        @media (max-width: 768px) {
+          .section-pad { padding: 56px 20px; }
+          .grid-2col { grid-template-columns: 1fr; gap: 32px; }
+          .grid-3col { grid-template-columns: 1fr; gap: 16px; }
+          .grid-4col { grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+          .split-2col { grid-template-columns: 1fr; }
+          .stats-row { gap: 28px; margin-top: 40px; }
+          .nav-pad { padding: 0 16px; gap: 16px !important; }
+          .hero-pad { padding: 56px 20px; }
+          .split-left { padding: 40px 20px; min-height: 200px; }
+          .split-right { padding: 40px 20px; }
+          .footer-pad { padding: 48px 20px 24px; }
+          .utility-bar { padding: 6px 16px; }
+        }
+        @media (max-width: 480px) {
+          .grid-4col { grid-template-columns: 1fr; }
+          .stats-row { gap: 20px; }
+        }
+      `}</style>
+
       {/* Top utility bar */}
-      <div style={{ background: R.bgDark, padding: "6px 40px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 24 }}>
+      <div className="utility-bar" style={{ background: R.bgDark, display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 24 }}>
         {!user && (
           <button style={{
             background: "none", border: "none", cursor: "pointer",
             fontSize: 11, fontWeight: 700, letterSpacing: "1.2px",
             color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase",
           }}
-          onClick={() => router.push("/login")}
+            onClick={() => router.push("/login")}
           >LOGIN</button>
         )}
         <button style={{
@@ -176,39 +191,41 @@ export default function LandingPage() {
           fontSize: 11, fontWeight: 700, letterSpacing: "1.2px",
           color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase",
         }}
-        onClick={() => setSupportModalOpen(true)}
+          onClick={() => setSupportModalOpen(true)}
         >GET SUPPORT</button>
       </div>
 
       {/* Main nav */}
-      <nav style={{
+      <nav className="nav-pad" style={{
         position: "sticky", top: 0, zIndex: 100,
         background: R.bgWhite, borderBottom: `1px solid ${R.borderLight}`,
-        padding: "0 40px", display: "flex", alignItems: "center", gap: 36, height: 68,
+        display: "flex", alignItems: "center", gap: 36, height: 68,
       }}>
-        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, marginRight: 16, textDecoration: "none" }}>
+        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, marginRight: 16, textDecoration: "none", flexShrink: 0 }}>
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-            <path d="M14 2C7.373 2 2 7.373 2 14s5.373 12 12 12 12-5.373 12-12S20.627 2 14 2z" fill={R.tealBtn} opacity="0.2"/>
-            <path d="M14 6l5 8H9l5-8z" fill={R.tealBtn}/>
-            <path d="M9 14h10l-3 6H12l-3-6z" fill={R.tealDark}/>
+            <path d="M14 2C7.373 2 2 7.373 2 14s5.373 12 12 12 12-5.373 12-12S20.627 2 14 2z" fill={R.tealBtn} opacity="0.2" />
+            <path d="M14 6l5 8H9l5-8z" fill={R.tealBtn} />
+            <path d="M9 14h10l-3 6H12l-3-6z" fill={R.tealDark} />
           </svg>
           <span style={{ fontFamily: R.fontSans, fontSize: 16, fontWeight: 800, color: R.textDark, letterSpacing: "0.08em", textTransform: "uppercase" }}>CLAUZE</span>
         </Link>
         {[["dashboard", "Dashboard"], ["pricing", "Pricing"]].map(([href, label]) => (
           <Link key={href} href={`/${href}`} style={{
             fontSize: 14, fontFamily: R.fontSans, fontWeight: 500, color: R.textDark,
-            padding: "4px 0", textDecoration: "none", borderBottom: "2px solid transparent",
+            padding: "4px 0", textDecoration: "none", borderBottom: "2px solid transparent", whiteSpace: "nowrap",
           }}>{label}</Link>
         ))}
         <div style={{ flex: 1 }} />
         {user ? (
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <span style={{ fontSize: 12, color: R.textLight, fontFamily: R.fontSans }}>{user.email}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+            <span style={{ fontSize: 12, color: R.textLight, fontFamily: R.fontSans, display: "none" }} className="hide-mobile">{user.email}</span>
             <PillBtn onClick={() => router.push("/dashboard")} variant="filled">Dashboard</PillBtn>
             <PillBtn onClick={() => logout().then(() => router.push("/"))}>Logout</PillBtn>
           </div>
         ) : (
-          <PillBtn onClick={() => router.push("/login?signup=true")} variant="filled">Get started</PillBtn>
+          <div style={{ flexShrink: 0 }}>
+            <PillBtn onClick={() => router.push("/login?signup=true")} variant="filled">Get started</PillBtn>
+          </div>
         )}
       </nav>
 
@@ -232,32 +249,32 @@ export default function LandingPage() {
           <div style={{ position: "absolute", left: "-10%", bottom: "-10%", width: "35%", height: "35%", borderRadius: "50%", background: "rgba(0,133,124,0.15)", filter: "blur(120px)" }} />
         </div>
 
-        <div style={{ position: "relative", zIndex: 10, maxWidth: 760, padding: "80px 32px" }}>
+        <div className="hero-pad" style={{ position: "relative", zIndex: 10, maxWidth: 760, width: "100%" }}>
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
             <Eyebrow dark>AI CONTRACT REVIEW · AI 계약서 검토</Eyebrow>
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}
-            style={{ fontFamily: R.fontSans, fontSize: "clamp(38px, 6vw, 68px)", fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.1, color: R.textWhite, margin: "0 0 12px" }}
+            style={{ fontFamily: R.fontSans, fontSize: "clamp(36px, 6vw, 68px)", fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.1, color: R.textWhite, margin: "0 0 12px" }}
           >
             One Review.<br />
             <span style={{ color: R.tealBright }}>Total Confidence.</span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.15 }}
-            style={{ fontSize: "clamp(18px, 2.5vw, 24px)", fontWeight: 700, color: R.tealBright, letterSpacing: "-0.02em", margin: "0 0 20px", fontFamily: R.fontSans, opacity: 0.85 }}
+            style={{ fontSize: "clamp(16px, 2.5vw, 24px)", fontWeight: 700, color: R.tealBright, letterSpacing: "-0.02em", margin: "0 0 20px", fontFamily: R.fontSans, opacity: 0.85 }}
           >
             한 번의 검토. 완전한 확신.
           </motion.p>
           <motion.p
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
-            style={{ fontSize: 17, color: R.textOffWhite, lineHeight: 1.75, maxWidth: 480, margin: "0 auto 8px", fontFamily: R.fontSans }}
+            style={{ fontSize: "clamp(14px, 2vw, 17px)", color: R.textOffWhite, lineHeight: 1.75, maxWidth: 480, margin: "0 auto 8px", fontFamily: R.fontSans }}
           >
             Upload your Korean contract. Get risk analysis in 30 seconds — in Korean and English.
           </motion.p>
           <motion.p
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.25 }}
-            style={{ fontSize: 15, color: "rgba(255,255,255,0.55)", lineHeight: 1.7, maxWidth: 480, margin: "0 auto 36px", fontFamily: R.fontSans }}
+            style={{ fontSize: "clamp(13px, 1.8vw, 15px)", color: "rgba(255,255,255,0.55)", lineHeight: 1.7, maxWidth: 480, margin: "0 auto 36px", fontFamily: R.fontSans }}
           >
             계약서를 업로드하면 30초 안에 위험 분석 결과를 한국어와 영어로 받아보세요.
           </motion.p>
@@ -272,11 +289,11 @@ export default function LandingPage() {
           {/* Stats */}
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
-            style={{ display: "flex", gap: 56, justifyContent: "center", marginTop: 64 }}
+            className="stats-row"
           >
             {[{ n: "Counting", l: "Contracts Reviewed" }, { n: "Measuring", l: "Average Review Time" }, { n: "Measuring", l: "Risk Detection Rate" }].map(({ n, l }) => (
               <div key={l} style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 28, fontWeight: 800, color: R.textWhite, fontFamily: R.fontMono, letterSpacing: "-0.04em" }}>{n}</div>
+                <div style={{ fontSize: "clamp(20px, 3vw, 28px)", fontWeight: 800, color: R.textWhite, fontFamily: R.fontMono, letterSpacing: "-0.04em" }}>{n}</div>
                 <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginTop: 4, fontFamily: R.fontSans }}>{l}</div>
               </div>
             ))}
@@ -285,14 +302,14 @@ export default function LandingPage() {
       </div>
 
       {/* What we do */}
-      <div style={{ background: R.bgWhite, padding: "96px 40px" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "start" }}>
+      <div className="section-pad" style={{ background: R.bgWhite }}>
+        <div className="grid-2col">
           <div>
             <Eyebrow>What we do</Eyebrow>
-            <h2 style={{ fontFamily: R.fontSans, fontSize: "clamp(28px,3.5vw,42px)", fontWeight: 800, color: R.textDark, letterSpacing: "-0.03em", lineHeight: 1.2, margin: 0 }}>
+            <h2 style={{ fontFamily: R.fontSans, fontSize: "clamp(24px,3.5vw,42px)", fontWeight: 800, color: R.textDark, letterSpacing: "-0.03em", lineHeight: 1.2, margin: 0 }}>
               Comprehensive contract review for freelancers and businesses
             </h2>
-            <h3 style={{ fontFamily: R.fontSans, fontSize: "clamp(20px,2.5vw,28px)", fontWeight: 600, color: R.tealMid, letterSpacing: "-0.02em", lineHeight: 1.2, margin: "12px 0 0" }}>
+            <h3 style={{ fontFamily: R.fontSans, fontSize: "clamp(18px,2.5vw,28px)", fontWeight: 600, color: R.tealMid, letterSpacing: "-0.02em", lineHeight: 1.2, margin: "12px 0 0" }}>
               프리랜서와 소상공인을 위한 계약서 검토
             </h3>
           </div>
@@ -314,40 +331,25 @@ export default function LandingPage() {
       </div>
 
       {/* How it works */}
-      <div style={{ background: R.bgWhite, padding: "96px 40px" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "start" }}>
+      <div className="section-pad" style={{ background: R.bgWhite }}>
+        <div className="grid-2col">
           <div>
             <Eyebrow>How it works</Eyebrow>
-            <h2 style={{ fontFamily: R.fontSans, fontSize: "clamp(28px,3.5vw,42px)", fontWeight: 800, color: R.textDark, letterSpacing: "-0.03em", lineHeight: 1.2, margin: "0 0 12px" }}>
+            <h2 style={{ fontFamily: R.fontSans, fontSize: "clamp(24px,3.5vw,42px)", fontWeight: 800, color: R.textDark, letterSpacing: "-0.03em", lineHeight: 1.2, margin: "0 0 12px" }}>
               Sign smarter, one clause at a time
             </h2>
-            <h3 style={{ fontFamily: R.fontSans, fontSize: "clamp(20px,2.5vw,28px)", fontWeight: 700, color: R.tealMid, letterSpacing: "-0.02em", lineHeight: 1.2, margin: "0 0 32px" }}>
+            <h3 style={{ fontFamily: R.fontSans, fontSize: "clamp(18px,2.5vw,28px)", fontWeight: 700, color: R.tealMid, letterSpacing: "-0.02em", lineHeight: 1.2, margin: "0 0 32px" }}>
               똑똑하게 서명하기
             </h3>
             <PillBtn onClick={() => router.push("/dashboard")} variant="outline">Get started</PillBtn>
           </div>
           <div style={{ borderTop: `1px solid ${R.borderLight}` }}>
             {[
-              {
-                title: "Upload your PDF",
-                title_ko: "PDF 업로드하기",
-                desc: "Drag and drop any Korean contract. Up to 10MB. No account needed to try." ,
-                desc_ko: "한국 계약서를 드래그 앤 드롭하세요. 최대 10MB. 계정 없이도 체험 가능합니다."
-              },
-              {
-                title: "AI analysis in 30 seconds",
-                title_ko: "30초 안에 AI 분석",
-                desc: "Claude AI reads every clause, identifies risks, and classifies them by severity." ,
-                desc_ko: "Claude AI가 모든 조항을 읽고 위험을 식별하며 심각도별로 분류합니다."
-              },
-              {
-                title: "Review in Korean & English",
-                title_ko: "한국어와 영어로 검토",
-                desc: "Each risky clause is explained in both languages with a recommended action." ,
-                desc_ko: "위험한 각 조항을 두 언어로 설명하고 권장 조치를 제시합니다."
-              },
+              { title: "Upload your PDF", title_ko: "PDF 업로드하기", desc: "Drag and drop any Korean contract. Up to 10MB. No account needed to try.", desc_ko: "한국 계약서를 드래그 앤 드롭하세요. 최대 10MB. 계정 없이도 체험 가능합니다." },
+              { title: "AI analysis in 30 seconds", title_ko: "30초 안에 AI 분석", desc: "Claude AI reads every clause, identifies risks, and classifies them by severity.", desc_ko: "Claude AI가 모든 조항을 읽고 위험을 식별하며 심각도별로 분류합니다." },
+              { title: "Review in Korean & English", title_ko: "한국어와 영어로 검토", desc: "Each risky clause is explained in both languages with a recommended action.", desc_ko: "위험한 각 조항을 두 언어로 설명하고 권장 조치를 제시합니다." },
             ].map(({ title, title_ko, desc, desc_ko }) => (
-              <div key={title} style={{ borderBottom: `1px solid ${R.borderLight}`, cursor: "pointer" }} onClick={() => {}}>
+              <div key={title} style={{ borderBottom: `1px solid ${R.borderLight}`, cursor: "pointer" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "22px 0" }}>
                   <div>
                     <span style={{ fontFamily: R.fontSans, fontSize: 17, fontWeight: 700, color: R.textDark, letterSpacing: "-0.01em" }}>{title}</span>
@@ -364,44 +366,26 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* 3대 차별화 기능 — ChatGPT와의 직접 비교 */}
+      {/* 3대 차별화 기능 */}
       <DifferentiationSection />
 
       {/* Who we serve */}
-      <div style={{ background: R.bgWhite, padding: "96px 40px" }}>
+      <div className="section-pad" style={{ background: R.bgWhite }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 56 }}>
             <Eyebrow>Who we serve</Eyebrow>
-            <h2 style={{ fontFamily: R.fontSans, fontSize: "clamp(28px,3.5vw,42px)", fontWeight: 800, color: R.textDark, letterSpacing: "-0.03em", lineHeight: 1.2, maxWidth: 540, margin: "0 auto" }}>
+            <h2 style={{ fontFamily: R.fontSans, fontSize: "clamp(24px,3.5vw,42px)", fontWeight: 800, color: R.textDark, letterSpacing: "-0.03em", lineHeight: 1.2, maxWidth: 540, margin: "0 auto" }}>
               Contract clarity for everyone in Korea
             </h2>
-            <h3 style={{ fontFamily: R.fontSans, fontSize: "clamp(20px,2.5vw,28px)", fontWeight: 700, color: R.tealMid, letterSpacing: "-0.02em", lineHeight: 1.2, maxWidth: 540, margin: "12px auto 0" }}>
+            <h3 style={{ fontFamily: R.fontSans, fontSize: "clamp(18px,2.5vw,28px)", fontWeight: 700, color: R.tealMid, letterSpacing: "-0.02em", lineHeight: 1.2, maxWidth: 540, margin: "12px auto 0" }}>
               한국에서 계약서가 필요한 모두를 위해
             </h3>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
+          <div className="grid-3col">
             {[
-              {
-                title: "Foreign freelancers",
-                title_ko: "해외 프리랜서",
-                desc: "Navigate Korean contracts with confidence, even without Korean language skills.",
-                desc_ko: "한국어 실력이 없어도 자신감 있게 한국 계약서를 이해하세요.",
-                link: "Freelancer solutions"
-              },
-              {
-                title: "Small businesses",
-                title_ko: "소상공인",
-                desc: "Protect your business from unfair clauses without the cost of a legal retainer.",
-                desc_ko: "비싼 변호사 비용 없이 부당한 조항으로부터 사업을 보호하세요.",
-                link: "Business solutions"
-              },
-              {
-                title: "Contractors & doers",
-                title_ko: "용역 계약자",
-                desc: "Quick on-demand contract review before you sign any service agreement.",
-                desc_ko: "서비스 계약에 서명하기 전에 빠르게 계약서를 검토하세요.",
-                link: "Quick review"
-              },
+              { title: "Foreign freelancers", title_ko: "해외 프리랜서", desc: "Navigate Korean contracts with confidence, even without Korean language skills.", desc_ko: "한국어 실력이 없어도 자신감 있게 한국 계약서를 이해하세요.", link: "Freelancer solutions" },
+              { title: "Small businesses", title_ko: "소상공인", desc: "Protect your business from unfair clauses without the cost of a legal retainer.", desc_ko: "비싼 변호사 비용 없이 부당한 조항으로부터 사업을 보호하세요.", link: "Business solutions" },
+              { title: "Contractors & doers", title_ko: "용역 계약자", desc: "Quick on-demand contract review before you sign any service agreement.", desc_ko: "서비스 계약에 서명하기 전에 빠르게 계약서를 검토하세요.", link: "Quick review" },
             ].map(({ title, title_ko, desc, desc_ko, link }) => (
               <div key={title} style={{ background: R.bgLight, padding: "36px 28px", borderRadius: R.cardRadius, display: "flex", flexDirection: "column", gap: 16 }}>
                 <div>
@@ -412,15 +396,7 @@ export default function LandingPage() {
                   <p style={{ fontSize: 14, color: R.textMid, lineHeight: 1.7, margin: "0 0 8px", fontFamily: R.fontSans }}>{desc}</p>
                   <p style={{ fontSize: 13, color: R.textMid, lineHeight: 1.7, margin: 0, fontFamily: R.fontSans }}>{desc_ko}</p>
                 </div>
-                <button
-                  onClick={() => router.push("/dashboard")}
-                  style={{
-                    background: "none", border: "none", cursor: "pointer", padding: 0,
-                    fontFamily: R.fontSans, fontSize: 14, fontWeight: 600, color: R.textDark,
-                    borderBottom: `1.5px solid ${R.textDark}`, paddingBottom: 2, width: "fit-content",
-                    transition: "opacity 0.15s",
-                  }}
-                >{link}</button>
+                <button onClick={() => router.push("/dashboard")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: R.fontSans, fontSize: 14, fontWeight: 600, color: R.textDark, borderBottom: `1.5px solid ${R.textDark}`, paddingBottom: 2, width: "fit-content", transition: "opacity 0.15s" }}>{link}</button>
               </div>
             ))}
           </div>
@@ -429,19 +405,19 @@ export default function LandingPage() {
 
       {/* Expert guidance split */}
       <div style={{ background: R.bgLight, overflow: "hidden" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", minHeight: 480 }}>
-          <div style={{ background: R.bgDark, display: "flex", alignItems: "center", justifyContent: "center", padding: 60 }}>
+        <div className="split-2col">
+          <div className="split-left">
             <div style={{ textAlign: "center" }}>
               <div style={{ fontFamily: R.fontMono, fontSize: 13, color: R.tealBright, letterSpacing: "0.1em", marginBottom: 8 }}>CONTRACT ANALYSIS</div>
-              <div style={{ fontFamily: R.fontMono, fontSize: 72, fontWeight: 800, color: R.textWhite, letterSpacing: "-0.04em", lineHeight: 1 }}>30s</div>
+              <div style={{ fontFamily: R.fontMono, fontSize: "clamp(48px, 8vw, 72px)", fontWeight: 800, color: R.textWhite, letterSpacing: "-0.04em", lineHeight: 1 }}>30s</div>
             </div>
           </div>
-          <div style={{ padding: "64px 56px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <div className="split-right">
             <Eyebrow>Expert guidance</Eyebrow>
-            <h2 style={{ fontFamily: R.fontSans, fontSize: "clamp(24px,3vw,36px)", fontWeight: 800, color: R.textDark, letterSpacing: "-0.03em", lineHeight: 1.2, margin: "0 0 12px" }}>
+            <h2 style={{ fontFamily: R.fontSans, fontSize: "clamp(22px,3vw,36px)", fontWeight: 800, color: R.textDark, letterSpacing: "-0.03em", lineHeight: 1.2, margin: "0 0 12px" }}>
               Meet your AI contract advisor
             </h2>
-            <h3 style={{ fontFamily: R.fontSans, fontSize: "clamp(18px,2vw,24px)", fontWeight: 700, color: R.tealMid, letterSpacing: "-0.02em", lineHeight: 1.2, margin: "0 0 20px" }}>
+            <h3 style={{ fontFamily: R.fontSans, fontSize: "clamp(16px,2vw,24px)", fontWeight: 700, color: R.tealMid, letterSpacing: "-0.02em", lineHeight: 1.2, margin: "0 0 20px" }}>
               당신의 AI 계약서 조언자
             </h3>
             <p style={{ fontSize: 15, color: R.textMid, lineHeight: 1.8, margin: "0 0 10px", fontFamily: R.fontSans }}>
@@ -450,70 +426,29 @@ export default function LandingPage() {
             <p style={{ fontSize: 14, color: R.textMid, lineHeight: 1.8, margin: "0 0 28px", fontFamily: R.fontSans }}>
               Claude AI로 구동되는 Clauze는 한국 법률 언어를 이해하고 위험한 조항을 식별합니다.
             </p>
-            <button
-              onClick={() => router.push("/review/demo")}
-              style={{ background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: R.fontSans, fontSize: 14, fontWeight: 600, color: R.textDark, borderBottom: `1.5px solid ${R.textDark}`, paddingBottom: 2, width: "fit-content" }}
-            >See a sample review</button>
+            <button onClick={() => router.push("/review/demo")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: R.fontSans, fontSize: 14, fontWeight: 600, color: R.textDark, borderBottom: `1.5px solid ${R.textDark}`, paddingBottom: 2, width: "fit-content" }}>See a sample review</button>
           </div>
         </div>
       </div>
 
       {/* Footer */}
-      <footer style={{ background: R.bgDark, padding: "64px 40px 32px" }}>
+      <footer className="footer-pad" style={{ background: R.bgDark }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 48, marginBottom: 48 }}>
+          <div className="grid-4col">
             <div>
               <div style={{ fontFamily: R.fontSans, fontSize: 16, fontWeight: 800, color: R.textWhite, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 16 }}>CLAUZE</div>
               <p style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", lineHeight: 1.7, maxWidth: 260, fontFamily: R.fontSans }}>AI-powered Korean contract review for freelancers and businesses.</p>
             </div>
             {[
-              { title: "PRODUCT", items: [
-                { label: "Dashboard", href: "/dashboard" },
-                { label: "Contract Review", href: "/dashboard" },
-                { label: "Pricing", href: "/pricing" },
-                { label: "Get Support", href: "modal" }
-              ]},
-              { title: "COMPANY", items: [
-                { label: "About", href: "#" },
-                { label: "Blog", href: "#" },
-                { label: "Contact", href: "#" }
-              ]},
-              { title: "LEGAL", items: [
-                { label: "Privacy Policy", href: "/privacy" },
-                { label: "Terms of Service", href: "/terms" },
-                { label: "Refund Policy", href: "/refund" },
-              ]},
+              { title: "PRODUCT", items: [{ label: "Dashboard", href: "/dashboard" }, { label: "Contract Review", href: "/dashboard" }, { label: "Pricing", href: "/pricing" }, { label: "Get Support", href: "modal" }] },
+              { title: "COMPANY", items: [{ label: "About", href: "#" }, { label: "Blog", href: "#" }, { label: "Contact", href: "#" }] },
+              { title: "LEGAL", items: [{ label: "Privacy Policy", href: "/privacy" }, { label: "Terms of Service", href: "/terms" }, { label: "Refund Policy", href: "/refund" }] },
             ].map(({ title, items }) => (
               <div key={title}>
                 <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1.5px", color: R.tealBright, marginBottom: 16, textTransform: "uppercase", fontFamily: R.fontSans }}>{title}</div>
                 {items.map(({ label, href }) => (
-                  <button
-                    key={label}
-                    onClick={() => {
-                      if (href === "#") return;
-                      if (href === "modal") {
-                        setSupportModalOpen(true);
-                      } else if (href.includes(".pdf")) {
-                        window.open(href, "_blank");
-                      } else {
-                        router.push(href);
-                      }
-                    }}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      padding: 0,
-                      margin: 0,
-                      marginBottom: 10,
-                      fontSize: 14,
-                      color: "rgba(255,255,255,0.6)",
-                      cursor: "pointer",
-                      fontFamily: R.fontSans,
-                      transition: "color 0.2s",
-                      textAlign: "left",
-                      display: "block",
-                      width: "100%"
-                    }}
+                  <button key={label} onClick={() => { if (href === "#") return; if (href === "modal") { setSupportModalOpen(true); } else if (href.includes(".pdf")) { window.open(href, "_blank"); } else { router.push(href); } }}
+                    style={{ background: "none", border: "none", padding: 0, margin: 0, marginBottom: 10, fontSize: 14, color: "rgba(255,255,255,0.6)", cursor: "pointer", fontFamily: R.fontSans, transition: "color 0.2s", textAlign: "left", display: "block", width: "100%" }}
                     onMouseEnter={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.85)"}
                     onMouseLeave={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.6)"}
                   >{label}</button>
@@ -528,7 +463,6 @@ export default function LandingPage() {
         <FooterDisclaimer />
       </footer>
 
-      {/* Support Video Modal */}
       <SupportVideoModal isOpen={supportModalOpen} onClose={() => setSupportModalOpen(false)} />
     </div>
   );
