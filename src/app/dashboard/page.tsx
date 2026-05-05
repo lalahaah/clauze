@@ -255,7 +255,7 @@ export default function DashboardPage() {
             borderBottom: href === "dashboard" ? `2px solid ${R.tealMid}` : "2px solid transparent",
           }}>{label}</Link>
         ))}
-        <div style={{ flex: 1 }} />
+        <div style={{ flex: 1, minWidth: 0 }} />
         <div style={{ display: "flex", gap: 4, padding: "4px 8px", background: R.bgLight, borderRadius: "20px", flexShrink: 0 }}>
           {(["ko", "en"] as const).map(l => (
             <button key={l} onClick={() => setLang(l)} style={{
