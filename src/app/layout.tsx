@@ -1,5 +1,6 @@
 // src/app/layout.tsx
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -23,6 +24,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="google-site-verification" content="CPysx2ERXBLCxjoV6pZGsa7x2mGZsYrYnFiBQep4Buc" />
       </head>
       <body className="antialiased">
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-NMP101HNKT"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-NMP101HNKT');
+          `}
+        </Script>
         {children}
         <Toaster />
       </body>
