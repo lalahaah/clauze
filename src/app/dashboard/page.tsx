@@ -48,21 +48,14 @@ function relativeTime(isoDate: string, lang: "ko" | "en"): string {
   return new Date(isoDate).toLocaleDateString("ko-KR", { month: "long", day: "numeric" });
 }
 
-function GridSVG({
-  gridOffX, gridOffY,
-}: {
+function GridSVG({ gridOffX, gridOffY }: {
   gridOffX: ReturnType<typeof useMotionValue<number>>;
   gridOffY: ReturnType<typeof useMotionValue<number>>;
 }) {
   return (
     <svg style={{ width: "100%", height: "100%" }}>
       <defs>
-        <motion.pattern
-          id="gp-dash"
-          width="40" height="40"
-          patternUnits="userSpaceOnUse"
-          x={gridOffX} y={gridOffY}
-        >
+        <motion.pattern id="gp-dash" width="40" height="40" patternUnits="userSpaceOnUse" x={gridOffX} y={gridOffY}>
           <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="0.8" />
         </motion.pattern>
       </defs>
@@ -71,44 +64,32 @@ function GridSVG({
   );
 }
 
-const PillBtn = ({
-  children, onClick, variant = "outline", dark = false,
-}: {
-  children: React.ReactNode;
-  onClick?: () => void;
-  variant?: "outline" | "filled";
-  dark?: boolean;
+const PillBtn = ({ children, onClick, variant = "outline", dark = false }: {
+  children: React.ReactNode; onClick?: () => void;
+  variant?: "outline" | "filled"; dark?: boolean;
 }) => {
   const [hov, setHov] = useState(false);
   return (
-    <button
-      onClick={onClick}
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
+    <button onClick={onClick} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
       style={{
         padding: "10px 24px",
-        background: variant === "filled"
-          ? (hov ? R.tealDark : R.tealBtn)
-          : (hov ? (dark ? "rgba(255,255,255,0.1)" : "rgba(4,34,40,0.06)") : "transparent"),
+        background: variant === "filled" ? (hov ? R.tealDark : R.tealBtn) : (hov ? (dark ? "rgba(255,255,255,0.1)" : "rgba(4,34,40,0.06)") : "transparent"),
         color: variant === "filled" ? R.textWhite : (dark ? R.textWhite : R.textDark),
         border: variant === "filled" ? `1.5px solid ${R.tealBtn}` : `1.5px solid ${dark ? "rgba(255,255,255,0.4)" : R.borderLight}`,
-        borderRadius: R.btnRadius,
-        fontSize: 13, fontWeight: 700,
-        fontFamily: R.fontSans, cursor: "pointer",
-        letterSpacing: "-0.01em", transition: "all 0.2s",
-        whiteSpace: "nowrap" as const,
+        borderRadius: R.btnRadius, fontSize: 13, fontWeight: 700,
+        fontFamily: R.fontSans, cursor: "pointer", letterSpacing: "-0.01em",
+        transition: "all 0.2s", whiteSpace: "nowrap" as const,
       }}
     >{children}</button>
   );
 };
 
-// 리스트 로딩 스켈레톤
 function ReviewSkeleton() {
   return (
     <div style={{ background: R.bgWhite, borderRadius: R.cardRadius, overflow: "hidden", border: `1px solid ${R.borderLight}` }}>
       {[1, 2, 3].map(i => (
         <div key={i} style={{ display: "flex", alignItems: "center", gap: 16, padding: "16px 24px", borderBottom: i < 3 ? `1px solid ${R.borderLight}` : "none" }}>
-          <div style={{ width: 36, height: 36, borderRadius: 4, background: R.bgLight }} />
+          <div style={{ width: 36, height: 36, borderRadius: 4, background: R.bgLight, flexShrink: 0 }} />
           <div style={{ flex: 1, height: 14, borderRadius: 4, background: R.bgLight, maxWidth: 280 }} />
           <div style={{ width: 60, height: 12, borderRadius: 4, background: R.bgLight }} />
           <div style={{ width: 56, height: 22, borderRadius: 28, background: R.bgLight }} />
@@ -118,20 +99,10 @@ function ReviewSkeleton() {
   );
 }
 
-// 빈 상태
 function EmptyState({ lang, onScroll }: { lang: "ko" | "en"; onScroll: () => void }) {
   return (
-    <div style={{
-      background: R.bgWhite, borderRadius: R.cardRadius,
-      border: `1px solid ${R.borderLight}`,
-      padding: "56px 32px", textAlign: "center",
-    }}>
-      <div style={{
-        width: 64, height: 64, borderRadius: "50%",
-        background: "rgba(0,165,153,0.08)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        margin: "0 auto 20px",
-      }}>
+    <div style={{ background: R.bgWhite, borderRadius: R.cardRadius, border: `1px solid ${R.borderLight}`, padding: "56px 32px", textAlign: "center" }}>
+      <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(0,165,153,0.08)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
         <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
           <path d="M14 17V10M11 13l3-3 3 3" stroke={R.tealMid} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           <rect x="4" y="4" width="20" height="20" rx="3" stroke={R.tealMid} strokeWidth="1.5" fill="none" />
@@ -141,19 +112,9 @@ function EmptyState({ lang, onScroll }: { lang: "ko" | "en"; onScroll: () => voi
         {lang === "ko" ? "아직 검토 이력이 없어요" : "No reviews yet"}
       </p>
       <p style={{ fontSize: 14, color: R.textLight, margin: "0 0 24px", fontFamily: R.fontSans }}>
-        {lang === "ko"
-          ? "위 업로드 영역에 계약서 PDF를 드래그하거나 클릭하여 첫 번째 분석을 시작하세요."
-          : "Drag & drop or click the upload area above to start your first analysis."}
+        {lang === "ko" ? "위 업로드 영역에 계약서 PDF를 드래그하거나 클릭하여 첫 번째 분석을 시작하세요." : "Drag & drop or click the upload area above to start your first analysis."}
       </p>
-      <button
-        onClick={onScroll}
-        style={{
-          padding: "10px 24px", borderRadius: R.btnRadius,
-          background: R.bgDark, border: "none",
-          fontSize: 13, fontWeight: 700, color: R.tealBright,
-          fontFamily: R.fontSans, cursor: "pointer",
-        }}
-      >
+      <button onClick={onScroll} style={{ padding: "10px 24px", borderRadius: R.btnRadius, background: R.bgDark, border: "none", fontSize: 13, fontWeight: 700, color: R.tealBright, fontFamily: R.fontSans, cursor: "pointer" }}>
         {lang === "ko" ? "계약서 업로드하기 →" : "Upload Contract →"}
       </button>
     </div>
@@ -182,24 +143,15 @@ export default function DashboardPage() {
 
   const maskImage = useMotionTemplate`radial-gradient(300px circle at ${mouseX}px ${mouseY}px, black, transparent)`;
 
-  // 인증 확인 및 리다이렉트
   useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login");
-    }
+    if (!loading && !user) router.push("/login");
   }, [user, loading, router]);
 
-  // Firestore에서 검토 이력 로드
   useEffect(() => {
     if (!user) return;
-
     const fetchReviews = async () => {
       try {
-        const q = query(
-          collection(db, "reviews"),
-          where("uid", "==", user.uid),
-          limit(20)
-        );
+        const q = query(collection(db, "reviews"), where("uid", "==", user.uid), limit(20));
         const snapshot = await getDocs(q);
         const data = snapshot.docs
           .map(doc => ({ id: doc.id, ...doc.data() } as Review))
@@ -211,11 +163,9 @@ export default function DashboardPage() {
         setReviewsLoading(false);
       }
     };
-
     fetchReviews();
   }, [user]);
 
-  // 동적 메트릭
   const totalReviews = reviews.length;
   const highRiskCount = reviews.filter(r => r.riskLevel === "high").length;
   const avgTimeSec = reviews.length > 0
@@ -237,300 +187,211 @@ export default function DashboardPage() {
   if (!user) return null;
 
   const handleLogout = async () => {
-    try {
-      await logout();
-      router.push("/");
-    } catch (err) {
-      console.error("로그아웃 실패:", err);
-    }
+    try { await logout(); router.push("/"); } catch (err) { console.error("로그아웃 실패:", err); }
   };
 
   return (
-    <div style={{ background: R.bgLight, minHeight: "100vh", fontFamily: R.fontSans }}>
+    <div style={{ background: R.bgLight, minHeight: "100vh", fontFamily: R.fontSans, overflowX: "hidden" }}>
+      <style>{`
+        * { box-sizing: border-box; }
+        .dash-utility { padding: 6px 40px; }
+        .dash-nav { padding: 0 40px; gap: 36px; }
+        .dash-hero { padding: 72px 40px 112px; }
+        .dash-hero-inner { max-width: 1100px; margin: 0 auto; }
+        .dash-plan { max-width: 1100px; margin: 0 auto; padding: 40px 40px 0; }
+        .dash-plan-card { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+        .dash-metrics { max-width: 1100px; margin: -56px auto 0; padding: 0 40px; position: relative; z-index: 20; }
+        .dash-metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .dash-content { max-width: 1100px; margin: 0 auto; padding: 36px 40px 80px; }
+        .dash-footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+        .dash-footer-pad { padding: 64px 40px 32px; }
+        .dash-email { display: block; }
+        @media (max-width: 768px) {
+          .dash-utility { padding: 6px 16px; }
+          .dash-nav { padding: 0 16px; gap: 16px; }
+          .dash-hero { padding: 48px 20px 80px; }
+          .dash-plan { padding: 24px 20px 0; }
+          .dash-metrics { padding: 0 20px; margin: -40px auto 0; }
+          .dash-metrics-grid { grid-template-columns: 1fr; gap: 12px; }
+          .dash-content { padding: 24px 20px 60px; }
+          .dash-footer-grid { grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+          .dash-footer-pad { padding: 48px 20px 24px; }
+          .dash-email { display: none; }
+        }
+        @media (max-width: 480px) {
+          .dash-footer-grid { grid-template-columns: 1fr; }
+          .dash-metrics-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
 
-      {/* ── Top utility bar ── */}
-      <div style={{ background: R.bgDark, padding: "6px 40px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 24 }}>
+      {/* Top utility bar */}
+      <div className="dash-utility" style={{ background: R.bgDark, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 24 }}>
         <div style={{ flex: 1 }} />
         <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", fontFamily: R.fontSans }}>
-            {user?.email}
-          </div>
+          <div className="dash-email" style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", fontFamily: R.fontSans }}>{user?.email}</div>
           <button onClick={() => setSupportOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase" }}>GET SUPPORT</button>
-          <button
-            onClick={handleLogout}
-            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase", transition: "color 0.2s" }}
+          <button onClick={handleLogout} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: "1.2px", color: "rgba(255,255,255,0.7)", fontFamily: R.fontSans, textTransform: "uppercase", transition: "color 0.2s" }}
             onMouseEnter={e => e.currentTarget.style.color = "rgba(255,255,255,0.9)"}
             onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.7)"}
           >LOGOUT</button>
         </div>
       </div>
 
-      {/* ── Sticky nav ── */}
-      <nav style={{ background: R.bgWhite, borderBottom: `1px solid ${R.borderLight}`, padding: "0 40px", display: "flex", alignItems: "center", gap: 36, height: 68, position: "sticky", top: 0, zIndex: 100 }}>
-        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, marginRight: 16, textDecoration: "none" }}>
+      {/* Sticky nav */}
+      <nav className="dash-nav" style={{ background: R.bgWhite, borderBottom: `1px solid ${R.borderLight}`, display: "flex", alignItems: "center", height: 68, position: "sticky", top: 0, zIndex: 100 }}>
+        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, marginRight: 16, textDecoration: "none", flexShrink: 0 }}>
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-            <path d="M14 2C7.373 2 2 7.373 2 14s5.373 12 12 12 12-5.373 12-12S20.627 2 14 2z" fill={R.tealBtn} opacity="0.2"/>
-            <path d="M14 6l5 8H9l5-8z" fill={R.tealBtn}/>
-            <path d="M9 14h10l-3 6H12l-3-6z" fill={R.tealDark}/>
+            <path d="M14 2C7.373 2 2 7.373 2 14s5.373 12 12 12 12-5.373 12-12S20.627 2 14 2z" fill={R.tealBtn} opacity="0.2" />
+            <path d="M14 6l5 8H9l5-8z" fill={R.tealBtn} />
+            <path d="M9 14h10l-3 6H12l-3-6z" fill={R.tealDark} />
           </svg>
           <span style={{ fontFamily: R.fontSans, fontSize: 16, fontWeight: 800, color: R.textDark, letterSpacing: "0.08em", textTransform: "uppercase" }}>CLAUZE</span>
         </Link>
-        {[["dashboard", "Dashboard"], ["pricing", "Pricing"]] .map(([href, label]) => (
+        {[["dashboard", "Dashboard"], ["pricing", "Pricing"]].map(([href, label]) => (
           <Link key={href} href={`/${href}`} style={{
             fontSize: 14, fontFamily: R.fontSans,
             fontWeight: href === "dashboard" ? 700 : 500, color: R.textDark,
-            padding: "4px 0", textDecoration: "none",
+            padding: "4px 0", textDecoration: "none", whiteSpace: "nowrap",
             borderBottom: href === "dashboard" ? `2px solid ${R.tealMid}` : "2px solid transparent",
           }}>{label}</Link>
         ))}
         <div style={{ flex: 1 }} />
-        <div style={{ display: "flex", gap: 4, padding: "4px 8px", background: R.bgLight, borderRadius: "20px" }}>
+        <div style={{ display: "flex", gap: 4, padding: "4px 8px", background: R.bgLight, borderRadius: "20px", flexShrink: 0 }}>
           {(["ko", "en"] as const).map(l => (
-            <button
-              key={l}
-              onClick={() => setLang(l)}
-              style={{
-                padding: "6px 12px", borderRadius: "16px",
-                background: lang === l ? R.bgWhite : "transparent",
-                border: "none", cursor: "pointer",
-                fontSize: 12, fontWeight: 700, color: lang === l ? R.textDark : R.textLight,
-                fontFamily: R.fontSans, transition: "all 0.2s"
-              }}
-            >{l.toUpperCase()}</button>
+            <button key={l} onClick={() => setLang(l)} style={{
+              padding: "6px 12px", borderRadius: "16px",
+              background: lang === l ? R.bgWhite : "transparent",
+              border: "none", cursor: "pointer",
+              fontSize: 12, fontWeight: 700, color: lang === l ? R.textDark : R.textLight,
+              fontFamily: R.fontSans, transition: "all 0.2s"
+            }}>{l.toUpperCase()}</button>
           ))}
         </div>
-        <PillBtn onClick={() => router.push("/pricing")} variant="filled">Upgrade</PillBtn>
+        <div style={{ marginLeft: 12, flexShrink: 0 }}>
+          <PillBtn onClick={() => router.push("/pricing")} variant="filled">Upgrade</PillBtn>
+        </div>
       </nav>
 
-      {/* ── Dark hero header ── */}
-      <div
-        onMouseMove={e => { mouseX.set(e.clientX); mouseY.set(e.clientY); }}
-        style={{ position: "relative", background: R.bgDark, padding: "72px 40px 112px", overflow: "hidden" }}
-      >
-        <div style={{ position: "absolute", inset: 0, opacity: 0.05, zIndex: 0 }}>
-          <GridSVG gridOffX={gridOffX} gridOffY={gridOffY} />
-        </div>
-        <motion.div style={{ position: "absolute", inset: 0, opacity: 0.35, maskImage, WebkitMaskImage: maskImage, zIndex: 0 }}>
-          <GridSVG gridOffX={gridOffX} gridOffY={gridOffY} />
-        </motion.div>
+      {/* Dark hero */}
+      <div className="dash-hero" onMouseMove={e => { mouseX.set(e.clientX); mouseY.set(e.clientY); }} style={{ position: "relative", background: R.bgDark, overflow: "hidden" }}>
+        <div style={{ position: "absolute", inset: 0, opacity: 0.05, zIndex: 0 }}><GridSVG gridOffX={gridOffX} gridOffY={gridOffY} /></div>
+        <motion.div style={{ position: "absolute", inset: 0, opacity: 0.35, maskImage, WebkitMaskImage: maskImage, zIndex: 0 }}><GridSVG gridOffX={gridOffX} gridOffY={gridOffY} /></motion.div>
         <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}>
           <div style={{ position: "absolute", right: "-5%", top: "-30%", width: "35%", height: "80%", borderRadius: "50%", background: "rgba(0,194,181,0.09)", filter: "blur(90px)" }} />
           <div style={{ position: "absolute", left: "-5%", bottom: "-20%", width: "25%", height: "60%", borderRadius: "50%", background: "rgba(0,133,124,0.12)", filter: "blur(100px)" }} />
         </div>
-
-        <div style={{ position: "relative", zIndex: 10, maxWidth: 1100, margin: "0 auto" }}>
+        <div className="dash-hero-inner" style={{ position: "relative", zIndex: 10 }}>
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
             <p style={{ fontFamily: R.fontSans, fontSize: 12, fontWeight: 700, letterSpacing: "1.8px", textTransform: "uppercase", color: R.tealBright, margin: "0 0 14px" }}>My Dashboard</p>
-            <h1 style={{ fontFamily: R.fontSans, fontSize: "clamp(30px, 4vw, 52px)", fontWeight: 800, color: R.textWhite, letterSpacing: "-0.03em", lineHeight: 1.1, margin: "0 0 14px" }}>
+            <h1 style={{ fontFamily: R.fontSans, fontSize: "clamp(26px, 4vw, 52px)", fontWeight: 800, color: R.textWhite, letterSpacing: "-0.03em", lineHeight: 1.1, margin: "0 0 14px" }}>
               {lang === "ko" ? "계약서 검토" : "Contract Reviews"}
             </h1>
             <p style={{ fontSize: 16, color: "rgba(255,255,255,0.5)", fontFamily: R.fontSans, margin: 0, maxWidth: 420 }}>
-              {lang === "ko"
-                ? "계약서를 업로드하고 30초 이내에 위험 분석을 받으세요."
-                : "Upload a contract for AI-powered risk analysis in under 30 seconds."
-              }
+              {lang === "ko" ? "계약서를 업로드하고 30초 이내에 위험 분석을 받으세요." : "Upload a contract for AI-powered risk analysis in under 30 seconds."}
             </p>
           </motion.div>
         </div>
       </div>
 
-      {/* ── Plan Status Card ── */}
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 40px 0" }}>
+      {/* Plan Status Card */}
+      <div className="dash-plan">
         {(() => {
           const plan = userData?.plan ?? "free";
           const credits = userData?.singleReviewCredits ?? 0;
           const currentPeriodEnd = userData?.currentPeriodEnd;
           const subscriptionStatus = userData?.subscriptionStatus;
 
-          // Free 플랜
-          if (plan === "free") {
-            return (
-              <div style={{
-                background: R.bgWhite,
-                borderRadius: R.cardRadius,
-                padding: "24px 28px",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 32,
-                borderLeft: `4px solid ${R.tealMid}`,
-                boxShadow: "0 4px 28px rgba(4,34,40,0.09)",
-              }}>
+          const cardStyle = {
+            background: R.bgWhite, borderRadius: R.cardRadius,
+            padding: "24px 28px", marginBottom: 32,
+            borderLeft: `4px solid ${R.tealMid}`,
+            boxShadow: "0 4px 28px rgba(4,34,40,0.09)",
+          };
+          const upgradeBtnStyle = {
+            padding: "10px 24px", background: R.tealBtn, color: R.textWhite,
+            border: `1.5px solid ${R.tealBtn}`, borderRadius: R.btnRadius,
+            fontSize: 13, fontWeight: 700, fontFamily: R.fontSans, cursor: "pointer", transition: "all 0.2s",
+            whiteSpace: "nowrap" as const,
+          };
+
+          if (plan === "free") return (
+            <div style={cardStyle}>
+              <div className="dash-plan-card">
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: R.textDark, marginBottom: 4, fontFamily: R.fontSans }}>
-                    {lang === "ko" ? "무료 플랜" : "Free Plan"}
-                  </div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: R.textDark, marginBottom: 4, fontFamily: R.fontSans }}>{lang === "ko" ? "무료 플랜" : "Free Plan"}</div>
                   <div style={{ fontSize: 13, color: R.textMid, fontFamily: R.fontSans }}>
-                    {lang === "ko"
-                      ? `이번 달 ${userData?.monthlyReviewCount ?? 0}/1건 사용 · 업그레이드하면 무제한`
-                      : `${userData?.monthlyReviewCount ?? 0}/1 reviews this month · Unlimited with upgrade`}
+                    {lang === "ko" ? `이번 달 ${userData?.monthlyReviewCount ?? 0}/1건 사용 · 업그레이드하면 무제한` : `${userData?.monthlyReviewCount ?? 0}/1 reviews this month · Unlimited with upgrade`}
                   </div>
                 </div>
-                <button
-                  onClick={() => router.push("/pricing")}
-                  style={{
-                    padding: "10px 24px",
-                    background: R.tealBtn,
-                    color: R.textWhite,
-                    border: `1.5px solid ${R.tealBtn}`,
-                    borderRadius: R.btnRadius,
-                    fontSize: 13,
-                    fontWeight: 700,
-                    fontFamily: R.fontSans,
-                    cursor: "pointer",
-                    transition: "all 0.2s",
-                  }}
+                <button onClick={() => router.push("/pricing")} style={upgradeBtnStyle}
                   onMouseEnter={e => e.currentTarget.style.background = R.tealDark}
                   onMouseLeave={e => e.currentTarget.style.background = R.tealBtn}
-                >
-                  {lang === "ko" ? "Pro 업그레이드 →" : "Upgrade to Pro →"}
-                </button>
+                >{lang === "ko" ? "Pro 업그레이드 →" : "Upgrade to Pro →"}</button>
               </div>
-            );
-          }
+            </div>
+          );
 
-          // Single Review
-          if (plan === "single") {
-            return (
-              <div style={{
-                background: R.bgWhite,
-                borderRadius: R.cardRadius,
-                padding: "24px 28px",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 32,
-                borderLeft: `4px solid ${R.tealMid}`,
-                boxShadow: "0 4px 28px rgba(4,34,40,0.09)",
-              }}>
+          if (plan === "single") return (
+            <div style={cardStyle}>
+              <div className="dash-plan-card">
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: R.textDark, marginBottom: 4, fontFamily: R.fontSans }}>
-                    Single Review
-                  </div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: R.textDark, marginBottom: 4, fontFamily: R.fontSans }}>Single Review</div>
                   <div style={{ fontSize: 13, color: R.textMid, fontFamily: R.fontSans }}>
-                    {lang === "ko"
-                      ? `검토권 ${credits}건 보유 중`
-                      : `${credits} credit${credits !== 1 ? "s" : ""} available`}
+                    {lang === "ko" ? `검토권 ${credits}건 보유 중` : `${credits} credit${credits !== 1 ? "s" : ""} available`}
                   </div>
                 </div>
-                <button
-                  onClick={() => router.push("/pricing")}
-                  style={{
-                    padding: "10px 24px",
-                    background: R.tealBtn,
-                    color: R.textWhite,
-                    border: `1.5px solid ${R.tealBtn}`,
-                    borderRadius: R.btnRadius,
-                    fontSize: 13,
-                    fontWeight: 700,
-                    fontFamily: R.fontSans,
-                    cursor: "pointer",
-                    transition: "all 0.2s",
-                  }}
+                <button onClick={() => router.push("/pricing")} style={upgradeBtnStyle}
                   onMouseEnter={e => e.currentTarget.style.background = R.tealDark}
                   onMouseLeave={e => e.currentTarget.style.background = R.tealBtn}
-                >
-                  {lang === "ko" ? "추가 구매 →" : "Buy more →"}
-                </button>
+                >{lang === "ko" ? "추가 구매 →" : "Buy more →"}</button>
               </div>
-            );
-          }
+            </div>
+          );
 
-          // Pro/Business 구독
           if ((plan === "pro" || plan === "business") && subscriptionStatus === "active") {
             const planName = plan === "pro" ? "Pro" : "Business";
             const renewalDate = currentPeriodEnd
-              ? new Date(currentPeriodEnd).toLocaleDateString(lang === "ko" ? "ko-KR" : "en-US", {
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
-                })
+              ? new Date(currentPeriodEnd).toLocaleDateString(lang === "ko" ? "ko-KR" : "en-US", { year: "numeric", month: "2-digit", day: "2-digit" })
               : "—";
-
             return (
-              <div style={{
-                background: R.bgWhite,
-                borderRadius: R.cardRadius,
-                padding: "24px 28px",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 32,
-                borderLeft: `4px solid ${R.tealMid}`,
-                boxShadow: "0 4px 28px rgba(4,34,40,0.09)",
-              }}>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: R.textDark, marginBottom: 4, fontFamily: R.fontSans }}>
-                    {planName} {lang === "ko" ? "플랜" : "Plan"}
+              <div style={cardStyle}>
+                <div className="dash-plan-card">
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: R.textDark, marginBottom: 4, fontFamily: R.fontSans }}>{planName} {lang === "ko" ? "플랜" : "Plan"}</div>
+                    <div style={{ fontSize: 13, color: R.textMid, fontFamily: R.fontSans }}>
+                      {lang === "ko" ? `구독 중 · 갱신일: ${renewalDate}` : `Active subscription · Renews: ${renewalDate}`}
+                    </div>
                   </div>
-                  <div style={{ fontSize: 13, color: R.textMid, fontFamily: R.fontSans }}>
-                    {lang === "ko"
-                      ? `구독 중 · 갱신일: ${renewalDate}`
-                      : `Active subscription · Renews: ${renewalDate}`}
-                  </div>
+                  <SubscriptionManager planName={planName} renewalDate={renewalDate} lang={lang} onSuccess={() => { }} />
                 </div>
-                <SubscriptionManager
-                  planName={planName}
-                  renewalDate={renewalDate}
-                  lang={lang}
-                  onSuccess={() => {
-                    // 구독 취소 후 동작
-                  }}
-                />
               </div>
             );
           }
-
           return null;
         })()}
       </div>
 
-      {/* ── Metric cards ── */}
-      <div style={{ maxWidth: 1100, margin: "-56px auto 0", padding: "0 40px", position: "relative", zIndex: 20 }}>
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}
-        >
-          {[
-            {
-              label: lang === "ko" ? "전체 검토" : "TOTAL REVIEWS",
-              value: reviewsLoading ? "—" : String(totalReviews),
-              sub: reviewsLoading ? "" : (lang === "ko" ? `누적 ${totalReviews}건` : `${totalReviews} total`),
-              accent: R.tealMid,
-            },
-            {
-              label: lang === "ko" ? "고위험 발견" : "HIGH RISK FOUND",
-              value: reviewsLoading ? "—" : String(highRiskCount),
-              sub: reviewsLoading ? "" : (lang === "ko"
-                ? (highRiskCount > 0 ? `전체의 ${Math.round(highRiskCount / Math.max(totalReviews, 1) * 100)}%` : "고위험 없음")
-                : (highRiskCount > 0 ? `${Math.round(highRiskCount / Math.max(totalReviews, 1) * 100)}% of total` : "None found")),
-              accent: R.danger,
-            },
-            {
-              label: lang === "ko" ? "평균 검토 시간" : "AVG REVIEW TIME",
-              value: reviewsLoading ? "—" : (avgTimeSec > 0 ? `${avgTimeSec}s` : "—"),
-              sub: lang === "ko" ? "업계 평균 3일 대비" : "vs. 3 days industry avg",
-              accent: R.success,
-            },
-          ].map(({ label, value, sub, accent }) => (
-            <div key={label} style={{
-              background: R.bgWhite, padding: "24px 28px",
-              borderRadius: R.cardRadius, borderTop: `3px solid ${accent}`,
-              boxShadow: "0 4px 28px rgba(4,34,40,0.09)",
-            }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1.5px", color: R.textLight, marginBottom: 8, fontFamily: R.fontSans }}>{label}</div>
-              <div style={{ fontSize: 34, fontWeight: 800, color: R.textDark, letterSpacing: "-0.04em", lineHeight: 1, marginBottom: 6, fontFamily: R.fontMono }}>{value}</div>
-              <div style={{ fontSize: 13, color: R.textLight, fontFamily: R.fontSans }}>{sub}</div>
-            </div>
-          ))}
+      {/* Metric cards */}
+      <div className="dash-metrics">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <div className="dash-metrics-grid">
+            {[
+              { label: lang === "ko" ? "전체 검토" : "TOTAL REVIEWS", value: reviewsLoading ? "—" : String(totalReviews), sub: reviewsLoading ? "" : (lang === "ko" ? `누적 ${totalReviews}건` : `${totalReviews} total`), accent: R.tealMid },
+              { label: lang === "ko" ? "고위험 발견" : "HIGH RISK FOUND", value: reviewsLoading ? "—" : String(highRiskCount), sub: reviewsLoading ? "" : (lang === "ko" ? (highRiskCount > 0 ? `전체의 ${Math.round(highRiskCount / Math.max(totalReviews, 1) * 100)}%` : "고위험 없음") : (highRiskCount > 0 ? `${Math.round(highRiskCount / Math.max(totalReviews, 1) * 100)}% of total` : "None found")), accent: R.danger },
+              { label: lang === "ko" ? "평균 검토 시간" : "AVG REVIEW TIME", value: reviewsLoading ? "—" : (avgTimeSec > 0 ? `${avgTimeSec}s` : "—"), sub: lang === "ko" ? "업계 평균 3일 대비" : "vs. 3 days industry avg", accent: R.success },
+            ].map(({ label, value, sub, accent }) => (
+              <div key={label} style={{ background: R.bgWhite, padding: "24px 28px", borderRadius: R.cardRadius, borderTop: `3px solid ${accent}`, boxShadow: "0 4px 28px rgba(4,34,40,0.09)" }}>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1.5px", color: R.textLight, marginBottom: 8, fontFamily: R.fontSans }}>{label}</div>
+                <div style={{ fontSize: 34, fontWeight: 800, color: R.textDark, letterSpacing: "-0.04em", lineHeight: 1, marginBottom: 6, fontFamily: R.fontMono }}>{value}</div>
+                <div style={{ fontSize: 13, color: R.textLight, fontFamily: R.fontSans }}>{sub}</div>
+              </div>
+            ))}
+          </div>
         </motion.div>
       </div>
 
-      {/* ── Main content ── */}
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "36px 40px 80px" }}>
-
+      {/* Main content */}
+      <div className="dash-content">
         {/* Upload */}
         <motion.div id="upload-zone" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} style={{ marginBottom: 36 }}>
           <IndustrySelector selected={industry} onChange={setIndustry} lang={lang} />
@@ -538,21 +399,14 @@ export default function DashboardPage() {
             onUploadComplete={(id, result, fileName, repeatedPatterns = [], industryKey) => {
               const createdAt = new Date().toISOString();
               sessionStorage.setItem(`review_${id}`, JSON.stringify({ id, result, fileName, createdAt, repeatedPatterns, industry: industryKey }));
-              // 목록에 즉시 추가 (낙관적 업데이트)
-              setReviews(prev => [{
-                id, uid: user.uid, fileName, storageUrl: "",
-                result, riskLevel: result.overallRisk as RiskLevel,
-                createdAt, processingTime: 0,
-              }, ...prev]);
+              setReviews(prev => [{ id, uid: user.uid, fileName, storageUrl: "", result, riskLevel: result.overallRisk as RiskLevel, createdAt, processingTime: 0 }, ...prev]);
               router.push(`/review/${id}`);
             }}
             onError={setUploadError}
             userId={user?.uid}
             industry={industry}
           />
-          {uploadError && (
-            <p style={{ fontSize: 12, color: R.danger, marginTop: 8, fontFamily: R.fontSans }}>{uploadError}</p>
-          )}
+          {uploadError && <p style={{ fontSize: 12, color: R.danger, marginTop: 8, fontFamily: R.fontSans }}>{uploadError}</p>}
         </motion.div>
 
         {/* Recent reviews */}
@@ -568,45 +422,31 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {reviewsLoading ? (
-            <ReviewSkeleton />
-          ) : reviews.length === 0 ? (
+          {reviewsLoading ? <ReviewSkeleton /> : reviews.length === 0 ? (
             <EmptyState lang={lang} onScroll={scrollToUpload} />
           ) : (
             <div style={{ background: R.bgWhite, borderRadius: R.cardRadius, overflow: "hidden", border: `1px solid ${R.borderLight}` }}>
               {reviews.map(({ id, fileName, createdAt, riskLevel, industry: reviewIndustry }, i) => {
-                // 업종 프로필 조회 (저장된 industry 키로)
-                const industryProfile = reviewIndustry && reviewIndustry in INDUSTRY_PROFILES
-                  ? INDUSTRY_PROFILES[reviewIndustry as IndustryKey]
-                  : null;
+                const industryProfile = reviewIndustry && reviewIndustry in INDUSTRY_PROFILES ? INDUSTRY_PROFILES[reviewIndustry as IndustryKey] : null;
                 return (
-                  <div
-                    key={id}
-                    onClick={() => {
-                      // sessionStorage에 데이터가 있으면 그대로, 없으면 review 페이지에서 처리
-                      router.push(`/review/${id}`);
-                    }}
-                    style={{
-                      display: "flex", alignItems: "center", gap: 16, padding: "16px 24px",
-                      borderBottom: i < reviews.length - 1 ? `1px solid ${R.borderLight}` : "none",
-                      cursor: "pointer", transition: "background 0.15s",
-                    }}
+                  <div key={id} onClick={() => router.push(`/review/${id}`)}
+                    style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 20px", borderBottom: i < reviews.length - 1 ? `1px solid ${R.borderLight}` : "none", cursor: "pointer", transition: "background 0.15s" }}
                     onMouseEnter={e => (e.currentTarget.style.background = R.bgLight)}
                     onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                   >
                     <div style={{ width: 36, height: 36, borderRadius: 4, background: R.bgLight, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: R.textLight, flexShrink: 0, fontFamily: R.fontMono }}>PDF</div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: 14, fontWeight: 500, color: R.textDark, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: R.fontSans }}>{fileName}</div>
-                      {/* 업종 태그 (general 제외) */}
                       {industryProfile && reviewIndustry !== "general" && (
                         <div style={{ fontSize: 11, color: R.tealMid, fontFamily: R.fontSans, marginTop: 2 }}>
                           {industryProfile.icon} {lang === "ko" ? industryProfile.label : industryProfile.labelEn}
                         </div>
                       )}
                     </div>
-                    <div style={{ fontSize: 13, color: R.textLight, flexShrink: 0, fontFamily: R.fontSans }}>{relativeTime(createdAt, lang)}</div>
+                    <div style={{ fontSize: 12, color: R.textLight, flexShrink: 0, fontFamily: R.fontSans, display: "none" }} className="review-time">{relativeTime(createdAt, lang)}</div>
+                    <style>{`@media (min-width: 480px) { .review-time { display: block !important; } }`}</style>
                     <RiskBadge level={riskLevel} />
-                    <div style={{ fontSize: 12, color: R.textLight, fontFamily: R.fontSans }}>→</div>
+                    <div style={{ fontSize: 12, color: R.textLight, fontFamily: R.fontSans, flexShrink: 0 }}>→</div>
                   </div>
                 );
               })}
@@ -615,59 +455,24 @@ export default function DashboardPage() {
         </motion.div>
       </div>
 
-      {/* 푸터 */}
-      <footer style={{ background: R.bgDark, padding: "64px 40px 32px" }}>
+      {/* Footer */}
+      <footer className="dash-footer-pad" style={{ background: R.bgDark }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 48, marginBottom: 48 }}>
+          <div className="dash-footer-grid">
             <div>
               <div style={{ fontFamily: R.fontSans, fontSize: 16, fontWeight: 800, color: R.textWhite, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 16 }}>CLAUZE</div>
               <p style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", lineHeight: 1.7, maxWidth: 260, fontFamily: R.fontSans }}>AI-powered Korean contract review for freelancers and businesses.</p>
             </div>
             {[
-              { title: "PRODUCT", items: [
-                { label: "Dashboard", href: "/dashboard" },
-                { label: "Contract Review", href: "/dashboard" },
-                { label: "Pricing", href: "/pricing" }
-              ]},
-              { title: "COMPANY", items: [
-                { label: "About", href: "#" },
-                { label: "Blog", href: "#" },
-                { label: "Contact", href: "#" }
-              ]},
-              { title: "LEGAL", items: [
-                { label: "Privacy Policy", href: "/privacy" },
-                { label: "Terms of Service", href: "/terms" },
-                { label: "Refund Policy", href: "/refund" },
-              ]},
+              { title: "PRODUCT", items: [{ label: "Dashboard", href: "/dashboard" }, { label: "Contract Review", href: "/dashboard" }, { label: "Pricing", href: "/pricing" }] },
+              { title: "COMPANY", items: [{ label: "About", href: "#" }, { label: "Blog", href: "#" }, { label: "Contact", href: "#" }] },
+              { title: "LEGAL", items: [{ label: "Privacy Policy", href: "/privacy" }, { label: "Terms of Service", href: "/terms" }, { label: "Refund Policy", href: "/refund" }] },
             ].map(({ title, items }) => (
               <div key={title}>
                 <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1.5px", color: R.tealBright, marginBottom: 16, textTransform: "uppercase", fontFamily: R.fontSans }}>{title}</div>
                 {items.map(({ label, href }) => (
-                  <button
-                    key={label}
-                    onClick={() => {
-                      if (href === "#") return;
-                      if (href.includes(".pdf")) {
-                        window.open(href, "_blank");
-                      } else {
-                        window.location.href = href;
-                      }
-                    }}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      padding: 0,
-                      margin: 0,
-                      marginBottom: 10,
-                      fontSize: 14,
-                      color: "rgba(255,255,255,0.6)",
-                      cursor: "pointer",
-                      fontFamily: R.fontSans,
-                      transition: "color 0.2s",
-                      textAlign: "left",
-                      display: "block",
-                      width: "100%"
-                    }}
+                  <button key={label} onClick={() => { if (href === "#") return; if (href.includes(".pdf")) { window.open(href, "_blank"); } else { window.location.href = href; } }}
+                    style={{ background: "none", border: "none", padding: 0, margin: 0, marginBottom: 10, fontSize: 14, color: "rgba(255,255,255,0.6)", cursor: "pointer", fontFamily: R.fontSans, transition: "color 0.2s", textAlign: "left", display: "block", width: "100%" }}
                     onMouseEnter={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.85)"}
                     onMouseLeave={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.6)"}
                   >{label}</button>
