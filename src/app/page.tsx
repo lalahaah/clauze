@@ -200,6 +200,7 @@ export default function LandingPage() {
         position: "sticky", top: 0, zIndex: 100,
         background: R.bgWhite, borderBottom: `1px solid ${R.borderLight}`,
         display: "flex", alignItems: "center", gap: 36, height: 68,
+        overflow: "hidden",
       }}>
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, marginRight: 16, textDecoration: "none", flexShrink: 0 }}>
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none">

@@ -216,7 +216,7 @@ export default function PricingPage() {
       </div>
 
       {/* 네비게이션 */}
-      <nav className="pricing-nav" style={{ background: T.bgCard, borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", height: 68, position: "sticky", top: 0, zIndex: 100 }}>
+      <nav className="pricing-nav" style={{ background: T.bgCard, borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", height: 68, position: "sticky", top: 0, zIndex: 100, overflow: "hidden" }}>
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, marginRight: 16, textDecoration: "none", flexShrink: 0 }}>
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
             <path d="M14 2C7.373 2 2 7.373 2 14s5.373 12 12 12 12-5.373 12-12S20.627 2 14 2z" fill={T.tealBr} opacity="0.2" />
