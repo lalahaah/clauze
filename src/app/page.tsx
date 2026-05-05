@@ -141,6 +141,25 @@ export default function LandingPage() {
 
   return (
     <div style={{ background: R.bgWhite, fontFamily: R.fontSans }}>
+      <style>{`
+  .landing-section { padding: 96px 40px; }
+  .landing-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; max-width: 1100px; margin: 0 auto; align-items: start; }
+  .landing-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .landing-grid-4 { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+  .landing-split { display: grid; grid-template-columns: 1fr 1fr; max-width: 1100px; margin: 0 auto; min-height: 480px; }
+  .landing-stats { display: flex; gap: 56px; justify-content: center; margin-top: 64px; }
+  @media (max-width: 768px) {
+    .landing-section { padding: 60px 20px; }
+    .landing-grid-2 { grid-template-columns: 1fr; gap: 32px; }
+    .landing-grid-3 { grid-template-columns: 1fr; }
+    .landing-grid-4 { grid-template-columns: 1fr 1fr; gap: 24px; }
+    .landing-split { grid-template-columns: 1fr; }
+    .landing-stats { gap: 24px; flex-wrap: wrap; }
+  }
+  @media (max-width: 480px) {
+    .landing-grid-4 { grid-template-columns: 1fr; }
+  }
+`}</style>
       {/* Top utility bar */}
       <div style={{ background: R.bgDark, padding: "6px 40px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 24 }}>
         {!user && (
