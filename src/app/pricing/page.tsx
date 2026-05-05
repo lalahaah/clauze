@@ -228,7 +228,7 @@ export default function PricingPage() {
         {([["dashboard", "Dashboard"], ["pricing", "Pricing"]] as [string, string][]).map(([href, label]) => (
           <Link key={href} href={`/${href}`} style={{ fontSize: 14, fontFamily: T.fontSans, fontWeight: href === "pricing" ? 700 : 500, color: T.text, padding: "4px 0", textDecoration: "none", borderBottom: href === "pricing" ? `2px solid ${T.teal}` : "2px solid transparent", whiteSpace: "nowrap" }}>{label}</Link>
         ))}
-        <div style={{ flex: 1 }} />
+        <div style={{ flex: 1, minWidth: 0 }} />
         {!loading && user && currentPlan !== "free" && (
           <div style={{ padding: "4px 12px", borderRadius: 20, background: "rgba(0,165,153,0.10)", fontSize: 11, fontWeight: 700, color: T.teal, fontFamily: T.fontSans, textTransform: "uppercase", letterSpacing: "0.5px", flexShrink: 0 }}>{currentPlan} Plan</div>
         )}

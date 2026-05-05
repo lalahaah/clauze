@@ -216,7 +216,7 @@ export default function LandingPage() {
             padding: "4px 0", textDecoration: "none", borderBottom: "2px solid transparent", whiteSpace: "nowrap",
           }}>{label}</Link>
         ))}
-        <div style={{ flex: 1 }} />
+        <div style={{ flex: 1, minWidth: 0 }} />
         {user ? (
           <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
             <span style={{ fontSize: 12, color: R.textLight, fontFamily: R.fontSans, display: "none" }} className="hide-mobile">{user.email}</span>
