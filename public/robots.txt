@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /dashboard
+Disallow: /login
+Disallow: /review/
+Allow: /
+
+Sitemap: https://clauze-ai.vercel.app/sitemap.xml
